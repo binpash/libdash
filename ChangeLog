@@ -6,6 +6,9 @@
 	* Generalise setinputfile for use in read_profile/readcmdfile.
 	* Handle SKIPEVAL in read_profile by exiting.
 	* Let evaltree handle traps from cmdloop.
+	* Reset evalskip after minusc is executed.
+	* Stop executing traps once SKIPEVAL is seen.
+	* Only handle each signal once in dotrap.
 
 2005-03-25  Gerrit Pape <pape@smarden.org>
 

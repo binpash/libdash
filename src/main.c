@@ -189,7 +189,7 @@ state2:
 state3:
 	state = 4;
 	if (minusc)
-		evalstring(minusc);
+		evalstring(minusc, 0);
 
 	if (sflag || minusc == NULL) {
 state4:	/* XXX ??? - why isn't this before the "if" statement */

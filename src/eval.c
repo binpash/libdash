@@ -163,7 +163,8 @@ evalcmd(int argc, char **argv)
                         STPUTC('\0', concat);
                         p = grabstackstr(concat);
                 }
-                evalstring(p);
+                evalstring(p, ~SKIPEVAL);
+                
         }
         return exitstatus;
 }
@@ -173,23 +174,29 @@ evalcmd(int argc, char **argv)
  * Execute a command or commands contained in a string.
  */
 
-void
-evalstring(char *s)
+int
+evalstring(char *s, int mask)
 {
 	union node *n;
 	struct stackmark smark;
+	int skip;
 
-	setstackmark(&smark);
 	setinputstring(s);
+	setstackmark(&smark);
 
+	skip = 0;
 	while ((n = parsecmd(0)) != NEOF) {
 		evaltree(n, 0);
 		popstackmark(&smark);
-		if (evalskip)
+		skip = evalskip;
+		if (skip)
 			break;
 	}
 	popfile();
-	popstackmark(&smark);
+
+	skip &= mask;
+	evalskip = skip;
+	return skip;
 }
 
 
@@ -319,12 +326,15 @@ setstatus:
 		break;
 	}
 out:
-	if (pendingsigs)
-		dotrap();
-	if (flags & EV_EXIT)
-		exraise(EXEXIT);
 	if ((checkexit & exitstatus))
 		evalskip |= SKIPEVAL;
+	else if (pendingsigs && dotrap())
+		goto exexit;
+
+	if (flags & EV_EXIT) {
+exexit:
+		exraise(EXEXIT);
+	}
 }
 
 
@@ -930,7 +940,6 @@ cmddone:
 	commandname = savecmdname;
 	exsig = 0;
 	handler = savehandler;
-	evalskip &= ~SKIPEVAL;
 
 	return i;
 }

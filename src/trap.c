@@ -301,23 +301,34 @@ onsig(int signo)
  * handlers while we are executing a trap handler.
  */
 
-void
+int
 dotrap(void)
 {
 	char *p;
 	char *q;
+	int i;
 	int savestatus;
+	int skip = 0;
 
 	savestatus = exitstatus;
-	q = gotsig;
-	while (pendingsigs = 0, barrier(), (p = memchr(q, 1, NSIG - 1))) {
-		*p = 0;
-		p = trap[p - q + 1];
+	pendingsigs = 0;
+	barrier();
+
+	for (i = 0, q = gotsig; i < NSIG - 1; i++, q++) {
+		if (!*q)
+			continue;
+		*q = 0;
+
+		p = trap[i + 1];
 		if (!p)
 			continue;
-		evalstring(p);
+		skip = evalstring(p, SKIPEVAL);
 		exitstatus = savestatus;
+		if (skip)
+			break;
 	}
+
+	return skip;
 }
 
 
@@ -364,9 +375,9 @@ exitshell(void)
 		goto out;
 	}
 	handler = &loc;
-	if ((p = trap[0]) != NULL && *p != '\0') {
+	if ((p = trap[0])) {
 		trap[0] = NULL;
-		evalstring(p);
+		evalstring(p, 0);
 	}
 	flushall();
 out:
