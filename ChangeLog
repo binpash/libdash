@@ -1,3 +1,7 @@
+2004-11-23  A Costa <agcosta@gis.net>
+
+	* Fixed spelling errors in manual page.
+
 2004-08-21  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Size optimisations around varvalue() in src/expand.c.
