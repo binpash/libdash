@@ -87,7 +87,7 @@ __RCSID("$NetBSD: eval.c,v 1.71 2003/01/23 03:33:16 rafal Exp $");
 int evalskip;			/* set if we are skipping commands */
 STATIC int skipcount;		/* number of levels to skip */
 MKINIT int loopnest;		/* current loop nesting level */
-int funcnest;			/* depth of function calls */
+static int funcnest;		/* depth of function calls */
 
 
 char *commandname;
@@ -134,7 +134,6 @@ INCLUDE "eval.h"
 RESET {
 	evalskip = 0;
 	loopnest = 0;
-	funcnest = 0;
 }
 #endif
 
@@ -958,16 +957,16 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
 	localvars = NULL;
 	shellparam.malloc = 0;
 	func->count++;
+	funcnest++;
 	INTON;
 	shellparam.nparam = argc - 1;
 	shellparam.p = argv + 1;
 	shellparam.optind = 1;
 	shellparam.optoff = -1;
-	funcnest++;
 	evaltree(&func->n, flags & EV_TESTED);
-	funcnest--;
 funcdone:
 	INTOFF;
+	funcnest--;
 	freefunc(func);
 	poplocalvars();
 	localvars = savelocalvars;
