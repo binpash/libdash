@@ -70,14 +70,9 @@
 #define ferror outerr
 #endif
 #define INITARGS(argv)
-#define	err sh_err
-#define	verr sh_verr
-#define	errx sh_errx
-#define	verrx sh_verrx
+#define	error sh_error
 #define	warn sh_warn
-#define	vwarn sh_vwarn
 #define	warnx sh_warnx
-#define	vwarnx sh_vwarnx
 #define exit sh_exit
 #define setprogname(s)
 #define getprogname() commandname

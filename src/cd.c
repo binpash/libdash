@@ -152,7 +152,7 @@ docd:
 			break;
 		}
 	} while (path);
-	error("can't cd to %s", dest);
+	sh_error("can't cd to %s", dest);
 	/* NOTREACHED */
 out:
 	if (flags & CD_PRINT)

@@ -61,7 +61,7 @@ int yyparse(void);
 void yyerror(const char *);
 #ifdef TESTARITH
 int main(int , char *[]);
-int error(char *);
+int sh_error(char *);
 #endif
 
 %}
@@ -145,7 +145,7 @@ main(argc, argv)
 {
 	printf("%d\n", exp(argv[1]));
 }
-error(s)
+sh_error(s)
 	char *s;
 {
 	fprintf(stderr, "exp: %s\n", s);
@@ -163,6 +163,6 @@ yyerror(s)
 #endif
 	yyclearin;
 	arith_lex_reset();	/* reprime lex */
-	error("arithmetic expression: %s: \"%s\"", s, arith_startbuf);
+	sh_error("arithmetic expression: %s: \"%s\"", s, arith_startbuf);
 	/* NOTREACHED */
 }

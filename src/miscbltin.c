@@ -113,7 +113,7 @@ readcmd(int argc, char **argv)
 #endif
 	}
 	if (*(ap = argptr) == NULL)
-		error("arg count");
+		sh_error("arg count");
 	if ((ifs = bltinlookup("IFS")) == NULL)
 		ifs = defifs;
 	status = 0;
@@ -219,7 +219,7 @@ umaskcmd(int argc, char **argv)
 			new_mask = 0;
 			do {
 				if (*ap >= '8' || *ap < '0')
-					error(illnum, *argptr);
+					sh_error(illnum, *argptr);
 				new_mask = (new_mask << 3) + (*ap - '0');
 			} while (*++ap != '\0');
 		} else {
@@ -279,7 +279,7 @@ umaskcmd(int argc, char **argv)
 					break;
 			}
 			if (*ap) {
-				error("Illegal mode: %s", *argptr);
+				sh_error("Illegal mode: %s", *argptr);
 				return 1;
 			}
 			new_mask = ~new_mask;
@@ -431,7 +431,7 @@ ulimitcmd(int argc, char **argv)
 		char *p = *argptr;
 
 		if (all || argptr[1])
-			error("too many arguments");
+			sh_error("too many arguments");
 		if (strcmp(p, "unlimited") == 0)
 			val = RLIM_INFINITY;
 		else {
@@ -444,7 +444,7 @@ ulimitcmd(int argc, char **argv)
 					break;
 			}
 			if (c)
-				error("bad number");
+				sh_error("bad number");
 			val *= l->factor;
 		}
 	}
@@ -464,7 +464,7 @@ ulimitcmd(int argc, char **argv)
 		if (how & SOFT)
 			limit.rlim_cur = val;
 		if (setrlimit(l->cmd, &limit) < 0)
-			error("error setting limit (%s)", strerror(errno));
+			sh_error("error setting limit (%s)", strerror(errno));
 	} else {
 		printlim(how, &limit, l);
 	}

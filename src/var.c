@@ -222,7 +222,7 @@ setvar(const char *name, const char *val, int flags)
 	p = strchrnul(q, '=');
 	namelen = p - name;
 	if (!namelen || p != q)
-		error("%.*s: bad variable name", namelen, name);
+		sh_error("%.*s: bad variable name", namelen, name);
 	vallen = 0;
 	if (val == NULL) {
 		flags |= VUNSET;
@@ -266,7 +266,8 @@ setvareq(char *s, int flags)
 			if (flags & VNOSAVE)
 				free(s);
 			n = vp->text;
-			error("%.*s: is read only", strchrnul(n, '=') - n, n);
+			sh_error("%.*s: is read only", strchrnul(n, '=') - n,
+				 n);
 		}
 
 		if (flags & VNOSET)

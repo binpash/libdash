@@ -1,3 +1,7 @@
+2005-03-02  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Renamed symbols to avoid conflict with libc.
+
 2005-02-28  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Replaced EXEVAL with SKIPEVAL.

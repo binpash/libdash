@@ -66,7 +66,7 @@ ckmalloc(size_t nbytes)
 
 	p = malloc(nbytes);
 	if (p == NULL)
-		error("Out of space");
+		sh_error("Out of space");
 	return p;
 }
 
@@ -80,7 +80,7 @@ ckrealloc(pointer p, size_t nbytes)
 {
 	p = realloc(p, nbytes);
 	if (p == NULL)
-		error("Out of space");
+		sh_error("Out of space");
 	return p;
 }
 
@@ -94,7 +94,7 @@ savestr(const char *s)
 {
 	char *p = strdup(s);
 	if (!p)
-		error("Out of space");
+		sh_error("Out of space");
 	return p;
 }
 
@@ -141,7 +141,7 @@ stalloc(size_t nbytes)
 			blocksize = MINSIZE;
 		len = sizeof(struct stack_block) - MINSIZE + blocksize;
 		if (len < blocksize)
-			error("Out of space");
+			sh_error("Out of space");
 		INTOFF;
 		sp = ckmalloc(len);
 		sp->prev = stackp;
@@ -220,7 +220,7 @@ growstackblock(void)
 
  	newlen = stacknleft * 2;
 	if (newlen < stacknleft)
-		error("Out of space");
+		sh_error("Out of space");
 	if (newlen < 128)
 		newlen += 128;
 

@@ -312,7 +312,7 @@ readcmdfile(char *name)
 	if ((fd = open(name, O_RDONLY)) >= 0)
 		setinputfd(fd, 1);
 	else
-		error("Can't open %s", name);
+		sh_error("Can't open %s", name);
 	INTON;
 	cmdloop(0);
 	popfile();
@@ -349,7 +349,7 @@ find_dot_file(char *basename)
 	}
 
 	/* not found in the PATH */
-	error("%s: not found", basename);
+	sh_error("%s: not found", basename);
 	/* NOTREACHED */
 }
 

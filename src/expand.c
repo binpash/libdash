@@ -511,7 +511,7 @@ expari(int quotes)
 			p--;
 #ifdef DEBUG
 			if (p < start) {
-				error("missing CTLARI (shouldn't happen)");
+				sh_error("missing CTLARI (shouldn't happen)");
 			}
 #endif
 		}
@@ -1204,7 +1204,7 @@ nometa:
 			exparg.lastp = &str->next;
 			break;
 		default:	/* GLOB_NOSPACE */
-			error("Out of space");
+			sh_error("Out of space");
 		}
 		str = str->next;
 	}
@@ -1749,5 +1749,5 @@ varunset(const char *end, const char *var, const char *umsg, int varflags)
 		} else
 			msg = umsg;
 	}
-	error("%.*s: %s%s", end - var - 1, var, msg, tail);
+	sh_error("%.*s: %s%s", end - var - 1, var, msg, tail);
 }

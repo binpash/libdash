@@ -160,7 +160,7 @@ void writetext(struct text *, FILE *);
 FILE *ckfopen(char *, char *);
 void *ckmalloc(int);
 char *savestr(char *);
-void error(char *);
+static void error(char *);
 int main(int, char **);
 
 #define equal(s1, s2)	(strcmp(s1, s2) == 0)
@@ -484,7 +484,7 @@ savestr(char *s)
 	return p;
 }
 
-void
+static void
 error(char *msg)
 {
 	if (curfile != NULL)

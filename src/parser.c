@@ -1527,7 +1527,7 @@ synexpect(int token)
 STATIC void
 synerror(const char *msg)
 {
-	error("Syntax error: %s", msg);
+	sh_error("Syntax error: %s", msg);
 	/* NOTREACHED */
 }
 

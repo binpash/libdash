@@ -441,12 +441,12 @@ setinputfile(const char *fname, int push)
 
 	INTOFF;
 	if ((fd = open(fname, O_RDONLY)) < 0)
-		error("Can't open %s", fname);
+		sh_error("Can't open %s", fname);
 	if (fd < 10) {
 		fd2 = copyfd(fd, 10);
 		close(fd);
 		if (fd2 < 0)
-			error("Out of file descriptors");
+			sh_error("Out of file descriptors");
 		fd = fd2;
 	}
 	setinputfd(fd, push);

@@ -126,7 +126,7 @@ number(const char *s)
 {
 
 	if (! is_number(s))
-		error(illnum, s);
+		sh_error(illnum, s);
 	return atoi(s);
 }
 

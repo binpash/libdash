@@ -430,7 +430,8 @@ loop:
 			readcmdfile(fullname);
 			if ((cmdp = cmdlookup(name, 0)) == NULL ||
 			    cmdp->cmdtype != CMDFUNCTION)
-				error("%s not defined in %s", name, fullname);
+				sh_error("%s not defined in %s", name,
+					 fullname);
 			stunalloc(fullname);
 			goto success;
 		}

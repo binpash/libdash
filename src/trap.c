@@ -132,7 +132,7 @@ trapcmd(int argc, char **argv)
 		action = *ap++;
 	while (*ap) {
 		if ((signo = decode_signal(*ap, 0)) < 0)
-			error("%s: bad trap", *ap);
+			sh_error("%s: bad trap", *ap);
 		INTOFF;
 		if (action) {
 			if (action[0] == '-' && action[1] == '\0')

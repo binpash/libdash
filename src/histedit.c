@@ -220,10 +220,10 @@ histcmd(int argc, char **argv)
 #endif
 
 	if (hist == NULL)
-		error("history not active");
+		sh_error("history not active");
 
 	if (argc == 1)
-		error("missing history argument");
+		sh_error("missing history argument");
 
 #ifdef __GLIBC__
 	optind = 0;
@@ -249,11 +249,11 @@ histcmd(int argc, char **argv)
 			sflg = 1;
 			break;
 		case ':':
-			error("option -%c expects argument", optopt);
+			sh_error("option -%c expects argument", optopt);
 			/* NOTREACHED */
 		case '?':
 		default:
-			error("unknown option: -%c", optopt);
+			sh_error("unknown option: -%c", optopt);
 			/* NOTREACHED */
 		}
 	argc -= optind, argv += optind;
@@ -280,7 +280,7 @@ histcmd(int argc, char **argv)
 		if (++active > MAXHISTLOOPS) {
 			active = 0;
 			displayhist = 0;
-			error("called recursively too many times");
+			sh_error("called recursively too many times");
 		}
 		/*
 		 * Set editor.
@@ -323,7 +323,7 @@ histcmd(int argc, char **argv)
 		laststr = argv[1];
 		break;
 	default:
-		error("too many args");
+		sh_error("too many args");
 		/* NOTREACHED */
 	}
 	/*
@@ -352,10 +352,10 @@ histcmd(int argc, char **argv)
 		INTOFF;		/* easier */
 		sprintf(editfile, "%s_shXXXXXX", _PATH_TMP);
 		if ((fd = mkstemp(editfile)) < 0)
-			error("can't create temporary file %s", editfile);
+			sh_error("can't create temporary file %s", editfile);
 		if ((efp = fdopen(fd, "w")) == NULL) {
 			close(fd);
-			error("can't allocate stdio buffer for temp");
+			sh_error("can't allocate stdio buffer for temp");
 		}
 	}
 
@@ -488,15 +488,15 @@ str_to_event(const char *str, int last)
 			}
 		}
 		if (retval == -1)
-			error("history number %s not found (internal error)",
-			       str);
+			sh_error("history number %s not found (internal error)",
+				 str);
 	} else {
 		/*
 		 * pattern
 		 */
 		retval = history(hist, &he, H_PREV_STR, str);
 		if (retval == -1)
-			error("history pattern not found: %s", str);
+			sh_error("history pattern not found: %s", str);
 	}
 	return (he.num);
 }
@@ -504,7 +504,7 @@ str_to_event(const char *str, int last)
 int
 histcmd(int argc, char **argv)
 {
-	error("not compiled with history support");
+	sh_error("not compiled with history support");
 	/* NOTREACHED */
 }
 #endif

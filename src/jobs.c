@@ -258,7 +258,7 @@ killcmd(argc, argv)
 
 	if (argc <= 1) {
 usage:
-		error(
+		sh_error(
 "Usage: kill [-s sigspec | -signum | -sigspec] [pid | job]... or\n"
 "kill -l [exitstatus]"
 		);
@@ -281,7 +281,7 @@ usage:
 				case 's':
 					signo = decode_signal(optionarg, 1);
 					if (signo < 0) {
-						error(
+						sh_error(
 							"invalid signal number or name: %s",
 							optionarg
 						);
@@ -317,8 +317,8 @@ usage:
 		if (0 < signo && signo < NSIG)
 			outfmt(out, snlfmt, signal_names[signo]);
 		else
-			error("invalid signal number or exit status: %s",
-			      *argv);
+			sh_error("invalid signal number or exit status: %s",
+				 *argv);
 		return 0;
 	}
 
@@ -727,7 +727,7 @@ gotit:
 #endif
 	return jp;
 err:
-	error(err_msg, name);
+	sh_error(err_msg, name);
 }
 
 
@@ -869,7 +869,7 @@ forkchild(struct job *jp, union node *n, int mode)
 		if (jp->nprocs == 0) {
 			close(0);
 			if (open(_PATH_DEVNULL, O_RDONLY) != 0)
-				error("Can't open %s", _PATH_DEVNULL);
+				sh_error("Can't open %s", _PATH_DEVNULL);
 		}
 	}
 	if (!oldlvl && iflag) {
@@ -928,7 +928,7 @@ forkshell(struct job *jp, union node *n, int mode)
 		TRACE(("Fork failed, errno=%d", errno));
 		if (jp)
 			freejob(jp);
-		error("Cannot fork");
+		sh_error("Cannot fork");
 	}
 	if (pid == 0)
 		forkchild(jp, n, mode);
@@ -1470,7 +1470,7 @@ STATIC void
 xtcsetpgrp(int fd, pid_t pgrp)
 {
 	if (tcsetpgrp(fd, pgrp))
-		error("Cannot set tty process group (%s)", strerror(errno));
+		sh_error("Cannot set tty process group (%s)", strerror(errno));
 }
 
 

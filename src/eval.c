@@ -540,7 +540,7 @@ evalpipe(union node *n, int flags)
 		if (lp->next) {
 			if (pipe(pip) < 0) {
 				close(prevfd);
-				error("Pipe call failed");
+				sh_error("Pipe call failed");
 			}
 		}
 		if (forkshell(jp, lp->n, n->npipe.backgnd) == 0) {
@@ -625,7 +625,7 @@ evalbackcmd(union node *n, struct backcmd *result)
 		struct job *jp;
 
 		if (pipe(pip) < 0)
-			error("Pipe call failed");
+			sh_error("Pipe call failed");
 		jp = makejob(n, 1);
 		if (forkshell(jp, n, FORK_NOJOB) == 0) {
 			FORCEINTON;
@@ -1037,7 +1037,7 @@ breakcmd(int argc, char **argv)
 	int n = argc > 1 ? number(argv[1]) : 1;
 
 	if (n <= 0)
-		error(illnum, argv[1]);
+		sh_error(illnum, argv[1]);
 	if (n > loopnest)
 		n = loopnest;
 	if (n > 0) {

@@ -137,7 +137,7 @@ void onint(void) __attribute__((__noreturn__));
 #else
 void onint(void);
 #endif
-void error(const char *, ...) __attribute__((__noreturn__));
+void sh_error(const char *, ...) __attribute__((__noreturn__));
 void exerror(int, const char *, ...) __attribute__((__noreturn__));
 const char *errmsg(int, int);
 

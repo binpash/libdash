@@ -157,7 +157,7 @@ redirect(union node *redir, int flags)
 				if (i != EBADF) {
 					const char *m = strerror(i);
 					close(newfd);
-					error("%d: %s", fd, m);
+					sh_error("%d: %s", fd, m);
 					/* NOTREACHED */
 				}
 			} else {
@@ -238,9 +238,9 @@ openredirect(union node *redir)
 
 	return f;
 ecreate:
-	error("cannot create %s: %s", fname, errmsg(errno, E_CREAT));
+	sh_error("cannot create %s: %s", fname, errmsg(errno, E_CREAT));
 eopen:
-	error("cannot open %s: %s", fname, errmsg(errno, E_OPEN));
+	sh_error("cannot open %s: %s", fname, errmsg(errno, E_OPEN));
 }
 
 
@@ -294,7 +294,7 @@ openhere(union node *redir)
 	size_t len = 0;
 
 	if (pipe(pip) < 0)
-		error("Pipe call failed");
+		sh_error("Pipe call failed");
 	if (redir->type == NHERE) {
 		len = strlen(redir->nhere.doc->narg.text);
 		if (len <= PIPESIZE) {
@@ -401,7 +401,7 @@ copyfd(int from, int to)
 		if (errno2 == EMFILE)
 			return EMPTY;
 		else
-			error("%d: %s", from, strerror(errno2));
+			sh_error("%d: %s", from, strerror(errno2));
 	}
 	return newfd;
 }

@@ -178,7 +178,7 @@ exverror(int cond, const char *msg, va_list ap)
 
 
 void
-error(const char *msg, ...)
+sh_error(const char *msg, ...)
 {
 	va_list ap;
 

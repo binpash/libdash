@@ -150,7 +150,7 @@ procargs(int argc, char **argv)
 	xminusc = minusc;
 	if (*xargv == NULL) {
 		if (xminusc)
-			error("-c requires an argument");
+			sh_error("-c requires an argument");
 		sflag = 1;
 	}
 	if (iflag == 2 && sflag == 1 && isatty(0) && isatty(1))
@@ -265,7 +265,7 @@ minus_o(char *name, int val)
 				optlist[i] = val;
 				return;
 			}
-		error("Illegal option -o %s", name);
+		sh_error("Illegal option -o %s", name);
 	}
 }
 
@@ -287,7 +287,7 @@ setoption(int flag, int val)
 			}
 			return;
 		}
-	error("Illegal option -%c", flag);
+	sh_error("Illegal option -%c", flag);
 	/* NOTREACHED */
 }
 
@@ -351,7 +351,7 @@ shiftcmd(int argc, char **argv)
 	if (argc > 1)
 		n = number(argv[1]);
 	if (n > shellparam.nparam)
-		error("can't shift that many");
+		sh_error("can't shift that many");
 	INTOFF;
 	shellparam.nparam -= n;
 	for (ap1 = shellparam.p ; --n >= 0 ; ap1++) {
@@ -409,7 +409,7 @@ getoptscmd(int argc, char **argv)
 	char **optbase;
 
 	if (argc < 3)
-		error("Usage: getopts optstring var [arg]");
+		sh_error("Usage: getopts optstring var [arg]");
 	else if (argc == 3) {
 		optbase = shellparam.p;
 		if (shellparam.optind > shellparam.nparam + 1) {
@@ -547,13 +547,13 @@ nextopt(const char *optstring)
 	c = *p++;
 	for (q = optstring ; *q != c ; ) {
 		if (*q == '\0')
-			error("Illegal option -%c", c);
+			sh_error("Illegal option -%c", c);
 		if (*++q == ':')
 			q++;
 	}
 	if (*++q == ':') {
 		if (*p == '\0' && (p = *argptr++) == NULL)
-			error("No arg for -%c option", c);
+			sh_error("No arg for -%c option", c);
 		optionarg = p;
 		p = NULL;
 	}
