@@ -97,6 +97,11 @@ __RCSID("$NetBSD: expand.c,v 1.56 2002/11/24 22:35:39 christos Exp $");
 #define RMESCAPE_GROW	0x8	/* Grow strings instead of stalloc */
 #define RMESCAPE_HEAP	0x10	/* Malloc strings instead of stalloc */
 
+/* Add CTLESC when necessary. */
+#define QUOTES_ESC	(EXP_FULL | EXP_CASE)
+/* Do not skip NUL characters. */
+#define QUOTES_KEEPNUL	EXP_TILDE
+
 /*
  * Structure specifying which parts of the string should be searched
  * for IFS characters.
@@ -125,7 +130,7 @@ STATIC char *exptilde(char *, char *, int);
 STATIC void expbackq(union node *, int, int);
 STATIC const char *subevalvar(char *, char *, int, int, int, int, int);
 STATIC char *evalvar(char *, int);
-STATIC void strtodest(const char *, const char *, int);
+STATIC size_t strtodest(const char *, const char *, int);
 STATIC void memtodest(const char *, size_t, const char *, int);
 STATIC ssize_t varvalue(char *, int, int);
 STATIC void recordregion(int, int, int);
@@ -272,7 +277,7 @@ argstr(char *p, int flag)
 	};
 	const char *reject = spclchars;
 	int c;
-	int quotes = flag & (EXP_FULL | EXP_CASE);	/* do CTLESC */
+	int quotes = flag & QUOTES_ESC;
 	int breakall = flag & EXP_WORD;
 	int inquotes;
 	size_t length;
@@ -393,7 +398,7 @@ exptilde(char *startp, char *p, int flag)
 	char *name;
 	struct passwd *pw;
 	const char *home;
-	int quotes = flag & (EXP_FULL | EXP_CASE);
+	int quotes = flag & QUOTES_ESC;
 	int startloc;
 
 	name = p + 1;
@@ -756,7 +761,7 @@ evalvar(char *p, int flag)
 	int quotes;
 	int quoted;
 
-	quotes = flag & (EXP_FULL | EXP_CASE);
+	quotes = flag & QUOTES_ESC;
 	varflags = *p++;
 	subtype = varflags & VSTYPE;
 	quoted = varflags & VSQUOTE;
@@ -883,30 +888,37 @@ end:
 
 STATIC void
 memtodest(const char *p, size_t len, const char *syntax, int quotes) {
-	char *q = expdest;
+	char *q;
 
-	q = makestrspace(len * 2, q);
+	if (unlikely(!len))
+		return;
 
-	while (len--) {
+	q = makestrspace(len * 2, expdest);
+
+	do {
 		int c = *p++;
-		if (!c)
+		if (c) {
+			if ((quotes & QUOTES_ESC) &&
+			    (syntax[c] == CCTL || syntax[c] == CBACK))
+				USTPUTC(CTLESC, q);
+		} else if (!(quotes & QUOTES_KEEPNUL))
 			continue;
-		if (quotes && (syntax[c] == CCTL || syntax[c] == CBACK))
-			USTPUTC(CTLESC, q);
 		USTPUTC(c, q);
-	}
+	} while (--len);
 
 	expdest = q;
 }
 
 
-STATIC void
+STATIC size_t
 strtodest(p, syntax, quotes)
 	const char *p;
 	const char *syntax;
 	int quotes;
 {
-	memtodest(p, strlen(p), syntax, quotes);
+	size_t len = strlen(p);
+	memtodest(p, len, syntax, quotes);
+	return len;
 }
 
 
@@ -921,19 +933,19 @@ varvalue(char *name, int varflags, int flags)
 	int num;
 	char *p;
 	int i;
-	int sep = 0;
-	int sepq = 0;
-	ssize_t len = 0;
+	int sep;
+	char sepc;
 	char **ap;
 	char const *syntax;
 	int quoted = varflags & VSQUOTE;
 	int subtype = varflags & VSTYPE;
-	int quotes = flags & (EXP_FULL | EXP_CASE);
+	int discard = subtype == VSPLUS || subtype == VSLENGTH;
+	int quotes = (discard ? 0 : (flags & QUOTES_ESC)) | QUOTES_KEEPNUL;
+	ssize_t len = 0;
 
-	if (quoted && (flags & EXP_FULL))
-		sep = 1 << CHAR_BIT;
-
+	sep = quoted ? ((flags & EXP_FULL) << CHAR_BIT) : 0;
 	syntax = quoted ? DQSYNTAX : BASESYNTAX;
+
 	switch (*name) {
 	case '$':
 		num = rootpid;
@@ -967,35 +979,19 @@ numvar:
 		/* fall through */
 	case '*':
 		sep = ifsset() ? ifsval()[0] : ' ';
-		if (quotes && (syntax[sep] == CCTL || syntax[sep] == CBACK))
-			sepq = 1;
 param:
 		if (!(ap = shellparam.p))
 			return -1;
+		sepc = sep;
 		while ((p = *ap++)) {
-			size_t partlen;
-
-			partlen = strlen(p);
-			len += partlen;
-
-			if (!(subtype == VSPLUS || subtype == VSLENGTH))
-				memtodest(p, partlen, syntax, quotes);
+			len += strtodest(p, syntax, quotes);
 
 			if (*ap && sep) {
-				char *q;
-
 				len++;
-				if (subtype == VSPLUS || subtype == VSLENGTH) {
-					continue;
-				}
-				q = expdest;
-				if (sepq)
-					STPUTC(CTLESC, q);
-				STPUTC(sep, q);
-				expdest = q;
+				memtodest(&sepc, 1, syntax, quotes);
 			}
 		}
-		return len;
+		break;
 	case '0':
 	case '1':
 	case '2':
@@ -1017,13 +1013,11 @@ value:
 		if (!p)
 			return -1;
 
-		len = strlen(p);
-		if (!(subtype == VSPLUS || subtype == VSLENGTH))
-			memtodest(p, len, syntax, quotes);
-		return len;
+		len = strtodest(p, syntax, quotes);
+		break;
 	}
 
-	if (subtype == VSPLUS || subtype == VSLENGTH)
+	if (discard)
 		STADJUST(-len, expdest);
 	return len;
 }
