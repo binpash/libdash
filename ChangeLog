@@ -1,6 +1,7 @@
 2004-08-21  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Size optimisations around varvalue() in src/expand.c.
+	* Fixed signed char promotion in src/expand.c.
 
 2004-08-18  Herbert Xu <herbert@gondor.apana.org.au>
 

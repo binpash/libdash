@@ -131,7 +131,7 @@ STATIC void expbackq(union node *, int, int);
 STATIC const char *subevalvar(char *, char *, int, int, int, int, int);
 STATIC char *evalvar(char *, int);
 STATIC size_t strtodest(const char *, const char *, int);
-STATIC void memtodest(const char *, size_t, const char *, int);
+STATIC void memtodest(const unsigned char *, size_t, const char *, int);
 STATIC ssize_t varvalue(char *, int, int);
 STATIC void recordregion(int, int, int);
 STATIC void removerecordregions(int); 
@@ -887,7 +887,7 @@ end:
  */
 
 STATIC void
-memtodest(const char *p, size_t len, const char *syntax, int quotes) {
+memtodest(const unsigned char *p, size_t len, const char *syntax, int quotes) {
 	char *q;
 
 	if (unlikely(!len))
