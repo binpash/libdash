@@ -352,16 +352,17 @@ exitshell(void)
 	struct jmploc loc;
 	char *p;
 	int status;
-	int jmp;
 
 #ifdef HETIO
 	hetio_reset_term();
 #endif
-	jmp = setjmp(loc.loc);
 	status = exitstatus;
 	TRACE(("pid %d, exitshell(%d)\n", getpid(), status));
-	if (jmp)
+	if (setjmp(loc.loc)) {
+		if (exception == EXEXIT)
+			_exit(exitstatus);
 		goto out;
+	}
 	handler = &loc;
 	if ((p = trap[0]) != NULL && *p != '\0') {
 		trap[0] = NULL;
