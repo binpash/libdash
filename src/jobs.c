@@ -328,7 +328,8 @@ usage:
 			jp = getjob(*argv, 0);
 			pid = -jp->ps[0].pid;
 		} else
-			pid = number(*argv);
+			pid = **argv == '-' ?
+				-number(*argv + 1) : number(*argv);
 		if (kill(pid, signo) != 0) {
 			sh_warnx("%s\n", strerror(errno));
 			i = 1;

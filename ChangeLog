@@ -1,3 +1,7 @@
+2004-08-07  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Allow negative pid argument to kill(1) in src/jobs.c.
+
 2004-08-04  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fixed cd - when OLDPWD is unset in src/cd.c.
