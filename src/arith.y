@@ -137,46 +137,6 @@ arith(s)
 }
 
 
-/*
- *  The exp(1) builtin.
- */
-int
-expcmd(argc, argv)
-	int argc;
-	char **argv;
-{
-	const char *p;
-	char *concat;
-	char **ap;
-	long i;
-
-	if (argc > 1) {
-		p = argv[1];
-		if (argc > 2) {
-			/*
-			 * concatenate arguments
-			 */
-			STARTSTACKSTR(concat);
-			ap = argv + 2;
-			for (;;) {
-				while (*p)
-					STPUTC(*p++, concat);
-				if ((p = *ap++) == NULL)
-					break;
-				STPUTC(' ', concat);
-			}
-			STPUTC('\0', concat);
-			p = grabstackstr(concat);
-		}
-	} else
-		p = nullstr;
-
-	i = arith(p);
-
-	out1fmt("%ld\n", i);
-	return (! i);
-}
-
 /*************************/
 #ifdef TEST_ARITH
 #include <stdio.h>

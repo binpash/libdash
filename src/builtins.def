@@ -59,7 +59,6 @@ echocmd		echo
 evalcmd		-s eval
 execcmd		-s exec
 exitcmd		-s exit
-expcmd		exp let
 exportcmd	-as export -as readonly
 falsecmd	-u false
 histcmd -h	-u fc

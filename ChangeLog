@@ -3,6 +3,7 @@
 	* Replaced EXEVAL with SKIPEVAL.
 	* Update funcnest atomically.
 	* Only set skipcount for break and continue.
+	* Removed expcmd built-in.
 
 2005-02-28  A Costa <agcosta@gis.net>
 
