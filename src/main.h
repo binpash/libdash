@@ -54,6 +54,5 @@ extern int *dash_errno;
 #endif
 
 void readcmdfile(char *);
-void cmdloop(int);
 int dotcmd(int, char **);
 int exitcmd(int, char **);

@@ -96,6 +96,7 @@ extern int etext();
 
 STATIC void read_profile(const char *);
 STATIC char *find_dot_file(char *);
+static int cmdloop(int);
 int main(int, char **);
 
 /*
@@ -213,7 +214,7 @@ state4:	/* XXX ??? - why isn't this before the "if" statement */
  * loop; it turns on prompting if the shell is interactive.
  */
 
-void
+static int
 cmdloop(int top)
 {
 	union node *n;
@@ -227,6 +228,8 @@ cmdloop(int top)
 		hetio_init();
 #endif
 	for (;;) {
+		int skip;
+
 		setstackmark(&smark);
 		if (pendingsigs)
 			dotrap();
@@ -254,11 +257,15 @@ cmdloop(int top)
 			evaltree(n, 0);
 		}
 		popstackmark(&smark);
-		if (evalskip) {
+
+		skip = evalskip;
+		if (skip) {
 			evalskip = 0;
-			break;
+			return skip & SKIPEVAL;
 		}
 	}
+
+	return 0;
 }
 
 
@@ -270,10 +277,16 @@ cmdloop(int top)
 STATIC void
 read_profile(const char *name)
 {
+	int skip;
+
 	if (setinputfile(name, INPUT_PUSH_FILE | INPUT_NOFILE_OK) < 0)
 		return;
-	cmdloop(0);
+
+	skip = cmdloop(0);
 	popfile();
+
+	if (skip)
+		exitshell();
 }
 
 
