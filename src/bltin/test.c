@@ -304,6 +304,11 @@ binop(void)
 		syntax(op->op_text, "argument expected");
 		
 	switch (op->op_num) {
+	default:
+#ifdef DEBUG
+		abort();
+		/* NOTREACHED */
+#endif
 	case STREQ:
 		return strcmp(opnd1, opnd2) == 0;
 	case STRNE:
@@ -330,9 +335,6 @@ binop(void)
 		return olderf (opnd1, opnd2);
 	case FILEQ:
 		return equalf (opnd1, opnd2);
-	default:
-		abort();
-		/* NOTREACHED */
 	}
 }
 
