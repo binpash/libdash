@@ -157,7 +157,7 @@ static int getn(const char *);
 static int newerf(const char *, const char *);
 static int olderf(const char *, const char *);
 static int equalf(const char *, const char *);
-static int test_eaccess(const char *, int);
+static int test_eaccess(const struct stat64 *, int);
 static int bash_group_member(gid_t);
 
 #ifndef SHELL
@@ -348,11 +348,11 @@ filstat(char *nm, enum token mode)
 
 	switch (mode) {
 	case FILRD:
-		return test_eaccess(nm, R_OK) == 0;
+		return test_eaccess(&s, R_OK) == 0;
 	case FILWR:
-		return test_eaccess(nm, W_OK) == 0;
+		return test_eaccess(&s, W_OK) == 0;
 	case FILEX:
-		return test_eaccess(nm, X_OK) == 0;
+		return test_eaccess(&s, X_OK) == 0;
 	case FILEXIST:
 		return 1;
 	case FILREG:
@@ -488,13 +488,9 @@ equalf (const char *f1, const char *f2)
    and don't make the mistake of telling root that any file is
    executable. */
 static int
-test_eaccess(const char *path, int mode)
+test_eaccess(const struct stat64 *st, int mode)
 {
-	struct stat64 st;
 	int euid = geteuid();
-
-	if (stat64(path, &st) < 0)
-		return (-1);
 
 	if (euid == 0) {
 		/* Root can read or write any file. */
@@ -503,16 +499,16 @@ test_eaccess(const char *path, int mode)
 
 		/* Root can execute any file that has any one of the execute
 		   bits set. */
-		if (st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
+		if (st->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
 			return (0);
 	}
 
-	if (st.st_uid == euid)		/* owner */
+	if (st->st_uid == euid)
 		mode <<= 6;
-	else if (bash_group_member(st.st_gid))
+	else if (bash_group_member(st->st_gid))
 		mode <<= 3;
 
-	if (st.st_mode & mode)
+	if (st->st_mode & mode)
 		return (0);
 
 	return (-1);
