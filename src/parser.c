@@ -51,7 +51,6 @@ __RCSID("$NetBSD: parser.c,v 1.54 2002/11/24 22:35:42 christos Exp $");
 #include "parser.h"
 #include "nodes.h"
 #include "expand.h"	/* defines rmescapes() */
-#include "eval.h"	/* defines commandname */
 #include "redir.h"	/* defines copyfd() */
 #include "exec.h"	/* defines find_builtin() */
 #include "syntax.h"

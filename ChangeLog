@@ -2,6 +2,7 @@
 
 	* Removed some unnecessary inclusions of input.h.
 	* Removed unnecessary inclusion of main.h from eval.c.
+	* Removed unnecessary inclusion of eval.h from parser.c.
 	* Generalise setinputfile for use in read_profile/readcmdfile.
 	* Handle SKIPEVAL in read_profile by exiting.
 	* Let evaltree handle traps from cmdloop.
