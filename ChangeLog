@@ -6,6 +6,7 @@
 
 	* Cleaned up src/Makefile.am.
 	* Get rid of duplicate -g -O2 in CFLAGS.
+	* Eliminate first null termination in setvar.
 
 2005-03-25  Gilles Chanteperdrix <gilles.chanteperdrix@laposte.net>
 
