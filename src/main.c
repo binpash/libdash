@@ -341,7 +341,7 @@ find_dot_file(char *basename)
 int
 dotcmd(int argc, char **argv)
 {
-	exitstatus = 0;
+	int status = 0;
 
 	if (argc >= 2) {		/* That's what SVR2 does */
 		char *fullname;
@@ -351,8 +351,9 @@ dotcmd(int argc, char **argv)
 		commandname = fullname;
 		cmdloop(0);
 		popfile();
+		status = exitstatus;
 	}
-	return exitstatus;
+	return status;
 }
 
 

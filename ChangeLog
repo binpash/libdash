@@ -2,6 +2,7 @@
 
 	* Removed qflag.
 	* Removed redundant setstackmark from dotcmd.
+	* Do not clobber exit status in dotcmd.
 
 2005-03-02  Herbert Xu <herbert@gondor.apana.org.au>
 
