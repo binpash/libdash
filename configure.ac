@@ -1,5 +1,5 @@
 dnl $Id$
-AC_INIT(dash, 0.5.1)
+AC_INIT(dash, 0.5.2)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.c])
 
