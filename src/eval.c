@@ -73,7 +73,6 @@ __RCSID("$NetBSD: eval.c,v 1.71 2003/01/23 03:33:16 rafal Exp $");
 #include "error.h"
 #include "show.h"
 #include "mystring.h"
-#include "main.h"
 #ifndef SMALL
 #include "myhistedit.h"
 #endif
