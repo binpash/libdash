@@ -114,7 +114,6 @@ cdcmd(int argc, char **argv)
 	else if (dest[0] == '-' && dest[1] == '\0') {
 		dest = bltinlookup("OLDPWD");
 		flags |= CD_PRINT;
-		goto step7;
 	}
 	if (!dest)
 		dest = nullstr;
