@@ -6,7 +6,7 @@
 
 	* Changed boolean rootshell into shlvl counter.
 	* Catch set -e exits within built-in commands.
-	* Size optimisations with state/s in main().
+	* Size optimisations with setjmp in main().
 	* Only reread exitstatus on EXEXIT in exitshell.
 	* Eliminated global exerrno.
 

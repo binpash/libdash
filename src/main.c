@@ -123,30 +123,18 @@ main(int argc, char **argv)
 #endif
 	state = 0;
 	if (unlikely(setjmp(jmploc.loc))) {
-		int status;
 		int e;
 		int s;
 
 		reset();
-		s = state;
 
 		e = exception;
-		switch (exception) {
-		case EXERROR:
-			status = 2;
-			break;
+		if (e == EXERROR)
+			exitstatus = 2;
 
-		case EXEXIT:
-		case EXEVAL:
-			s = 0;
-			/* fall through */
-		default:
-			status = exitstatus;
-			break;
-		}
-		exitstatus = status;
-
-		if (s == 0 || iflag == 0 || shlvl)
+		s = state;
+		if (e == EXEXIT || e == EXEVAL ||
+		    s == 0 || iflag == 0 || shlvl)
 			exitshell();
 
 		if (e == EXINT
