@@ -1,3 +1,5 @@
+	* Cleaned up src/Makefile.am.
+
 2005-03-25  Gilles Chanteperdrix <gilles.chanteperdrix@laposte.net>
 
 	* Fixed support for cross-compilation.

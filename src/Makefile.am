@@ -1,13 +1,22 @@
 # $Id$
 
-AM_CPPFLAGS = -include $(top_builddir)/config.h
 AM_YFLAGS = -d
 
-AM_CFLAGS = -g -O2 -Wall
-DEFS = \
+COMMON_CFLAGS = -g -O2 -Wall
+COMMON_CPPFLAGS = \
+	-include $(top_builddir)/config.h \
 	-DBSD=1 -DSMALL -DSHELL \
 	-DGLOB_BROKEN -DFNMATCH_BROKEN -DIFS_BROKEN \
 	-D__COPYRIGHT\(x\)= -D__RCSID\(x\)= -D_DIAGASSERT\(x\)=
+
+AM_CFLAGS = $(COMMON_CFLAGS)
+AM_CPPFLAGS = $(COMMON_CPPFLAGS)
+AM_CFLAGS_FOR_BUILD = $(COMMON_CFLAGS) 
+AM_CPPFLAGS_FOR_BUILD = $(COMMON_CPPFLAGS)
+
+COMPILE_FOR_BUILD = \
+	$(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) \
+	$(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) 
 
 bin_PROGRAMS = dash
 
@@ -29,7 +38,7 @@ HELPERS = mkinit mksyntax mknodes mksignames
 BUILT_SOURCES = arith.h builtins.h nodes.h syntax.h token.h
 CLEANFILES = \
 	$(BUILT_SOURCES) $(patsubst %.o,%.c,$(dash_LDADD)) \
-	arith.c mkinit mknodes mksignames mksyntax
+	arith.c $(HELPERS)
 
 man_MANS = dash.1
 EXTRA_DIST = \
@@ -56,4 +65,4 @@ signames.c: mksignames
 	./$^
 
 $(HELPERS): %: %.c
-	$(CC_FOR_BUILD) -o $@ $<
+	$(COMPILE_FOR_BUILD) -o $@ $<
