@@ -8,6 +8,7 @@
 	* Catch set -e exits within built-in commands.
 	* Size optimisations with state/s in main().
 	* Only reread exitstatus on EXEXIT in exitshell.
+	* Eliminated global exerrno.
 
 2005-01-31  Gerrit Pape <pape@smarden.org>
 

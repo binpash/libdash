@@ -66,7 +66,6 @@ struct jmploc {
 
 extern struct jmploc *handler;
 extern int exception;
-extern int exerrno;	/* error for EXEXEC */
 
 /* exceptions */
 #define EXINT 0		/* SIGINT received */

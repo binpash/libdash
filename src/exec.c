@@ -100,7 +100,6 @@ struct tblentry {
 
 STATIC struct tblentry *cmdtable[CMDTABLESIZE];
 STATIC int builtinloc = -1;		/* index in path of %builtin, or -1 */
-int exerrno;				/* Last exec error */
 
 
 STATIC void tryexec(char *, char **, char **);
@@ -123,6 +122,7 @@ shellexec(char **argv, const char *path, int idx)
 	char *cmdname;
 	int e;
 	char **envp;
+	int exerrno;
 
 	clearredir(1);
 	envp = environment();
@@ -153,6 +153,7 @@ shellexec(char **argv, const char *path, int idx)
 		exerrno = 2;
 		break;
 	}
+	exitstatus = exerrno;
 	TRACE(("shellexec failed for %s, errno %d, suppressint %d\n",
 		argv[0], e, suppressint ));
 	exerror(EXEXEC, "%s: %s", argv[0], errmsg(e, E_EXEC));

@@ -132,10 +132,6 @@ main(int argc, char **argv)
 
 		e = exception;
 		switch (exception) {
-		case EXEXEC:
-			status = exerrno;
-			break;
-
 		case EXERROR:
 			status = 2;
 			break;
