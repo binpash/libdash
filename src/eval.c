@@ -974,10 +974,8 @@ funcdone:
 	shellparam = saveparam;
 	handler = savehandler;
 	INTON;
-	if (evalskip == SKIPFUNC) {
+	if (evalskip == SKIPFUNC)
 		evalskip = 0;
-		skipcount = 0;
-	}
 	return e;
 }
 
@@ -1057,19 +1055,12 @@ breakcmd(int argc, char **argv)
 int
 returncmd(int argc, char **argv)
 {
-	int ret = argc > 1 ? number(argv[1]) : exitstatus;
-
-	if (funcnest) {
-		evalskip = SKIPFUNC;
-		skipcount = 1;
-		return ret;
-	}
-	else {
-		/* Do what ksh does; skip the rest of the file */
-		evalskip = SKIPFILE;
-		skipcount = 1;
-		return ret;
-	}
+	/*
+	 * If called outside a function, do what ksh does;
+	 * skip the rest of the file.
+	 */
+	evalskip = funcnest ? SKIPFUNC : SKIPFILE;
+	return argv[1] ? number(argv[1]) : exitstatus;
 }
 
 
