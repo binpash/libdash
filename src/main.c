@@ -122,11 +122,13 @@ main(int argc, char **argv)
 	monitor(4, etext, profile_buf, sizeof profile_buf, 50);
 #endif
 	state = 0;
-	if (setjmp(jmploc.loc)) {
+	if (unlikely(setjmp(jmploc.loc))) {
 		int status;
 		int e;
+		int s;
 
 		reset();
+		s = state;
 
 		e = exception;
 		switch (exception) {
@@ -140,7 +142,7 @@ main(int argc, char **argv)
 
 		case EXEXIT:
 		case EXEVAL:
-			state = 0;
+			s = 0;
 			/* fall through */
 		default:
 			status = exitstatus;
@@ -148,7 +150,7 @@ main(int argc, char **argv)
 		}
 		exitstatus = status;
 
-		if (state == 0 || iflag == 0 || shlvl)
+		if (s == 0 || iflag == 0 || shlvl)
 			exitshell();
 
 		if (e == EXINT
@@ -163,11 +165,11 @@ main(int argc, char **argv)
 		}
 		popstackmark(&smark);
 		FORCEINTON;				/* enable interrupts */
-		if (state == 1)
+		if (s == 1)
 			goto state1;
-		else if (state == 2)
+		else if (s == 2)
 			goto state2;
-		else if (state == 3)
+		else if (s == 3)
 			goto state3;
 		else
 			goto state4;

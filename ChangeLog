@@ -6,6 +6,7 @@
 
 	* Changed boolean rootshell into shlvl counter.
 	* Catch set -e exits within built-in commands.
+	* Size optimisations with state/s in main().
 
 2005-01-31  Gerrit Pape <pape@smarden.org>
 
