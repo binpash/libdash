@@ -874,6 +874,12 @@ bail:
 			i = exception;
 			if (i == EXEXIT)
 				goto raise;
+			if (i == EXEVAL) {
+				if (oldlvl == shlvl)
+					goto trap;
+				else
+					goto raise;
+			}
 
 			status = 2;
 			j = 0;
@@ -885,11 +891,11 @@ bail:
 				status = j + 128;
 			exitstatus = status;
 
-			if (i == EXINT || (i != EXEVAL && spclbltin > 0) ||
-			    oldlvl != shlvl) {
+			if (i == EXINT || spclbltin > 0) {
 raise:
 				longjmp(handler->loc, 1);
 			}
+trap:
 			FORCEINTON;
 		}
 		break;
