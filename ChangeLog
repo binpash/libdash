@@ -1,3 +1,7 @@
+2005-03-25  Gilles Chanteperdrix <gilles.chanteperdrix@laposte.net>
+
+	* Fixed support for cross-compilation.
+
 2005-03-03  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed qflag.

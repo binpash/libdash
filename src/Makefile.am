@@ -3,7 +3,7 @@
 AM_CPPFLAGS = -include $(top_builddir)/config.h
 AM_YFLAGS = -d
 
-CFLAGS = -g -O2 -Wall
+AM_CFLAGS = -g -O2 -Wall
 DEFS = \
 	-DBSD=1 -DSMALL -DSHELL \
 	-DGLOB_BROKEN -DFNMATCH_BROKEN -DIFS_BROKEN \
@@ -23,6 +23,8 @@ dash_SOURCES = \
 	myhistedit.h mystring.h options.h output.h parser.h redir.h shell.h \
 	show.h system.h trap.h var.h
 dash_LDADD = builtins.o init.o nodes.o signames.o syntax.o
+
+HELPERS = mkinit mksyntax mknodes mksignames
 
 BUILT_SOURCES = arith.h builtins.h nodes.h syntax.h token.h
 CLEANFILES = \
@@ -52,3 +54,6 @@ syntax.c syntax.h: mksyntax
 
 signames.c: mksignames
 	./$^
+
+$(HELPERS): %: %.c
+	$(CC_FOR_BUILD) -o $@ $<
