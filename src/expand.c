@@ -81,7 +81,6 @@ __RCSID("$NetBSD: expand.c,v 1.56 2002/11/24 22:35:39 christos Exp $");
 #include "jobs.h"
 #include "options.h"
 #include "var.h"
-#include "input.h"
 #include "output.h"
 #include "memalloc.h"
 #include "error.h"

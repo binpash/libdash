@@ -72,7 +72,6 @@ __RCSID("$NetBSD: exec.c,v 1.35 2003/01/22 20:36:04 dsl Exp $");
 #include "builtins.h"
 #include "var.h"
 #include "options.h"
-#include "input.h"
 #include "output.h"
 #include "syntax.h"
 #include "memalloc.h"
