@@ -143,7 +143,7 @@ and
 if they exist.
 If the environment variable
 .Ev ENV
-is set on entry to a shell, or is set in the
+is set on entry to an interactive shell, or is set in the
 .Pa .profile
 of a login shell, the shell next reads
 commands from the file named in
@@ -151,7 +151,7 @@ commands from the file named in
 Therefore, a user should place commands that are to be executed only at
 login time in the
 .Pa .profile
-file, and commands that are executed for every shell inside the
+file, and commands that are executed for every interactive shell inside the
 .Ev ENV
 file.
 To set the
@@ -165,31 +165,6 @@ of your home directory
 substituting for
 .Dq .shinit
 any filename you wish.
-Since the
-.Ev ENV
-file is read for every invocation of the shell, including shell scripts
-and non-interactive shells, the following paradigm is useful for
-restricting commands in the
-.Ev ENV
-file to interactive invocations.
-Place commands within the
-.Dq case
-and
-.Dq esac
-below (these commands are described later):
-.Pp
-.Bl -item -compact -offset indent
-.It
-.Li case $- in *i*)
-.Bl -item -compact -offset indent
-.It
-.Li # commands for interactive use only
-.It
-.Li ...
-.El
-.It
-.Li esac
-.El
 .Pp
 If command line arguments besides the options have been specified, then
 the shell treats the first argument as the name of a file from which to
