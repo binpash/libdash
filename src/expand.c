@@ -976,9 +976,12 @@ param:
 			size_t partlen;
 
 			partlen = strlen(p);
-
 			len += partlen;
-			if (len > partlen && sep) {
+
+			if (!(subtype == VSPLUS || subtype == VSLENGTH))
+				memtodest(p, partlen, syntax, quotes);
+
+			if (*ap && sep) {
 				char *q;
 
 				len++;
@@ -991,9 +994,6 @@ param:
 				STPUTC(sep, q);
 				expdest = q;
 			}
-
-			if (!(subtype == VSPLUS || subtype == VSLENGTH))
-				memtodest(p, partlen, syntax, quotes);
 		}
 		return len;
 	case '0':

@@ -1,3 +1,7 @@
+2004-08-18  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed $@ expansion when leading argument is null in src/expand.c.
+
 2004-08-07  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Allow negative pid argument to kill(1) in src/jobs.c.
