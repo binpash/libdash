@@ -325,8 +325,8 @@ out:
 		dotrap();
 	if (flags & EV_EXIT)
 		exraise(EXEXIT);
-	if (checkexit & exitstatus)
-		exraise(EXEVAL);
+	if ((checkexit & exitstatus) && evalskip != SKIPFILE)
+		evalskip = SKIPEVAL;
 }
 
 
@@ -711,14 +711,12 @@ evalcommand(union node *cmd, int flags)
 	int spclbltin;
 	int execcmd;
 	int status;
-	int oldlvl;
 	char **nargv;
 
 	/* First expand the arguments. */
 	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
 	setstackmark(&smark);
 	back_exitstatus = 0;
-	oldlvl = shlvl;
 
 	cmdentry.cmdtype = CMDBUILTIN;
 	cmdentry.u.cmd = &bltin;
@@ -874,12 +872,6 @@ bail:
 			i = exception;
 			if (i == EXEXIT)
 				goto raise;
-			if (i == EXEVAL) {
-				if (oldlvl == shlvl)
-					goto trap;
-				else
-					goto raise;
-			}
 
 			status = 2;
 			j = 0;
@@ -895,7 +887,6 @@ bail:
 raise:
 				longjmp(handler->loc, 1);
 			}
-trap:
 			FORCEINTON;
 		}
 		break;
@@ -941,6 +932,8 @@ cmddone:
 	commandname = savecmdname;
 	exsig = 0;
 	handler = savehandler;
+	if (evalskip == SKIPEVAL)
+		evalskip = 0;
 
 	return i;
 }

@@ -1,3 +1,7 @@
+2005-02-28  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Replaced EXEVAL with SKIPEVAL.
+
 2005-02-28  A Costa <agcosta@gis.net>
 
 	* Corrected that/than typo in manual page.

@@ -74,7 +74,6 @@ extern int exception;
 #define EXEXEC 3	/* command execution failed */
 #define EXEXIT 4	/* exit the shell */
 #define EXSIG 5		/* trapped signal in wait(1) */
-#define EXEVAL 6	/* exit the shell due to set -e */
 
 
 /*

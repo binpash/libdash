@@ -133,8 +133,7 @@ main(int argc, char **argv)
 			exitstatus = 2;
 
 		s = state;
-		if (e == EXEXIT || e == EXEVAL ||
-		    s == 0 || iflag == 0 || shlvl)
+		if (e == EXEXIT || s == 0 || iflag == 0 || shlvl)
 			exitshell();
 
 		if (e == EXINT
