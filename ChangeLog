@@ -1,6 +1,7 @@
 2005-02-25  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Changed boolean rootshell into shlvl counter.
+	* Catch set -e exits within built-in commands.
 
 2005-01-31  Gerrit Pape <pape@smarden.org>
 

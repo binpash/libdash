@@ -138,13 +138,17 @@ main(int argc, char **argv)
 			status = 2;
 			break;
 
+		case EXEXIT:
+		case EXEVAL:
+			state = 0;
+			/* fall through */
 		default:
 			status = exitstatus;
 			break;
 		}
 		exitstatus = status;
 
-		if (e == EXEXIT || state == 0 || iflag == 0 || ! rootshell)
+		if (state == 0 || iflag == 0 || shlvl)
 			exitshell();
 
 		if (e == EXINT

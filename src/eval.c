@@ -73,6 +73,7 @@ __RCSID("$NetBSD: eval.c,v 1.71 2003/01/23 03:33:16 rafal Exp $");
 #include "error.h"
 #include "show.h"
 #include "mystring.h"
+#include "main.h"
 #ifndef SMALL
 #include "myhistedit.h"
 #endif
@@ -322,8 +323,10 @@ setstatus:
 out:
 	if (pendingsigs)
 		dotrap();
-	if (flags & EV_EXIT || checkexit & exitstatus)
+	if (flags & EV_EXIT)
 		exraise(EXEXIT);
+	if (checkexit & exitstatus)
+		exraise(EXEVAL);
 }
 
 
@@ -708,12 +711,14 @@ evalcommand(union node *cmd, int flags)
 	int spclbltin;
 	int execcmd;
 	int status;
+	int oldlvl;
 	char **nargv;
 
 	/* First expand the arguments. */
 	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
 	setstackmark(&smark);
 	back_exitstatus = 0;
+	oldlvl = shlvl;
 
 	cmdentry.cmdtype = CMDBUILTIN;
 	cmdentry.u.cmd = &bltin;
@@ -880,7 +885,8 @@ bail:
 				status = j + 128;
 			exitstatus = status;
 
-			if (i == EXINT || spclbltin > 0) {
+			if (i == EXINT || (i != EXEVAL && spclbltin > 0) ||
+			    oldlvl != shlvl) {
 raise:
 				longjmp(handler->loc, 1);
 			}
