@@ -324,8 +324,8 @@ out:
 		dotrap();
 	if (flags & EV_EXIT)
 		exraise(EXEXIT);
-	if ((checkexit & exitstatus) && evalskip != SKIPFILE)
-		evalskip = SKIPEVAL;
+	if ((checkexit & exitstatus))
+		evalskip |= SKIPEVAL;
 }
 
 
@@ -931,8 +931,7 @@ cmddone:
 	commandname = savecmdname;
 	exsig = 0;
 	handler = savehandler;
-	if (evalskip == SKIPEVAL)
-		evalskip = 0;
+	evalskip &= ~SKIPEVAL;
 
 	return i;
 }
@@ -974,8 +973,7 @@ funcdone:
 	shellparam = saveparam;
 	handler = savehandler;
 	INTON;
-	if (evalskip == SKIPFUNC)
-		evalskip = 0;
+	evalskip &= ~SKIPFUNC;
 	return e;
 }
 

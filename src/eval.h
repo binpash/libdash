@@ -62,8 +62,8 @@ extern int funcnest;
 extern int evalskip;
 
 /* reasons for skipping commands (see comment on breakcmd routine) */
-#define SKIPBREAK	1
-#define SKIPCONT	2
-#define SKIPFUNC	3
-#define SKIPFILE	4
-#define SKIPEVAL	5
+#define SKIPBREAK	(1 << 0)
+#define SKIPCONT	(1 << 1)
+#define SKIPFUNC	(1 << 2)
+#define SKIPFILE	(1 << 3)
+#define SKIPEVAL	(1 << 4)
