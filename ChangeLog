@@ -4,6 +4,7 @@
 	* Removed unnecessary inclusion of main.h from eval.c.
 	* Generalise setinputfile for use in read_profile/readcmdfile.
 	* Handle SKIPEVAL in read_profile by exiting.
+	* Let evaltree handle traps from cmdloop.
 
 2005-03-25  Gerrit Pape <pape@smarden.org>
 

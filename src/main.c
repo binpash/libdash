@@ -231,8 +231,6 @@ cmdloop(int top)
 		int skip;
 
 		setstackmark(&smark);
-		if (pendingsigs)
-			dotrap();
 		if (jobctl)
 			showjobs(out2, SHOW_CHANGED);
 		inter = 0;
@@ -251,7 +249,7 @@ cmdloop(int top)
 				out2str("\nUse \"exit\" to leave shell.\n");
 			}
 			numeof++;
-		} else if (n != NULL && nflag == 0) {
+		} else if (nflag == 0) {
 			job_warning = (job_warning == 2) ? 1 : 0;
 			numeof = 0;
 			evaltree(n, 0);
