@@ -345,15 +345,12 @@ dotcmd(int argc, char **argv)
 
 	if (argc >= 2) {		/* That's what SVR2 does */
 		char *fullname;
-		struct stackmark smark;
 
-		setstackmark(&smark);
 		fullname = find_dot_file(argv[1]);
 		setinputfile(fullname, 1);
 		commandname = fullname;
 		cmdloop(0);
 		popfile();
-		popstackmark(&smark);
 	}
 	return exitstatus;
 }

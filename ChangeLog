@@ -1,6 +1,7 @@
 2005-03-03  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed qflag.
+	* Removed redundant setstackmark from dotcmd.
 
 2005-03-02  Herbert Xu <herbert@gondor.apana.org.au>
 
