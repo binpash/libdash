@@ -376,7 +376,7 @@ filstat(char *nm, enum token mode)
 	case FILSTCK:
 		return (s.st_mode & S_ISVTX) != 0;
 	case FILGZ:
-		return s.st_size > (off_t)0;
+		return !!s.st_size;
 	case FILUID:
 		return s.st_uid == geteuid();
 	case FILGID:
