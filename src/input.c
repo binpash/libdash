@@ -433,15 +433,18 @@ popstring(void)
  * old input onto the stack first.
  */
 
-void
-setinputfile(const char *fname, int push)
+int
+setinputfile(const char *fname, int flags)
 {
 	int fd;
 	int fd2;
 
 	INTOFF;
-	if ((fd = open(fname, O_RDONLY)) < 0)
+	if ((fd = open(fname, O_RDONLY)) < 0) {
+		if (flags & INPUT_NOFILE_OK)
+			goto out;
 		sh_error("Can't open %s", fname);
+	}
 	if (fd < 10) {
 		fd2 = copyfd(fd, 10);
 		close(fd);
@@ -449,8 +452,10 @@ setinputfile(const char *fname, int push)
 			sh_error("Out of file descriptors");
 		fd = fd2;
 	}
-	setinputfd(fd, push);
+	setinputfd(fd, flags & INPUT_PUSH_FILE);
+out:
 	INTON;
+	return fd;
 }
 
 

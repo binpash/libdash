@@ -270,13 +270,7 @@ cmdloop(int top)
 STATIC void
 read_profile(const char *name)
 {
-	int fd;
-
-	INTOFF;
-	if ((fd = open(name, O_RDONLY)) >= 0)
-		setinputfd(fd, 1);
-	INTON;
-	if (fd < 0)
+	if (setinputfile(name, INPUT_PUSH_FILE | INPUT_NOFILE_OK) < 0)
 		return;
 	cmdloop(0);
 	popfile();
@@ -291,14 +285,7 @@ read_profile(const char *name)
 void
 readcmdfile(char *name)
 {
-	int fd;
-
-	INTOFF;
-	if ((fd = open(name, O_RDONLY)) >= 0)
-		setinputfd(fd, 1);
-	else
-		sh_error("Can't open %s", name);
-	INTON;
+	setinputfile(name, INPUT_PUSH_FILE);
 	cmdloop(0);
 	popfile();
 }
@@ -347,7 +334,7 @@ dotcmd(int argc, char **argv)
 		char *fullname;
 
 		fullname = find_dot_file(argv[1]);
-		setinputfile(fullname, 1);
+		setinputfile(fullname, INPUT_PUSH_FILE);
 		commandname = fullname;
 		cmdloop(0);
 		popfile();

@@ -40,6 +40,11 @@
 
 /* PEOF (the end of file marker) is defined in syntax.h */
 
+enum {
+	INPUT_PUSH_FILE = 1,
+	INPUT_NOFILE_OK = 2,
+};
+
 /*
  * The input line number.  Input.c just defines this variable, and saves
  * and restores it when files are pushed and popped.  The user of this
@@ -56,7 +61,7 @@ int preadbuffer(void);
 void pungetc(void);
 void pushstring(char *, void *);
 void popstring(void);
-void setinputfile(const char *, int);
+int setinputfile(const char *, int);
 void setinputfd(int, int);
 void setinputstring(char *);
 void popfile(void);

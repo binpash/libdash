@@ -1,6 +1,7 @@
 2005-03-28  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed some unnecessary inclusions of input.h.
+	* Generalise setinputfile for use in read_profile/readcmdfile.
 
 2005-03-25  Gerrit Pape <pape@smarden.org>
 
