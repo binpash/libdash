@@ -42,8 +42,10 @@
 
 /* pid of main shell */
 extern int rootpid;
-/* true if we aren't a child of the main shell */
-extern int rootshell;
+/* shell level: 0 for the main shell, 1 for its children, and so on */
+extern int shlvl;
+#define rootshell (!shlvl)
+
 #ifdef __GLIBC__
 /* glibc sucks */
 extern int *dash_errno;

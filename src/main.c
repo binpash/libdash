@@ -85,7 +85,7 @@ __RCSID("$NetBSD: main.c,v 1.46 2002/12/11 19:12:18 christos Exp $");
 #define PROFILE 0
 
 int rootpid;
-int rootshell;
+int shlvl;
 #ifdef __GLIBC__
 int *dash_errno;
 #endif
@@ -174,7 +174,6 @@ main(int argc, char **argv)
 	trputs("Shell args:  ");  trargs(argv);
 #endif
 	rootpid = getpid();
-	rootshell = 1;
 	init();
 	setstackmark(&smark);
 	procargs(argc, argv);

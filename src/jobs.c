@@ -838,19 +838,19 @@ growjobtab(void)
 STATIC inline void
 forkchild(struct job *jp, union node *n, int mode)
 {
-	int wasroot;
+	int oldlvl;
 	pid_t pgrp;
 
 	TRACE(("Child shell %d\n", getpid()));
-	wasroot = rootshell;
-	rootshell = 0;
+	oldlvl = shlvl;
+	shlvl++;
 
 	closescript();
 	clear_traps();
 #if JOBS
 	/* do job control only in root shell */
 	jobctl = 0;
-	if (mode != FORK_NOJOB && jp->jobctl && wasroot) {
+	if (mode != FORK_NOJOB && jp->jobctl && !oldlvl) {
 		if (jp->nprocs == 0)
 			pgrp = getpid();
 		else
@@ -872,7 +872,7 @@ forkchild(struct job *jp, union node *n, int mode)
 				error("Can't open %s", _PATH_DEVNULL);
 		}
 	}
-	if (wasroot && iflag) {
+	if (!oldlvl && iflag) {
 		setsignal(SIGINT);
 		setsignal(SIGQUIT);
 		setsignal(SIGTERM);
