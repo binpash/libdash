@@ -157,7 +157,7 @@ static int getn(const char *);
 static int newerf(const char *, const char *);
 static int olderf(const char *, const char *);
 static int equalf(const char *, const char *);
-static int test_eaccess(const struct stat64 *, int);
+static int test_st_mode(const struct stat64 *, int);
 static int bash_group_member(gid_t);
 
 #ifndef SHELL
@@ -348,11 +348,11 @@ filstat(char *nm, enum token mode)
 
 	switch (mode) {
 	case FILRD:
-		return test_eaccess(&s, R_OK) == 0;
+		return test_st_mode(&s, R_OK);
 	case FILWR:
-		return test_eaccess(&s, W_OK) == 0;
+		return test_st_mode(&s, W_OK);
 	case FILEX:
-		return test_eaccess(&s, X_OK) == 0;
+		return test_st_mode(&s, X_OK);
 	case FILEXIST:
 		return 1;
 	case FILREG:
@@ -484,34 +484,30 @@ equalf (const char *f1, const char *f2)
 		b1.st_ino == b2.st_ino);
 }
 
-/* Do the same thing access(2) does, but use the effective uid and gid,
-   and don't make the mistake of telling root that any file is
-   executable. */
+/*
+ * Similar to what access(2) does, but uses the effective uid and gid.
+ * Doesn't make the mistake of telling root that any file is executable.
+ * Returns non-zero if the file is accessible.
+ */
 static int
-test_eaccess(const struct stat64 *st, int mode)
+test_st_mode(const struct stat64 *st, int mode)
 {
 	int euid = geteuid();
 
 	if (euid == 0) {
 		/* Root can read or write any file. */
 		if (mode != X_OK)
-		return (0);
+			return 1;
 
 		/* Root can execute any file that has any one of the execute
 		   bits set. */
-		if (st->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
-			return (0);
-	}
-
-	if (st->st_uid == euid)
+		mode = S_IXUSR | S_IXGRP | S_IXOTH;
+	} else if (st->st_uid == euid)
 		mode <<= 6;
 	else if (bash_group_member(st->st_gid))
 		mode <<= 3;
 
-	if (st->st_mode & mode)
-		return (0);
-
-	return (-1);
+	return st->st_mode & mode;
 }
 
 /* Return non-zero if GID is one that we have in our groups list. */
