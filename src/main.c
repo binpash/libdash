@@ -271,8 +271,6 @@ STATIC void
 read_profile(const char *name)
 {
 	int fd;
-	int xflag_set = 0;
-	int vflag_set = 0;
 
 	INTOFF;
 	if ((fd = open(name, O_RDONLY)) >= 0)
@@ -280,20 +278,7 @@ read_profile(const char *name)
 	INTON;
 	if (fd < 0)
 		return;
-	/* -q turns off -x and -v just when executing init files */
-	if (qflag)  {
-	    if (xflag)
-		    xflag = 0, xflag_set = 1;
-	    if (vflag)
-		    vflag = 0, vflag_set = 1;
-	}
 	cmdloop(0);
-	if (qflag)  {
-	    if (xflag_set)
-		    xflag = 1;
-	    if (vflag_set)
-		    vflag = 1;
-	}
 	popfile();
 }
 

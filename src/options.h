@@ -63,11 +63,10 @@ struct shparam {
 #define	aflag optlist[12]
 #define	bflag optlist[13]
 #define	uflag optlist[14]
-#define	qflag optlist[15]
-#define	nolog optlist[16]
-#define	debug optlist[17]
+#define	nolog optlist[15]
+#define	debug optlist[16]
 
-#define NOPTS	18
+#define NOPTS	17
 
 extern const char optletters[NOPTS];
 extern char optlist[NOPTS];

@@ -1,3 +1,7 @@
+2005-03-03  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Removed qflag.
+
 2005-03-02  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Renamed symbols to avoid conflict with libc.
