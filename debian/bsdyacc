@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+if echo "$@" | grep -q -- -o; then
+	OUTPUT=$(echo "$@" |
+		 sed 's/.*-o[[:blank:]]\+\([^[:blank:]]\+\)\.c.*/\1/')
+	OPTIONS=$(echo "$@" |
+		 sed 's/\(.*\)-o[[:blank:]]\+[^[:blank:]]\+\(.*\)/\1\2/')
+	NEW=1
+else
+	OUTPUT=$(echo "$@" |
+		 sed -e 's/.*[[:blank:]]\+\([^[:blank:]]\+\)\.y.*/\1/')
+	OPTIONS="$@"
+	NEW=0
+fi
+
+byacc $OPTIONS
+if [ $NEW = 1 ]; then
+	mv y.tab.c $OUTPUT.c
+fi
+mv y.tab.h $OUTPUT.h

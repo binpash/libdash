@@ -1,0 +1,53 @@
+Source: dash
+Section: shells
+Priority: optional
+Maintainer: Herbert Xu <herbert@debian.org>
+Build-Depends: bison, debhelper (>= 4), pmake
+Standards-Version: 3.6.1
+
+Package: dash
+Architecture: any
+Pre-Depends: ${shlibs:Depends}
+Description: The Debian Almquist Shell
+ "dash" is a POSIX compliant shell that is much smaller than "bash".
+ We take advantage of that by making it the shell on the installation
+ root floppy, where space is at a premium.
+ .
+ It can be usefully installed as /bin/sh (because it executes scripts
+ somewhat faster than "bash"), or as the default shell either of root
+ or of a second user with a userid of 0 (because it depends on fewer
+ libraries, and is therefore less likely to be affected by an upgrade
+ problem or a disk failure).  It is also useful for checking that a
+ script uses only POSIX syntax.
+ .
+ "bash" is a better shell for most users, since it has some nice
+ features absent from "dash", and is a required part of the system.
+
+Package: dash-udeb
+Architecture: any
+Depends: ${shlibs:Depends}
+Section: debian-installer
+Priority: extra
+Description: The Debian Almquist Shell for boot floppies
+ "dash" is a POSIX compliant shell that is much smaller than "bash".
+ We take advantage of that by making it the shell on the installation
+ root floppy, where space is at a premium.
+ .
+ It can be usefully installed as /bin/sh (because it executes scripts
+ somewhat faster than "bash"), or as the default shell either of root
+ or of a second user with a userid of 0 (because it depends on fewer
+ libraries, and is therefore less likely to be affected by an upgrade
+ problem or a disk failure).  It is also useful for checking that a
+ script uses only POSIX syntax.
+ .
+ "bash" is a better shell for most users, since it has some nice
+ features absent from "dash", and is a required part of the system.
+
+Package: ash
+Architecture: all
+Pre-Depends: dash
+Description: Compatibility package for the Debian Almquist Shell
+ This package exists so that users of the "ash" package can upgrade to the
+ "dash" package which replaces the former.  It includes the /bin/ash symlink.
+ You can remove this package if you do not use /bin/ash explicitly.
+

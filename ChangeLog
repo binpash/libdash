@@ -1,0 +1,25 @@
+2004-07-03  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Release 0.5.1.
+	* Use automake and autoconf.
+	* Include stdlib.h for exit(3) in src/mksyntax.c.
+
+2004-06-29  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Added sigclearmask.
+	* Removed hack for _setjmp/_longjmp.
+	* Added default implementations of mempcpy/stpcpy/strchrnul.
+	* Use strtoll/strtoull if strtoimax/strtoumax are unavailable.
+	* Removed sh.1 to dash.1.
+
+2004-05-28  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed vstype trim operator ordering in cmdputs.
+	* Fixed quote for CTLENDVAR in cmdputs.
+	* Fixed VSLENGTH crash in cmdputs.
+	* Turned vstype back into a 2-d array of chars.
+	* Added POSIX character class support in pmatch.
+
+For older ChangeLogs see ChangeLog.O.
+
+ChangeLog ends here

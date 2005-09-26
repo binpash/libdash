@@ -1,0 +1,92 @@
+#!/bin/sh
+#
+# post-install script for the Debian GNU/Linux dash package
+#
+# $Id$
+
+set -e
+
+check_divert() {
+	div=$(dpkg-divert --list $2)
+	distrib=${4:-$2.distrib}
+	case "$1" in
+	true)
+		if [ -z "$div" ]; then
+			dpkg-divert --package dash --divert $distrib --add $2
+			cp -dp $2 $distrib
+			ln -sf $3 $2
+		fi
+		;;
+	false)
+		if [ -n "$div" ] && [ -z "${div%%*by dash}" ]; then
+			mv $distrib $2
+			dpkg-divert --remove $2
+		fi
+		;;
+	ash)
+		case $div in
+		'')
+			;;
+		*by\ ash)
+			dst=${div% by ash}
+			dst=${dst##* to }
+
+			# Work around dpkg-divert bug.
+			if [ -e "$dst" ]; then
+				mv "$dst" "$dst.dash-tmp"
+			fi
+			dpkg-divert --remove $2
+			if [ -e "$dst.dash-tmp" ]; then
+				mv "$dst.dash-tmp" "$dst"
+			fi
+
+			dpkg-divert --package dash --divert $distrib --add $2
+			if [ "$dst" != $distrib ] && [ -e "$dst" ]; then
+				mv "$dst" $distrib
+			fi
+			ln -sf $3 $2
+			;;
+		*)
+			d=${2%/*}
+			if
+				[ -h $2 ] && [ -f $2 ] && [ -f $d/$5 ] &&
+				cmp $2 $d/$5
+			then
+				ln -sf $3 $2
+			fi
+			;;
+		esac
+	esac
+}
+
+add_shell() {
+	if ! type add-shell > /dev/null 2>&1; then
+		return
+	fi
+
+	add-shell /bin/dash
+}
+
+debconf=
+if [ -f /usr/share/debconf/confmodule ]; then
+	. /usr/share/debconf/confmodule
+	debconf=yes
+fi
+
+if [ "$1" = configure ] && [ -z "$2" ]; then
+	check_divert ash /bin/sh dash '' ash
+	check_divert ash /usr/share/man/man1/sh.1.gz dash.1.gz \
+		/usr/share/man/man1/sh.distrib.1.gz ash.1.gz
+	add_shell
+elif [ "$1" = configure ] && dpkg --compare-versions "$2" lt 0.4.18; then
+	add_shell
+fi
+
+if [ $debconf ]; then
+	db_get dash/sh
+	check_divert "$RET" /bin/sh dash
+	check_divert "$RET" /usr/share/man/man1/sh.1.gz dash.1.gz \
+		/usr/share/man/man1/sh.distrib.1.gz
+fi
+
+#DEBHELPER#

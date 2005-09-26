@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# pre-removal script for the Debian GNU/Linux ash package
+#
+# $Id$
+
+set -e
+
+remove_divert() {
+	div=$(dpkg-divert --list $1)
+	if [ -n "$div" ] && [ -z "${div%%*by dash}" ]; then
+		distrib=${div% by dash}
+		distrib=${distrib##* to }
+		mv $distrib $1
+		dpkg-divert --remove $1
+	fi
+}
+
+remove_shell() {
+	if ! type remove-shell > /dev/null 2>&1; then
+		return
+	fi
+
+	remove-shell /bin/dash
+}
+
+if [ "$1" = remove ] || [ "$1" = deconfigure ]; then
+	remove_divert /bin/sh
+	remove_divert /usr/share/man/man1/sh.1.gz
+fi
+
+if [ "$1" = remove ]; then
+	remove_shell
+fi
+
+#DEBHELPER#
