@@ -300,9 +300,9 @@ again:
 	something = 0;
 #endif
 	for (more = 1; more;) {
-		switch (*p) {
+		switch (*p++) {
 		case '\0':
-			p++;	/* Skip nul */
+			p = memmove(q, p, parselleft);
 			goto check;
 
 #ifndef SMALL
@@ -323,7 +323,7 @@ again:
 #endif
 		}
 
-		*q++ = *p++;
+		q++;
 check:
 		if (--parselleft <= 0 && more) {
 			parsenleft = q - parsenextc - 1;

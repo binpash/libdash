@@ -1,3 +1,7 @@
+2005-10-01  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Skip NUL characters properly in input.c
+
 2005-03-28  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed some unnecessary inclusions of input.h.
