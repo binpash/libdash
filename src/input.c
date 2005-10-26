@@ -260,14 +260,14 @@ retry:
 int
 preadbuffer(void)
 {
-	char *p, *q;
+	char *q;
 	int more;
 #ifndef SMALL
 	int something;
 #endif
 	char savec;
 
-	while (parsefile->strpush) {
+	while (unlikely(parsefile->strpush)) {
 		if (
 			parsenleft == -1 && parsefile->strpush->ap &&
 			parsenextc[-1] != ' ' && parsenextc[-1] != '\t'
@@ -278,60 +278,64 @@ preadbuffer(void)
 		if (--parsenleft >= 0)
 			return (*parsenextc++);
 	}
-	if (parsenleft == EOF_NLEFT || parsefile->buf == NULL)
+	if (unlikely(parsenleft == EOF_NLEFT || parsefile->buf == NULL))
 		return PEOF;
 	flushout(&output);
 #ifdef FLUSHERR
 	flushout(&errout);
 #endif
 
+	more = parselleft;
+	if (more <= 0) {
 again:
-	if (parselleft <= 0) {
-		if ((parselleft = preadfd()) <= 0) {
+		if ((more = preadfd()) <= 0) {
 			parselleft = parsenleft = EOF_NLEFT;
 			return PEOF;
 		}
 	}
 
-	q = p = parsenextc;
+	q = parsenextc;
 
 	/* delete nul characters */
 #ifndef SMALL
 	something = 0;
 #endif
-	for (more = 1; more;) {
-		switch (*p++) {
-		case '\0':
-			p = memmove(q, p, parselleft);
-			goto check;
+	for (;;) {
+		int c;
+
+		more--;
+		c = *q;
+
+		if (!c)
+			memmove(q, q + 1, more);
+		else {
+			q++;
+
+			if (c == '\n') {
+				parsenleft = q - parsenextc - 1;
+				break;
+			}
 
 #ifndef SMALL
-		case '\t':
-		case ' ':
-			break;
-#endif
-
-		case '\n':
-			parsenleft = q - parsenextc;
-			more = 0; /* Stop processing here */
-			break;
-
-#ifndef SMALL
-		default:
-			something = 1;
-			break;
+			switch (c) {
+			default:
+				something = 1;
+				/* fall through */
+			case '\t':
+			case ' ':
+				break;
+			}
 #endif
 		}
 
-		q++;
-check:
-		if (--parselleft <= 0 && more) {
+		if (more <= 0) {
 			parsenleft = q - parsenextc - 1;
 			if (parsenleft < 0)
 				goto again;
-			more = 0;
+			break;
 		}
 	}
+	parselleft = more;
 
 	savec = *q;
 	*q = '\0';

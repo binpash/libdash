@@ -1,6 +1,10 @@
+2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Size optimisations in preadbuffer().
+
 2005-10-01  Herbert Xu <herbert@gondor.apana.org.au>
 
-	* Skip NUL characters properly in input.c
+	* Skip NUL characters properly in input.c.
 
 2005-03-28  Herbert Xu <herbert@gondor.apana.org.au>
 
