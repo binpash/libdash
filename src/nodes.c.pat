@@ -44,6 +44,7 @@
 #include "memalloc.h"
 #include "machdep.h"
 #include "mystring.h"
+#include "system.h"
 
 
 int     funcblocksize;		/* size of structures in function */
@@ -145,21 +146,10 @@ STATIC char *
 nodesavestr(s)
 	char   *s;
 {
-#ifdef _GNU_SOURCE
 	char   *rtn = funcstring;
 
 	funcstring = stpcpy(funcstring, s) + 1;
 	return rtn;
-#else
-	register char *p = s;
-	register char *q = funcstring;
-	char   *rtn = funcstring;
-
-	while ((*q++ = *p++) != '\0')
-		continue;
-	funcstring = q;
-	return rtn;
-#endif
 }
 
 

@@ -20,6 +20,7 @@
 	* Added dummy strtod implementation.
 	* Removed standalone/csh support from test.
 	* Added dummy sysconf implementation.
+	* Include system.h for stpcpy in nodes.c.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 
