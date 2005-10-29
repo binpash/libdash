@@ -13,6 +13,7 @@
 	* Added missing system.h inclusion for mempcpy.
 	* Added default implementation of strsignal.
 	* Added default implementation of killpg.
+	* Disable ulimit if there is no getrlimit.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 

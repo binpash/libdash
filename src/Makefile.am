@@ -35,19 +35,22 @@ HELPERS = mkinit mksyntax mknodes mksignames
 BUILT_SOURCES = arith.h builtins.h nodes.h syntax.h token.h
 CLEANFILES = \
 	$(BUILT_SOURCES) $(patsubst %.o,%.c,$(dash_LDADD)) \
-	arith.c $(HELPERS)
+	arith.c $(HELPERS) builtins.def
 
 man_MANS = dash.1
 EXTRA_DIST = \
 	$(man_MANS) \
-	mktokens mkbuiltins builtins.def mkinit.c \
+	mktokens mkbuiltins builtins.def.in mkinit.c \
 	mknodes.c nodetypes nodes.c.pat mksyntax.c mksignames.c
 
 token.h: mktokens
 	sh $^
 
-builtins.c builtins.h: mkbuiltins shell.h builtins.def
-	sh $^ . '$(CFLAGS)'
+builtins.def: builtins.def.in $(top_builddir)/config.h
+	$(COMPILE) -E -x c -o $@ $<
+
+builtins.c builtins.h: mkbuiltins builtins.def
+	sh $^
 
 init.c: mkinit $(dash_CFILES)
 	./$^

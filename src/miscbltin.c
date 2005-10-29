@@ -58,10 +58,6 @@
 
 #undef rflag
 
-#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ < 1
-typedef enum __rlimit_resource rlim_t;
-#endif
-
 
 
 /*
@@ -276,6 +272,7 @@ umaskcmd(int argc, char **argv)
 	return 0;
 }
 
+#ifdef HAVE_GETRLIMIT
 /*
  * ulimit builtin
  *
@@ -457,3 +454,4 @@ ulimitcmd(int argc, char **argv)
 	}
 	return 0;
 }
+#endif
