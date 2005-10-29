@@ -41,6 +41,7 @@
 #include "error.h"
 #include "machdep.h"
 #include "mystring.h"
+#include "system.h"
 
 /*
  * Like malloc, but returns an error when out of space.

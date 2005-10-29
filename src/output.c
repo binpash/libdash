@@ -62,6 +62,7 @@
 #include "memalloc.h"
 #include "error.h"
 #include "main.h"
+#include "system.h"
 
 
 #define OUTBUFSIZ BUFSIZ

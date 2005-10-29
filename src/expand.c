@@ -75,6 +75,7 @@
 #include "error.h"
 #include "mystring.h"
 #include "show.h"
+#include "system.h"
 
 /*
  * _rmescape() flags
@@ -1650,12 +1651,7 @@ _rmescapes(char *str, int flag)
 		}
 		q = r;
 		if (len > 0) {
-#ifdef _GNU_SOURCE
 			q = mempcpy(q, str, len);
-#else
-			memcpy(q, str, len);
-			q += len;
-#endif
 		}
 	}
 	inquotes = (flag & RMESCAPE_QUOTED) ^ RMESCAPE_QUOTED;

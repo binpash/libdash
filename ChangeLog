@@ -10,6 +10,7 @@
 	* Added default implementation of bsearch.
 	* Added getpwhome as a wrapper for getpwnam.
 	* Fixed gcc 4.0 compilation problems.
+	* Added missing system.h inclusion for mempcpy.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 
