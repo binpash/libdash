@@ -25,5 +25,13 @@ dnl Checks for header files.
 dnl Checks for library functions.
 AC_CHECK_FUNCS(mempcpy sigsetmask stpcpy strchrnul strtoimax strtoumax)
 
+dnl Check for klibc signal.
+AC_CHECK_FUNC(signal)
+if test "$ac_cv_func_signal" != yes; then
+	AC_CHECK_FUNC(bsd_signal,
+		      [AC_DEFINE(signal, bsd_signal,
+				 [klibc has bsd_signal instead of signal])])
+fi
+
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
