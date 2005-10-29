@@ -1,3 +1,9 @@
+2005-10-29  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Updated BSD licence to 3-clause version per NetBSD.
+	* Updated copyright.
+	* Removed CVS IDs and inclusion of sys/cdefs.h.
+
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Size optimisations in preadbuffer().

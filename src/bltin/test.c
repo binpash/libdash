@@ -1,5 +1,3 @@
-/* $NetBSD: test.c,v 1.25 2002/05/25 23:12:16 wiz Exp $ */
-
 /*
  * test(1); version 7-like  --  author Erik Baalbergen
  * modified by Eric Gisin to be used as built-in.
@@ -9,11 +7,6 @@
  *
  * This program is in the Public Domain.
  */
-
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: test.c,v 1.25 2002/05/25 23:12:16 wiz Exp $");
-#endif
 
 #include <sys/stat.h>
 #include <sys/types.h>
