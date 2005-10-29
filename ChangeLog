@@ -14,6 +14,7 @@
 	* Added default implementation of strsignal.
 	* Added default implementation of killpg.
 	* Disable ulimit if there is no getrlimit.
+	* Disable histcmd completely when SMALL is defined.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 

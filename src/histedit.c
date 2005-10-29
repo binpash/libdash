@@ -489,11 +489,4 @@ str_to_event(const char *str, int last)
 	}
 	return (he.num);
 }
-#else
-int
-histcmd(int argc, char **argv)
-{
-	sh_error("not compiled with history support");
-	/* NOTREACHED */
-}
 #endif
