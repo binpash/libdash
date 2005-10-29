@@ -67,6 +67,7 @@
 #include "show.h"
 #include "jobs.h"
 #include "alias.h"
+#include "system.h"
 
 
 #define CMDTABLESIZE 31		/* should be prime */

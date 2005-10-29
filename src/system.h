@@ -58,3 +58,8 @@ char *strchrnul(const char *, int);
 #ifndef HAVE_STRTOUMAX
 #define strtoumax strtoull
 #endif
+
+#ifndef HAVE_BSEARCH
+void *bsearch(const void *, const void *, size_t, size_t,
+	      int (*)(const void *, const void *));
+#endif

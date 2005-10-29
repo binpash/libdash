@@ -7,6 +7,7 @@
 	* Use bsd_signal if it exists and signal does not.
 	* Stop using sysexits.h in commandcmd.
 	* Use stat if stat64 does not exist.
+	* Added default implementation of bsearch.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 
