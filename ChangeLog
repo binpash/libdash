@@ -22,6 +22,7 @@
 	* Added dummy sysconf implementation.
 	* Include system.h for stpcpy in nodes.c.
 	* Added out-of-line ctypes functions for klibc.
+	* Fixed fallback stpcpy implementation.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 

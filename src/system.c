@@ -71,7 +71,9 @@ void *mempcpy(void *dest, const void *src, size_t n)
 #ifndef HAVE_STPCPY
 char *stpcpy(char *dest, const char *src)
 {
-	return mempcpy(dest, src, strlen(src) + 1);
+	size_t len = strlen(src);
+	dest[len] = 0;
+	return mempcpy(dest, src, len);
 }
 #endif
 
