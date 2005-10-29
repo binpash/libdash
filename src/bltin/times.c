@@ -10,10 +10,9 @@
 #else
 #include "bltin.h"
 #endif
+#include "system.h"
 
-#define main timescmd
-
-int main() {
+int timescmd() {
 	struct tms buf;
 	long int clk_tck = sysconf(_SC_CLK_TCK);
 

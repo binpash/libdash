@@ -92,3 +92,8 @@ static inline int killpg(pid_t pid, int signal)
 	return kill(-pid, signal);
 }
 #endif
+
+#ifndef HAVE_SYSCONF
+#define _SC_CLK_TCK 2
+long sysconf(int) __attribute__((__noreturn__));
+#endif

@@ -19,6 +19,7 @@
 	* Removed standalone/csh support from printf.
 	* Added dummy strtod implementation.
 	* Removed standalone/csh support from test.
+	* Added dummy sysconf implementation.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 

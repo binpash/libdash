@@ -28,6 +28,7 @@
 
 #include <signal.h>
 #include <string.h>
+#include "error.h"
 #include "output.h"
 #include "system.h"
 
@@ -87,5 +88,12 @@ void *bsearch(const void *key, const void *base, size_t nmemb,
 	}
 
 	return 0;
+}
+#endif
+
+#ifndef HAVE_SYSCONF
+long sysconf(int name)
+{
+	sh_error("no sysconf for: %d", name);
 }
 #endif
