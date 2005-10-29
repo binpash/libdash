@@ -5,6 +5,7 @@
 	* Removed CVS IDs and inclusion of sys/cdefs.h.
 	* Removed use of __P from error.h.
 	* Use bsd_signal if it exists and signal does not.
+	* Stop using sysexits.h in commandcmd.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 

@@ -37,7 +37,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <sysexits.h>
 #include <paths.h>
 
 /*
@@ -847,41 +846,23 @@ commandcmd(argc, argv)
 	char **argv;
 {
 	int c;
-	int default_path = 0;
-	int verify_only = 0;
-	int verbose_verify_only = 0;
+	enum {
+		VERIFY_BRIEF = 1,
+		VERIFY_VERBOSE = 2,
+	} verify = 0;
 
 	while ((c = nextopt("pvV")) != '\0')
-		switch (c) {
-		default:
+		if (c == 'V')
+			verify |= VERIFY_VERBOSE;
+		else if (c == 'v')
+			verify |= VERIFY_BRIEF;
 #ifdef DEBUG
-			outfmt(out2,
-"command: nextopt returned character code 0%o\n", c);
-			return EX_SOFTWARE;
+		else if (c != 'p')
+			abort();
 #endif
-		case 'p':
-			default_path = 1;
-			break;
-		case 'v':
-			verify_only = 1;
-			break;
-		case 'V':
-			verbose_verify_only = 1;
-			break;
-		}
 
-	if (default_path + verify_only + verbose_verify_only > 1 ||
-	    !*argptr) {
-			outfmt(out2,
-"command [-p] command [arg ...]\n");
-			outfmt(out2,
-"command {-v|-V} command\n");
-			return EX_USAGE;
-	}
-
-	if (verify_only || verbose_verify_only) {
-		return describe_command(out1, *argptr, verbose_verify_only);
-	}
+	if (verify)
+		return describe_command(out1, *argptr, verify - VERIFY_BRIEF);
 
 	return 0;
 }
