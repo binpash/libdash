@@ -87,6 +87,8 @@ extern pid_t backgndpid;	/* pid of last background process */
 extern int job_warning;		/* user was warned about stopped jobs */
 #if JOBS
 extern int jobctl;		/* true if doing job control */
+#else
+#define jobctl 0
 #endif
 
 void setjobctl(int);

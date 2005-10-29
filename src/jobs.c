@@ -82,19 +82,21 @@ static struct job *jobtab;
 static unsigned njobs;
 /* pid of last background process */
 pid_t backgndpid;
+
 #if JOBS
 /* pgrp of shell on invocation */
 static int initialpgrp;
+/* control terminal */
+static int ttyfd = -1;
 #endif
+
 /* current job */
 static struct job *curjob;
-static int ttyfd = -1;
 /* number of presumed living untracked jobs */
 static int jobless;
 
 STATIC void set_curjob(struct job *, unsigned);
 STATIC int jobno(const struct job *);
-STATIC int restartjob(struct job *, int);
 STATIC int sprint_status(char *, int, int);
 STATIC void freejob(struct job *);
 STATIC struct job *getjob(const char *, int);
@@ -111,8 +113,12 @@ STATIC void cmdtxt(union node *);
 STATIC void cmdlist(union node *, int);
 STATIC void cmdputs(const char *);
 STATIC void showpipe(struct job *, struct output *);
-STATIC void xtcsetpgrp(int, pid_t);
 STATIC int getstatus(struct job *);
+
+#if JOBS
+static int restartjob(struct job *, int);
+static void xtcsetpgrp(int, pid_t);
+#endif
 
 STATIC void
 set_curjob(struct job *jp, unsigned mode)
@@ -150,7 +156,7 @@ set_curjob(struct job *jp, unsigned mode)
 			jpp = &jp1->prev_job;
 		} while (1);
 		/* FALLTHROUGH */
-#ifdef JOBS
+#if JOBS
 	case CUR_STOPPED:
 #endif
 		/* newly stopped job - becomes curjob */
@@ -333,7 +339,7 @@ jobno(const struct job *jp)
 	return jp - jobtab + 1;
 }
 
-#ifdef JOBS
+#if JOBS
 int
 fgcmd(int argc, char **argv)
 {
@@ -827,7 +833,6 @@ STATIC inline void
 forkchild(struct job *jp, union node *n, int mode)
 {
 	int oldlvl;
-	pid_t pgrp;
 
 	TRACE(("Child shell %d\n", getpid()));
 	oldlvl = shlvl;
@@ -839,6 +844,8 @@ forkchild(struct job *jp, union node *n, int mode)
 	/* do job control only in root shell */
 	jobctl = 0;
 	if (mode != FORK_NOJOB && jp->jobctl && !oldlvl) {
+		pid_t pgrp;
+
 		if (jp->nprocs == 0)
 			pgrp = getpid();
 		else
@@ -1014,7 +1021,7 @@ dowait(int block, struct job *job)
 			}
 			if (sp->status == -1)
 				state = JOBRUNNING;
-#ifdef JOBS
+#if JOBS
 			if (state == JOBRUNNING)
 				continue;
 			if (WIFSTOPPED(sp->status)) {
@@ -1037,7 +1044,7 @@ gotjob:
 		if (thisjob->state != state) {
 			TRACE(("Job %d: changing state from %d to %d\n", jobno(thisjob), thisjob->state, state));
 			thisjob->state = state;
-#ifdef JOBS
+#if JOBS
 			if (state == JOBSTOPPED) {
 				set_curjob(thisjob, CUR_STOPPED);
 			}
@@ -1454,12 +1461,14 @@ showpipe(struct job *jp, struct output *out)
 }
 
 
+#if JOBS
 STATIC void
 xtcsetpgrp(int fd, pid_t pgrp)
 {
 	if (tcsetpgrp(fd, pgrp))
 		sh_error("Cannot set tty process group (%s)", strerror(errno));
 }
+#endif
 
 
 STATIC int
