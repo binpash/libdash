@@ -8,6 +8,7 @@
 	* Stop using sysexits.h in commandcmd.
 	* Use stat if stat64 does not exist.
 	* Added default implementation of bsearch.
+	* Added getpwhome as a wrapper for getpwnam.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 

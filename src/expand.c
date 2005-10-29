@@ -37,7 +37,9 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
+#ifdef HAVE_GETPWNAM
 #include <pwd.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
@@ -172,6 +174,17 @@ esclen(const char *start, const char *p) {
 		esc++;
 	}
 	return esc;
+}
+
+
+static inline const char *getpwhome(const char *name)
+{
+#ifdef HAVE_GETPWNAM
+	struct passwd *pw = getpwnam(name);
+	return pw ? pw->pw_dir : 0;
+#else
+	return 0;
+#endif
 }
 
 
@@ -382,7 +395,6 @@ exptilde(char *startp, char *p, int flag)
 {
 	char c;
 	char *name;
-	struct passwd *pw;
 	const char *home;
 	int quotes = flag & QUOTES_ESC;
 	int startloc;
@@ -407,14 +419,11 @@ exptilde(char *startp, char *p, int flag)
 done:
 	*p = '\0';
 	if (*name == '\0') {
-		if ((home = lookupvar(homestr)) == NULL)
-			goto lose;
+		home = lookupvar(homestr);
 	} else {
-		if ((pw = getpwnam(name)) == NULL)
-			goto lose;
-		home = pw->pw_dir;
+		home = getpwhome(name);
 	}
-	if (*home == '\0')
+	if (!home || !*home)
 		goto lose;
 	*p = c;
 	startloc = expdest - (char *)stackblock();
