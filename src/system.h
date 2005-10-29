@@ -27,6 +27,7 @@
  */
 
 #include <signal.h>
+#include <sys/types.h>
 
 static inline void sigclearmask(void)
 {
@@ -66,4 +67,15 @@ char *strsignal(int);
 #ifndef HAVE_BSEARCH
 void *bsearch(const void *, const void *, size_t, size_t,
 	      int (*)(const void *, const void *));
+#endif
+
+#ifndef HAVE_KILLPG
+static inline int killpg(pid_t pid, int signal)
+{
+#ifdef DEBUG
+	if (pid < 0)
+		abort();
+#endif
+	return kill(-pid, signal);
+}
 #endif
