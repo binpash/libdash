@@ -12,7 +12,6 @@
 #include <sys/types.h>
 
 #include <ctype.h>
-#include <err.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -153,38 +152,11 @@ static int equalf(const char *, const char *);
 static int test_st_mode(const struct stat64 *, int);
 static int bash_group_member(gid_t);
 
-#ifndef SHELL
-static void error(const char *, ...) __attribute__((__noreturn__));
-
-static void
-error(const char *msg, ...)
-{
-	va_list ap;
-
-	va_start(ap, msg);
-	verrx(2, msg, ap);
-	/*NOTREACHED*/
-	va_end(ap);
-}
-#endif
-
-#ifdef SHELL
-int testcmd(int, char **);
-
 int
 testcmd(int argc, char **argv)
-#else
-int main(int, char *[]);
-
-int
-main(int argc, char *argv[])
-#endif
 {
 	int res;
 
-#ifndef SHELL
-	setprogname(argv[0]);
-#endif
 	if (strcmp(argv[0], "[") == 0) {
 		if (strcmp(argv[--argc], "]"))
 			error("missing ]");
@@ -516,11 +488,7 @@ bash_group_member(gid_t gid)
 		return (1);
 
 	ngroups = getgroups(0, NULL);
-#ifdef SHELL
 	group_array = stalloc(ngroups * sizeof(gid_t));
-#else
-	group_array = alloca(ngroups * sizeof(gid_t));
-#endif
 	getgroups(ngroups, group_array);
 
 	/* Search through the list looking for GID. */
