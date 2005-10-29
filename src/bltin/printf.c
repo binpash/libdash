@@ -32,15 +32,10 @@
 #include <sys/types.h>
 
 #include <ctype.h>
-#include <err.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
-#include <locale.h>
 #include <stdarg.h>
-#ifndef SHELL
-#include <stdio.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -58,19 +53,10 @@ static void      check_conversion(const char *, const char *);
 static int	rval;
 static char  **gargv;
 
-#ifdef BUILTIN		/* csh builtin */
-#define main progprintf
-#endif
-
 #define isodigit(c)	((c) >= '0' && (c) <= '7')
 #define octtobin(c)	((c) - '0')
 
-#ifdef SHELL		/* sh (aka ash) builtin */
-#define main printfcmd
 #include "bltin.h"
-#else
-#define nullstr ""
-#endif /* SHELL */
 #include "system.h"
 
 #define PF(f, func) { \
@@ -87,8 +73,7 @@ static char  **gargv;
 	} \
 }
 
-int main(int, char **);
-int main(int argc, char *argv[])
+int printfcmd(int argc, char *argv[])
 {
 	char *fmt;
 	char *format;
@@ -96,13 +81,7 @@ int main(int argc, char *argv[])
 
 	rval = 0;
 
-#if !defined(SHELL) && !defined(BUILTIN)
-	(void)setlocale (LC_ALL, "");
-#endif
-
-#ifdef SHELL
 	nextopt(nullstr);
-#endif
 
 	argv = argptr;
 	format = *argv;
@@ -229,12 +208,7 @@ pc:
 	} while (gargv != argv && *gargv);
 
 out:
-#ifdef SHELL
 	return (rval & ~0x100);
-#else
-	fflush(stdout);
-	return (rval & ~0x100 ?: ferror(stdout));
-#endif
 err:
 	return 1;
 }
@@ -248,22 +222,10 @@ static char *
 conv_escape_str(char *str)
 {
 	int ch;
-#ifndef SHELL
-	static char *conv_str;
-#endif
 	char *cp;
 
 	/* convert string into a temporary buffer... */
-#ifdef SHELL
 	STARTSTACKSTR(cp);
-#else
-	if (conv_str)
-		free(conv_str);
-	conv_str = malloc(strlen(str) + 4);
-	if (!conv_str)
-		return "<no memory>";
-	cp = conv_str;
-#endif
 
 	do {
 		int c;
@@ -303,15 +265,9 @@ conv_escape_str(char *str)
 		/* Finally test for sequences valid in the format string */
 		str = conv_escape(str - 1, &c);
 		ch = c;
-#ifdef SHELL
 	} while (STPUTC(ch, cp), ch);
 
 	return stackblock();
-#else
-	} while ((*cp++ = ch));
-
-	return conv_str;
-#endif
 }
 
 /*
@@ -360,23 +316,12 @@ out:
 static char *
 mklong(const char *str, const char *ch)
 {
-#ifdef SHELL
 	char *copy;
-#else
-	static char copy[64];
-#endif
 	size_t len;	
 
 	len = ch - str + 3;
-#ifdef SHELL
 	STARTSTACKSTR(copy);
 	copy = makestrspace(len, copy);
-#else
-	if (len > sizeof copy) {
-		warnx("format %s too complex\n", str);
-		len = 4;
-	}
-#endif
 	memcpy(copy, str, len - 3);
 	copy[len - 3] = 'j';
 	copy[len - 2] = *ch;
@@ -483,7 +428,6 @@ check_conversion(const char *s, const char *ep)
 	}
 }
 
-#ifdef SHELL
 int
 echocmd(int argc, char **argv)
 {
@@ -524,4 +468,3 @@ print:
 	} while (*argv);
 	return 0;
 }
-#endif
