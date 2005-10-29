@@ -17,6 +17,7 @@
 	* Disable histcmd completely when SMALL is defined.
 	* Added default definition for SSIZE_MAX.
 	* Removed standalone/csh support from printf.
+	* Added dummy strtod implementation.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 

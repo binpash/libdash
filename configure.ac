@@ -24,7 +24,7 @@ dnl Checks for header files.
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(bsearch getpwnam getrlimit killpg mempcpy sigsetmask stpcpy \
-	       strchrnul strsignal strtoimax strtoumax)
+	       strchrnul strsignal strtod strtoimax strtoumax)
 
 dnl Check for klibc signal.
 AC_CHECK_FUNC(signal)
