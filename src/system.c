@@ -26,7 +26,9 @@
  * SUCH DAMAGE.
  */
 
+#include <signal.h>
 #include <string.h>
+#include "output.h"
 #include "system.h"
 
 #ifndef HAVE_MEMPCPY
@@ -50,6 +52,18 @@ char *strchrnul(const char *s, int c)
 	if (!p)
 		p = (char *)s + strlen(s);
 	return p;
+}
+#endif
+
+#ifndef HAVE_STRSIGNAL
+char *strsignal(int sig)
+{
+	static char buf[19];
+
+	if ((unsigned)sig < NSIG && sys_siglist[sig])
+		return (char *)sys_siglist[sig];
+	fmtstr(buf, sizeof(buf), "Signal %d", sig); 
+	return buf;
 }
 #endif
 

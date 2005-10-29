@@ -11,6 +11,7 @@
 	* Added getpwhome as a wrapper for getpwnam.
 	* Fixed gcc 4.0 compilation problems.
 	* Added missing system.h inclusion for mempcpy.
+	* Added default implementation of strsignal.
 
 2005-10-26  Herbert Xu <herbert@gondor.apana.org.au>
 

@@ -65,6 +65,7 @@
 #include "memalloc.h"
 #include "error.h"
 #include "mystring.h"
+#include "system.h"
 
 /* mode flags for set_curjob */
 #define CUR_DELETE 2

@@ -51,6 +51,10 @@ char *stpcpy(char *, const char *);
 char *strchrnul(const char *, int);
 #endif
 
+#ifndef HAVE_STRSIGNAL
+char *strsignal(int);
+#endif
+
 #ifndef HAVE_STRTOIMAX
 #define strtoimax strtoll
 #endif
