@@ -91,7 +91,7 @@ extern int exsig;
 		0; \
 	})
 #ifdef REALLY_SMALL
-void __inton __P((void));
+void __inton(void);
 #define INTON __inton()
 #else
 #define INTON \
