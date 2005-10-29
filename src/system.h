@@ -26,8 +26,13 @@
  * SUCH DAMAGE.
  */
 
+#include <limits.h>
 #include <signal.h>
 #include <sys/types.h>
+
+#ifndef SSIZE_MAX
+#define SSIZE_MAX ((ssize_t)((size_t)-1 >> 1))
+#endif
 
 static inline void sigclearmask(void)
 {
