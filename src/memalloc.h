@@ -64,7 +64,7 @@ char *stnputs(const char *, size_t, char *);
 char *stputs(const char *, char *);
 
 
-static inline char *_STPUTC(char c, char *p) {
+static inline char *_STPUTC(int c, char *p) {
 	if (p == sstrend)
 		p = growstackstr();
 	*p++ = c;

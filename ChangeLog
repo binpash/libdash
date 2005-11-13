@@ -1,4 +1,8 @@
-2005-11-4  Herbert Xu <herbert@gondor.apana.org.au>
+2005-11-13  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Remove unnecessary truncation in _STPUTC.
+
+2005-11-04  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Use mktemp if tempfile is not available.
 
