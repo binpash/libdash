@@ -1,6 +1,7 @@
 2005-11-13  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Remove unnecessary truncation in _STPUTC.
+	* Always call conv_escape_str in echocmd.
 
 2005-11-04  Herbert Xu <herbert@gondor.apana.org.au>
 

@@ -445,16 +445,10 @@ echocmd(int argc, char **argv)
 	do {
 		char c;
 
-		c = *(*argv)++;
-		if (!c)
-			goto next;
-		if (c != '\\')
-			goto print;
-
-		outstr(conv_escape_str(*argv - 1), outs);
+		outstr(conv_escape_str(*argv), outs);
 		if (rval & 0x100)
 			break;
-next:
+
 		c = ' ';
 		if (!*++argv) {
 end:
@@ -463,7 +457,6 @@ end:
 			}
 			c = '\n';
 		}
-print:
 		outc(c, outs);
 	} while (*argv);
 	return 0;
