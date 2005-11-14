@@ -40,7 +40,7 @@
 #include <string.h>
 #include <unistd.h>
 
-static char	*conv_escape_str(char *);
+static int	 conv_escape_str(char *);
 static char	*conv_escape(char *, int *);
 static int	 getchr(void);
 static double	 getdouble(void);
@@ -155,11 +155,12 @@ pc:
 			switch (ch) {
 
 			case 'b': {
-				char *p = conv_escape_str(getstr());
+				int done = conv_escape_str(getstr());
+				char *p = stackblock();
 				*fmt = 's';
 				PF(start, p);
 				/* escape if a \c was encountered */
-				if (rval & 0x100)
+				if (done)
 					goto out;
 				*fmt = 'b';
 				break;
@@ -208,7 +209,7 @@ pc:
 	} while (gargv != argv && *gargv);
 
 out:
-	return (rval & ~0x100);
+	return rval;
 err:
 	return 1;
 }
@@ -218,7 +219,7 @@ err:
  * Print SysV echo(1) style escape string 
  *	Halts processing string if a \c escape is encountered.
  */
-static char *
+static int
 conv_escape_str(char *str)
 {
 	int ch;
@@ -237,8 +238,7 @@ conv_escape_str(char *str)
 		ch = *str++;
 		if (ch == 'c') {
 			/* \c as in SYSV echo - abort all processing.... */
-			rval |= 0x100;
-			ch = 0;
+			ch = 0x100;
 			continue;
 		}
 
@@ -265,9 +265,9 @@ conv_escape_str(char *str)
 		/* Finally test for sequences valid in the format string */
 		str = conv_escape(str - 1, &c);
 		ch = c;
-	} while (STPUTC(ch, cp), ch);
+	} while (STPUTC(ch, cp), (char)ch);
 
-	return stackblock();
+	return ch;
 }
 
 /*
@@ -445,8 +445,9 @@ echocmd(int argc, char **argv)
 	do {
 		char c;
 
-		outstr(conv_escape_str(*argv), outs);
-		if (rval & 0x100)
+		nonl += conv_escape_str(*argv);
+		outstr(stackblock(), outs);
+		if (nonl > 0)
 			break;
 
 		c = ' ';
