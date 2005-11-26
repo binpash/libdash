@@ -1,3 +1,7 @@
+2005-11-26  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Release 0.5.3.
+
 2005-11-14  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix \c spillage across echo commands.
