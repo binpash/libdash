@@ -150,10 +150,9 @@ evalcmd(int argc, char **argv)
                         STPUTC('\0', concat);
                         p = grabstackstr(concat);
                 }
-                evalstring(p, ~SKIPEVAL);
-                
+                return evalstring(p, ~SKIPEVAL);
         }
-        return exitstatus;
+        return 0;
 }
 
 
@@ -166,24 +165,23 @@ evalstring(char *s, int mask)
 {
 	union node *n;
 	struct stackmark smark;
-	int skip;
+	int status;
 
 	setinputstring(s);
 	setstackmark(&smark);
 
-	skip = 0;
+	status = 0;
 	while ((n = parsecmd(0)) != NEOF) {
 		evaltree(n, 0);
+		status = exitstatus;
 		popstackmark(&smark);
-		skip = evalskip;
-		if (skip)
+		if (evalskip)
 			break;
 	}
 	popfile();
 
-	skip &= mask;
-	evalskip = skip;
-	return skip;
+	evalskip &= mask;
+	return status;
 }
 
 

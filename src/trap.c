@@ -295,7 +295,6 @@ dotrap(void)
 	char *q;
 	int i;
 	int savestatus;
-	int skip = 0;
 
 	savestatus = exitstatus;
 	pendingsigs = 0;
@@ -309,13 +308,13 @@ dotrap(void)
 		p = trap[i + 1];
 		if (!p)
 			continue;
-		skip = evalstring(p, SKIPEVAL);
+		evalstring(p, SKIPEVAL);
 		exitstatus = savestatus;
-		if (skip)
-			break;
+		if (evalskip)
+			return evalskip;
 	}
 
-	return skip;
+	return 0;
 }
 
 

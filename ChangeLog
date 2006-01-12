@@ -1,3 +1,7 @@
+2006-01-12  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed eval exit status with empty arguments.
+
 2005-11-26  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Release 0.5.3.
