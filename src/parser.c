@@ -32,6 +32,7 @@
  * SUCH DAMAGE.
  */
 
+#include <alloca.h>
 #include <stdlib.h>
 
 #include "shell.h"
@@ -846,19 +847,6 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 	int dqvarnest;	/* levels of variables expansion within double quotes */
 	int oldstyle;
 	char const *prevsyntax;	/* syntax before arithmetic */
-#if __GNUC__
-	/* Avoid longjmp clobbering */
-	(void) &out;
-	(void) &quotef;
-	(void) &dblquote;
-	(void) &varnest;
-	(void) &arinest;
-	(void) &parenlevel;
-	(void) &dqvarnest;
-	(void) &oldstyle;
-	(void) &prevsyntax;
-	(void) &syntax;
-#endif
 
 	startlinno = plinno;
 	dblquote = 0;
@@ -1263,31 +1251,16 @@ badsub:			synerror("Bad substitution");
 parsebackq: {
 	struct nodelist **nlpp;
 	union node *n;
-	char *volatile str;
-	struct jmploc jmploc;
-	struct jmploc *volatile savehandler;
+	char *str;
 	size_t savelen;
 	int saveprompt;
-#ifdef __GNUC__
-	(void) &saveprompt;
-#endif
 
-	if (setjmp(jmploc.loc)) {
-		if (str)
-			ckfree(str);
-		handler = savehandler;
-		longjmp(handler->loc, 1);
-	}
-	INTOFF;
 	str = NULL;
 	savelen = out - (char *)stackblock();
 	if (savelen > 0) {
-		str = ckmalloc(savelen);
+		str = alloca(savelen);
 		memcpy(str, stackblock(), savelen);
 	}
-	savehandler = handler;
-	handler = &jmploc;
-	INTON;
         if (oldstyle) {
                 /* We must read until the closing backquote, giving special
                    treatment to some slashes, and then push the string and
@@ -1386,12 +1359,7 @@ done:
 	if (str) {
 		memcpy(out, str, savelen);
 		STADJUST(savelen, out);
-		INTOFF;
-		ckfree(str);
-		str = NULL;
-		INTON;
 	}
-	handler = savehandler;
 	if (arinest || dblquote)
 		USTPUTC(CTLBACKQ | CTLQUOTE, out);
 	else

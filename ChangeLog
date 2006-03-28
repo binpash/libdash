@@ -1,6 +1,7 @@
 2006-03-29  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed useless parsebackquote flag.
+	* Use alloca to get rid of setjmp in parse.c.
 
 2006-01-12  Herbert Xu <herbert@gondor.apana.org.au>
 
