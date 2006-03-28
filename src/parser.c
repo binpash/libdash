@@ -76,7 +76,6 @@ struct heredoc {
 
 
 struct heredoc *heredoclist;	/* list of here documents to read */
-int parsebackquote;		/* nonzero if we are inside backquotes */
 int doprompt;			/* if set, prompt the user */
 int needprompt;			/* true if interactive and at start of line */
 int lasttoken;			/* last token read */
@@ -1019,7 +1018,7 @@ quotemark:
 endword:
 	if (syntax == ARISYNTAX)
 		synerror("Missing '))'");
-	if (syntax != BASESYNTAX && ! parsebackquote && eofmark == NULL)
+	if (syntax != BASESYNTAX && eofmark == NULL)
 		synerror("Unterminated quoted string");
 	if (varnest != 0) {
 		startlinno = plinno;
@@ -1263,7 +1262,6 @@ badsub:			synerror("Bad substitution");
 
 parsebackq: {
 	struct nodelist **nlpp;
-	int savepbq;
 	union node *n;
 	char *volatile str;
 	struct jmploc jmploc;
@@ -1274,11 +1272,9 @@ parsebackq: {
 	(void) &saveprompt;
 #endif
 
-	savepbq = parsebackquote;
 	if (setjmp(jmploc.loc)) {
 		if (str)
 			ckfree(str);
-		parsebackquote = 0;
 		handler = savehandler;
 		longjmp(handler->loc, 1);
 	}
@@ -1360,7 +1356,6 @@ done:
 		nlpp = &(*nlpp)->next;
 	*nlpp = (struct nodelist *)stalloc(sizeof (struct nodelist));
 	(*nlpp)->next = NULL;
-	parsebackquote = oldstyle;
 
 	if (oldstyle) {
 		saveprompt = doprompt;
@@ -1396,7 +1391,6 @@ done:
 		str = NULL;
 		INTON;
 	}
-	parsebackquote = savepbq;
 	handler = savehandler;
 	if (arinest || dblquote)
 		USTPUTC(CTLBACKQ | CTLQUOTE, out);
