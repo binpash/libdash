@@ -165,7 +165,7 @@ sharg(union node *arg, FILE *fp)
 	}
 	bqlist = arg->narg.backquote;
 	for (p = arg->narg.text ; *p ; p++) {
-		switch (*p) {
+		switch ((signed char)*p) {
 		case CTLESC:
 			putc(*++p, fp);
 			break;
@@ -306,7 +306,7 @@ trstring(char *s)
 		return;
 	putc('"', tracefile);
 	for (p = s ; *p ; p++) {
-		switch (*p) {
+		switch ((signed char)*p) {
 		case '\n':  c = 'n';  goto backslash;
 		case '\t':  c = 't';  goto backslash;
 		case '\r':  c = 'r';  goto backslash;

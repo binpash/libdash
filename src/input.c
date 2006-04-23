@@ -263,7 +263,7 @@ preadbuffer(void)
 		}
 		popstring();
 		if (--parsenleft >= 0)
-			return (*parsenextc++);
+			return (signed char)*parsenextc++;
 	}
 	if (unlikely(parsenleft == EOF_NLEFT || parsefile->buf == NULL))
 		return PEOF;
@@ -346,7 +346,7 @@ again:
 
 	*q = savec;
 
-	return *parsenextc++;
+	return (signed char)*parsenextc++;
 }
 
 /*

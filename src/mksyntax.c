@@ -92,34 +92,20 @@ static char writer[] = "\
 static FILE *cfile;
 static FILE *hfile;
 static char *syntax[513];
-static int base;
-static int size;	/* number of values which a char variable can have */
-static int nbits;	/* number of bits in a character */
-static int digit_contig;/* true if digits are contiguous */
 
 static void filltable(char *);
 static void init(void);
 static void add(char *, char *);
 static void print(char *);
-static void output_type_macros(int);
-static void digit_convert(void);
+static void output_type_macros(void);
 int main(int, char **);
 
 int
 main(int argc, char **argv)
 {
-#ifdef	TARGET_CHAR
-	TARGET_CHAR c;
-	TARGET_CHAR d;
-#else
-	char c;
-	char d;
-#endif
-	int sign;
 	int i;
 	char buf[80];
 	int pos;
-	static char digit[] = "0123456789";
 
 	/* Create output files */
 	if ((cfile = fopen("syntax.c", "w")) == NULL) {
@@ -132,32 +118,6 @@ main(int argc, char **argv)
 	}
 	fputs(writer, hfile);
 	fputs(writer, cfile);
-
-	/* Determine the characteristics of chars. */
-	c = -1;
-	if (c <= 0)
-		sign = 1;
-	else
-		sign = 0;
-	for (nbits = 1 ; ; nbits++) {
-		d = (1 << nbits) - 1;
-		if (d == c)
-			break;
-	}
-	printf("%s %d bit chars\n", sign? "signed" : "unsigned", nbits);
-	if (nbits > 9) {
-		fputs("Characters can't have more than 9 bits\n", stderr);
-		exit(2);
-	}
-	size = (1 << nbits) + 1;
-	base = 2;
-	if (sign)
-		base += 1 << (nbits - 1);
-	digit_contig = 1;
-	for (i = 0 ; i < 10 ; i++) {
-		if (digit[i] != '0' + i)
-			digit_contig = 0;
-	}
 
 	fputs("#include <ctype.h>\n", hfile);
 	fputs("\n", hfile);
@@ -185,16 +145,16 @@ main(int argc, char **argv)
 		fprintf(hfile, "/* %s */\n", is_entry[i].comment);
 	}
 	putc('\n', hfile);
-	fprintf(hfile, "#define SYNBASE %d\n", base);
-	fprintf(hfile, "#define PEOF %d\n\n", -base);
-	fprintf(hfile, "#define PEOA %d\n\n", -base + 1);
+	fprintf(hfile, "#define SYNBASE %d\n", 130);
+	fprintf(hfile, "#define PEOF %d\n\n", -130);
+	fprintf(hfile, "#define PEOA %d\n\n", -129);
 	putc('\n', hfile);
 	fputs("#define BASESYNTAX (basesyntax + SYNBASE)\n", hfile);
 	fputs("#define DQSYNTAX (dqsyntax + SYNBASE)\n", hfile);
 	fputs("#define SQSYNTAX (sqsyntax + SYNBASE)\n", hfile);
 	fputs("#define ARISYNTAX (arisyntax + SYNBASE)\n", hfile);
 	putc('\n', hfile);
-	output_type_macros(sign);		/* is_digit, etc. */
+	output_type_macros();		/* is_digit, etc. */
 	putc('\n', hfile);
 
 	/* Generate the syntax tables. */
@@ -248,8 +208,6 @@ main(int argc, char **argv)
 	add("_", "ISUNDER");
 	add("#?$!-*@", "ISSPECL");
 	print("is_type");
-	if (! digit_contig)
-		digit_convert();
 	exit(0);
 	/* NOTREACHED */
 }
@@ -265,7 +223,7 @@ filltable(char *dftval)
 {
 	int i;
 
-	for (i = 0 ; i < size ; i++)
+	for (i = 0 ; i < 257; i++)
 		syntax[i] = dftval;
 }
 
@@ -283,11 +241,7 @@ init(void)
 	syntax[0] = "CEOF";
 	syntax[1] = "CIGN";
 	for (ctl = CTL_FIRST; ctl <= CTL_LAST; ctl++ )
-#ifdef TARGET_CHAR
-		syntax[base + (TARGET_CHAR)ctl ] = "CCTL";
-#else
-		syntax[base + ctl] = "CCTL";
-#endif /* TARGET_CHAR */
+		syntax[130 + ctl] = "CCTL";
 }
 
 
@@ -299,7 +253,7 @@ static void
 add(char *p, char *type)
 {
 	while (*p)
-		syntax[*p++ + base] = type;
+		syntax[(signed char)*p++ + 130] = type;
 }
 
 
@@ -315,9 +269,9 @@ print(char *name)
 	int col;
 
 	fprintf(hfile, "extern const char %s[];\n", name);
-	fprintf(cfile, "const char %s[%d] = {\n", name, size);
+	fprintf(cfile, "const char %s[%d] = {\n", name, 257);
 	col = 0;
-	for (i = 0 ; i < size ; i++) {
+	for (i = 0 ; i < 257; i++) {
 		if (i == 0) {
 			fputs("      ", cfile);
 		} else if ((i & 03) == 0) {
@@ -342,7 +296,7 @@ print(char *name)
  */
 
 static char *macro[] = {
-	"#define is_digit(c)\t((is_type+SYNBASE)[(signed char)(c)] & ISDIGIT)\n",
+	"#define is_digit(c)\t((unsigned)((c) - '0') <= 9)\n",
 	"#define is_alpha(c)\tisalpha((unsigned char)(c))\n",
 	"#define is_name(c)\t((c) == '_' || isalpha((unsigned char)(c)))\n",
 	"#define is_in_name(c)\t((c) == '_' || isalnum((unsigned char)(c)))\n",
@@ -351,45 +305,11 @@ static char *macro[] = {
 };
 
 static void
-output_type_macros(int sign)
+output_type_macros(void)
 {
 	char **pp;
 
-	if (digit_contig)
-		macro[0] = "#define is_digit(c)\t((unsigned)((c) - '0') <= 9)\n";
 	for (pp = macro ; *pp ; pp++)
-		fprintf(hfile, *pp, sign ? "char" : "unsigned char");
-	if (digit_contig)
-		fputs("#define digit_val(c)\t((c) - '0')\n", hfile);
-	else
-		fputs("#define digit_val(c)\t(digit_value[(unsigned char)(c)])\n", hfile);
-}
-
-
-
-/*
- * Output digit conversion table (if digits are not contiguous).
- */
-
-static void
-digit_convert(void)
-{
-	int maxdigit;
-	static char digit[] = "0123456789";
-	char *p;
-	int i;
-
-	maxdigit = 0;
-	for (p = digit ; *p ; p++)
-		if (*p > maxdigit)
-			maxdigit = *p;
-	fputs("extern const char digit_value[];\n", hfile);
-	fputs("\n\nconst char digit_value[] = {\n", cfile);
-	for (i = 0 ; i <= maxdigit ; i++) {
-		for (p = digit ; *p && *p != i ; p++);
-		if (*p == '\0')
-			p = digit;
-		fprintf(cfile, "      %ld,\n", (long)(p - digit));
-	}
-	fputs("};\n", cfile);
+		fputs(*pp, hfile);
+	fputs("#define digit_val(c)\t((c) - '0')\n", hfile);
 }

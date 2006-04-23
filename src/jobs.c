@@ -1357,8 +1357,9 @@ STATIC void
 cmdputs(const char *s)
 {
 	const char *p, *str;
-	char c, cc[2] = " ";
+	char cc[2] = " ";
 	char *nextc;
+	signed char c;
 	int subtype = 0;
 	int quoted = 0;
 	static const char vstype[VSTYPE + 1][4] = {

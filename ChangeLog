@@ -2,6 +2,7 @@
 
 	* Removed useless parsebackquote flag.
 	* Use alloca to get rid of setjmp in parse.c.
+	* Only use signed char for syntax arrays.
 
 2006-01-12  Herbert Xu <herbert@gondor.apana.org.au>
 

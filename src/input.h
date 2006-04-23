@@ -64,4 +64,5 @@ void popfile(void);
 void popallfiles(void);
 void closescript(void);
 
-#define pgetc_macro()	(--parsenleft >= 0? *parsenextc++ : preadbuffer())
+#define pgetc_macro() \
+	(--parsenleft >= 0 ? (signed char)*parsenextc++ : preadbuffer())

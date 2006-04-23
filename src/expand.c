@@ -171,7 +171,7 @@ STATIC size_t
 esclen(const char *start, const char *p) {
 	size_t esc = 0;
 
-	while (p > start && *--p == CTLESC) {
+	while (p > start && *--p == (char)CTLESC) {
 		esc++;
 	}
 	return esc;
@@ -296,7 +296,7 @@ argstr(char *p, int flag)
 		flag &= ~EXP_TILDE;
 tilde:
 		q = p;
-		if (*q == CTLESC && (flag & EXP_QWORD))
+		if (*q == (char)CTLESC && (flag & EXP_QWORD))
 			q++;
 		if (*q == '~')
 			p = exptilde(p, q, flag);
@@ -305,7 +305,7 @@ start:
 	startloc = expdest - (char *)stackblock();
 	for (;;) {
 		length += strcspn(p + length, reject);
-		c = p[length];
+		c = (signed char)p[length];
 		if (c && (!(c & 0x80) || c == CTLENDARI)) {
 			/* c == '=' || c == ':' || c == CTLENDARI */
 			length++;
@@ -352,9 +352,9 @@ start:
 			if (
 				!inquotes &&
 				!memcmp(p, dolatstr, DOLATSTRLEN) &&
-				(p[4] == CTLQUOTEMARK || (
-					p[4] == CTLENDVAR &&
-					p[5] == CTLQUOTEMARK
+				(p[4] == (char)CTLQUOTEMARK || (
+					p[4] == (char)CTLENDVAR &&
+					p[5] == (char)CTLQUOTEMARK
 				))
 			) {
 				p = evalvar(p + 1, flag) + 1;
@@ -394,7 +394,7 @@ breakloop:
 STATIC char *
 exptilde(char *startp, char *p, int flag)
 {
-	char c;
+	signed char c;
 	char *name;
 	const char *home;
 	int quotes = flag & QUOTES_ESC;
@@ -503,7 +503,7 @@ expari(int quotes)
 	do {
 		int esc;
 
-		while (*p != CTLARI) {
+		while (*p != (char)CTLARI) {
 			p--;
 #ifdef DEBUG
 			if (p < start) {
@@ -626,7 +626,7 @@ scanleft(
 		*loc2 = c;
 		if (match)
 			return loc;
-		if (quotes && *loc == CTLESC)
+		if (quotes && *loc == (char)CTLESC)
 			loc++;
 		loc++;
 		loc2++;
@@ -860,7 +860,7 @@ end:
 	if (subtype != VSNORMAL) {	/* skip to end of alternative */
 		int nesting = 1;
 		for (;;) {
-			if ((c = *p++) == CTLESC)
+			if ((c = (signed char)*p++) == CTLESC)
 				p++;
 			else if (c == CTLBACKQ || c == (CTLBACKQ|CTLQUOTE)) {
 				if (varlen >= 0)
@@ -892,7 +892,7 @@ memtodest(const char *p, size_t len, const char *syntax, int quotes) {
 	q = makestrspace(len * 2, expdest);
 
 	do {
-		int c = (unsigned char)*p++;
+		int c = (signed char)*p++;
 		if (c) {
 			if ((quotes & QUOTES_ESC) &&
 			    (syntax[c] == CCTL || syntax[c] == CBACK))
@@ -1078,7 +1078,7 @@ ifsbreakup(char *string, struct arglist *arglist)
 			ifsspc = 0;
 			while (p < string + ifsp->endoff) {
 				q = p;
-				if (*p == CTLESC)
+				if (*p == (char)CTLESC)
 					p++;
 				if (strchr(ifs, *p)) {
 					if (!nulonly)
@@ -1101,7 +1101,7 @@ ifsbreakup(char *string, struct arglist *arglist)
 								break;
 							}
 							q = p;
-							if (*p == CTLESC)
+							if (*p == (char)CTLESC)
 								p++;
 							if (strchr(ifs, *p) == NULL ) {
 								p = q;
@@ -1658,7 +1658,7 @@ _rmescapes(char *str, int flag)
 	globbing = flag & RMESCAPE_GLOB;
 	notescaped = globbing;
 	while (*p) {
-		if (*p == CTLQUOTEMARK) {
+		if (*p == (char)CTLQUOTEMARK) {
 			inquotes = ~inquotes;
 			p++;
 			notescaped = globbing;
@@ -1669,7 +1669,7 @@ _rmescapes(char *str, int flag)
 			notescaped = 0;
 			goto copy;
 		}
-		if (*p == CTLESC) {
+		if (*p == (char)CTLESC) {
 			p++;
 			if (notescaped && inquotes && *p != '/') {
 				*q++ = '\\';
@@ -1734,7 +1734,7 @@ varunset(const char *end, const char *var, const char *umsg, int varflags)
 	tail = nullstr;
 	msg = "parameter not set";
 	if (umsg) {
-		if (*end == CTLENDVAR) {
+		if (*end == (char)CTLENDVAR) {
 			if (varflags & VSNUL)
 				tail = " or null";
 		} else

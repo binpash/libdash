@@ -1414,7 +1414,7 @@ STATIC int
 noexpand(char *text)
 {
 	char *p;
-	char c;
+	signed char c;
 
 	p = text;
 	while ((c = *p++) != '\0') {
