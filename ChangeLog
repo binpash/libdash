@@ -1,3 +1,7 @@
+2006-05-23  Alexey Gladkov <legion@altlinux.org>
+
+	* Added --with-libedit option to configure.
+
 2006-03-29  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed useless parsebackquote flag.

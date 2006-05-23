@@ -42,5 +42,18 @@ AC_CHECK_FUNC(stat64,, [
 	AC_DEFINE(open64, open, [64-bit operations are the same as 32-bit])
 ])
 
+AC_ARG_WITH(libedit, AS_HELP_STRING(--with-libedit, [Compile with libedit support]))
+use_libedit=
+if test "$with_libedit" = "yes"; then
+	AC_CHECK_LIB(edit, history_init, [
+		AC_CHECK_HEADER([histedit.h], [use_libedit="yes"],
+				AC_MSG_ERROR(
+					[Can't find required header files.]))])
+fi
+if test "$use_libedit" != "yes"; then
+	AC_DEFINE([SMALL], 1, [Define if you build with -DSMALL])
+else
+	export LIBS="$LIBS -ledit"
+fi
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
