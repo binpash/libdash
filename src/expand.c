@@ -1581,7 +1581,7 @@ pmatch(const char *pattern, const char *string)
 				if (c == '[') {
 					const char *r;
 
-					found |= ccmatch(p, chr, &r);
+					found |= !!ccmatch(p, chr, &r);
 					if (r) {
 						p = r;
 						continue;
