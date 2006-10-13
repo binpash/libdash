@@ -427,9 +427,12 @@ writetext(struct text *text, FILE *fp)
 	struct block *bp;
 
 	if (text->start != NULL) {
-		for (bp = text->start ; bp != text->last ; bp = bp->next)
-			fwrite(bp->text, sizeof (char), BLOCKSIZE, fp);
-		fwrite(bp->text, sizeof (char), BLOCKSIZE - text->nleft, fp);
+		for (bp = text->start ; bp != text->last ; bp = bp->next) {
+			if ((fwrite(bp->text, sizeof (char), BLOCKSIZE, fp)) != BLOCKSIZE)
+				error("Can't write data\n");
+		}
+		if ((fwrite(bp->text, sizeof (char), BLOCKSIZE - text->nleft, fp)) != (BLOCKSIZE - text->nleft))
+			error("Can't write data\n");
 	}
 }
 

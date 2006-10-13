@@ -489,7 +489,8 @@ bash_group_member(gid_t gid)
 
 	ngroups = getgroups(0, NULL);
 	group_array = stalloc(ngroups * sizeof(gid_t));
-	getgroups(ngroups, group_array);
+	if ((getgroups(ngroups, group_array)) != ngroups)
+		return (0);
 
 	/* Search through the list looking for GID. */
 	for (i = 0; i < ngroups; i++)

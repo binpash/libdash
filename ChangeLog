@@ -1,3 +1,11 @@
+2006-10-13  Alexey Gladkov <legion@altlinux.org>
+
+	* Check return code for getgroups and fwrite.
+
+2006-10-04  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed inverted char class matching.
+
 2006-05-23  Alexey Gladkov <legion@altlinux.org>
 
 	* Added --with-libedit option to configure.
