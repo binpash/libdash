@@ -65,7 +65,7 @@ awk '{	for (i = 2 ; i <= NF ; i++) {
 		if ($i ~ /^-/)
 			line = $(++i) "\t" line
 		print line
-	}}' $temp | sort -k 1,1 | tee $temp2 | awk '{
+	}}' $temp | LC_COLLATE=C sort -k 1,1 | tee $temp2 | awk '{
 		opt = ""
 		if (NF > 2) {
 			opt = substr($2, 2)
