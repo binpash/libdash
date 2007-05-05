@@ -1,3 +1,7 @@
+2007-05-05  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed typo in parser.h comment.
+
 2007-04-28  Dan Nicholson <dbn.lists@gmail.com>
 
 	* Set LC_COLLATE for sort in mkbuiltin.

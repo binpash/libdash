@@ -41,7 +41,7 @@
 #define CTLENDVAR -125
 #define CTLBACKQ -124
 #define CTLQUOTE 01		/* ored with CTLBACKQ code if in quotes */
-/*	CTLBACKQ | CTLQUOTE == 133 */
+/*	CTLBACKQ | CTLQUOTE == -123 */
 #define	CTLARI -122		/* arithmetic expression */
 #define	CTLENDARI -121
 #define	CTLQUOTEMARK -120
