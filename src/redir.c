@@ -372,9 +372,7 @@ clearredir(int drop)
 
 
 /*
- * Copy a file descriptor to be >= to.  Returns -1
- * if the source file descriptor is closed, EMPTY if there are no unused
- * file descriptors left.
+ * Copy a file descriptor to be >= to.  Invokes sh_error on error.
  */
 
 int
@@ -383,13 +381,8 @@ copyfd(int from, int to)
 	int newfd;
 
 	newfd = fcntl(from, F_DUPFD, to);
-	if (newfd < 0) {
-		int errno2 = errno;
-		if (errno2 == EMFILE)
-			return EMPTY;
-		else
-			sh_error("%d: %s", from, strerror(errno2));
-	}
+	if (newfd < 0)
+		sh_error("%d: %s", from, strerror(errno));
 	return newfd;
 }
 

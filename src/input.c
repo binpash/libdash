@@ -439,8 +439,6 @@ setinputfile(const char *fname, int flags)
 	if (fd < 10) {
 		fd2 = copyfd(fd, 10);
 		close(fd);
-		if (fd2 < 0)
-			sh_error("Out of file descriptors");
 		fd = fd2;
 	}
 	setinputfd(fd, flags & INPUT_PUSH_FILE);

@@ -1,6 +1,7 @@
 2007-05-06  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed unnecessary inclusion of redir.h from parser.c.
+	* Invoke sh_error on error in copyfd.
 
 2007-05-05  Herbert Xu <herbert@gondor.apana.org.au>
 
