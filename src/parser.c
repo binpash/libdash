@@ -39,7 +39,6 @@
 #include "parser.h"
 #include "nodes.h"
 #include "expand.h"	/* defines rmescapes() */
-#include "redir.h"	/* defines copyfd() */
 #include "exec.h"	/* defines find_builtin() */
 #include "syntax.h"
 #include "options.h"
