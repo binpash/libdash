@@ -345,25 +345,18 @@ popredir(int drop)
 INCLUDE "redir.h"
 
 RESET {
-	clearredir(0);
-}
-
-#endif
-
-/*
- * Discard all saved file descriptors.
- */
-
-void
-clearredir(int drop)
-{
+	/*
+	 * Discard all saved file descriptors.
+	 */
 	for (;;) {
 		nullredirs = 0;
 		if (!redirlist)
 			break;
-		popredir(drop);
+		popredir(0);
 	}
 }
+
+#endif
 
 
 

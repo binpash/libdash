@@ -110,7 +110,6 @@ shellexec(char **argv, const char *path, int idx)
 	char **envp;
 	int exerrno;
 
-	clearredir(1);
 	envp = environment();
 	if (strchr(argv[0], '/') != NULL) {
 		tryexec(argv[0], argv, envp);

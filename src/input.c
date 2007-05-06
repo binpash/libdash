@@ -452,7 +452,6 @@ out:
 void
 setinputfd(int fd, int push)
 {
-	(void) fcntl(fd, F_SETFD, FD_CLOEXEC);
 	if (push) {
 		pushfile();
 		parsefile->buf = 0;
