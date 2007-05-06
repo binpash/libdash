@@ -2,6 +2,7 @@
 
 	* Removed unnecessary inclusion of redir.h from parser.c.
 	* Invoke sh_error on error in copyfd.
+	* Use dup2 instead of copyfd in evalbackcmd.
 
 2007-05-05  Herbert Xu <herbert@gondor.apana.org.au>
 

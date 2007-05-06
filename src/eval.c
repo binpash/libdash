@@ -625,8 +625,7 @@ evalbackcmd(union node *n, struct backcmd *result)
 			FORCEINTON;
 			close(pip[0]);
 			if (pip[1] != 1) {
-				close(1);
-				copyfd(pip[1], 1);
+				dup2(pip[1], 1);
 				close(pip[1]);
 			}
 			eflag = 0;
