@@ -138,21 +138,10 @@ redirect(union node *redir, int flags)
 		if (fd == newfd)
 			continue;
 		if (sv && *(p = &sv->renamed[fd]) == EMPTY) {
-			int i = fcntl(fd, F_DUPFD, 10);
-			if (i == -1) {
-				i = errno;
-				if (i != EBADF) {
-					const char *m = strerror(i);
-					close(newfd);
-					sh_error("%d: %s", fd, m);
-					/* NOTREACHED */
-				}
-			} else {
+			int i = savefd(fd);
+
+			if (i >= 0)
 				*p = i;
-				close(fd);
-			}
-		} else {
-			close(fd);
 		}
 #ifdef notyet
 		dupredirect(n, newfd, memory);
@@ -244,6 +233,7 @@ dupredirect(redir, f)
 #endif
 	{
 	int fd = redir->nfile.fd;
+	int err = 0;
 
 #ifdef notyet
 	memory[fd] = 0;
@@ -255,16 +245,24 @@ dupredirect(redir, f)
 				memory[fd] = 1;
 			else
 #endif
-				copyfd(redir->ndup.dupfd, fd);
+				if (dup2(f, fd) < 0) {
+					err = errno;
+					goto err;
+				}
+			return;
 		}
-		return;
-	}
+		f = fd;
+	} else if (dup2(f, fd) < 0)
+		err = errno;
 
-	if (f != fd) {
-		copyfd(f, fd);
-		close(f);
-	}
+	close(f);
+	if (err < 0)
+		goto err;
+
 	return;
+
+err:
+	sh_error("%d: %s", f, strerror(err));
 }
 
 
@@ -327,10 +325,8 @@ popredir(int drop)
 	rp = redirlist;
 	for (i = 0 ; i < 10 ; i++) {
 		if (rp->renamed[i] != EMPTY) {
-			if (!drop) {
-				close(i);
-				copyfd(rp->renamed[i], i);
-			}
+			if (!drop)
+				dup2(rp->renamed[i], i);
 			close(rp->renamed[i]);
 		}
 	}
@@ -372,17 +368,26 @@ clearredir(int drop)
 
 
 /*
- * Copy a file descriptor to be >= to.  Invokes sh_error on error.
+ * Move a file descriptor to > 10.  Invokes sh_error on error unless
+ * the original file dscriptor is not open.
  */
 
 int
-copyfd(int from, int to)
+savefd(int from)
 {
 	int newfd;
+	int err;
 
-	newfd = fcntl(from, F_DUPFD, to);
-	if (newfd < 0)
-		sh_error("%d: %s", from, strerror(errno));
+	newfd = fcntl(from, F_DUPFD, 10);
+	err = newfd < 0 ? errno : 0;
+	if (err != EBADF) {
+		close(from);
+		if (err)
+			sh_error("%d: %s", from, strerror(err));
+		else
+			fcntl(newfd, F_SETFD, FD_CLOEXEC);
+	}
+
 	return newfd;
 }
 
