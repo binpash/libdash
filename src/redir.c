@@ -57,7 +57,10 @@
 #include "error.h"
 
 
+#define REALLY_CLOSED -3	/* fd that was closed and still is */
 #define EMPTY -2		/* marks an unused slot in redirtab */
+#define CLOSED -1		/* fd opened for redir needs to be closed */
+
 #ifndef PIPE_BUF
 # define PIPESIZE 4096		/* amount of buffering in a pipe */
 #else
@@ -135,14 +138,29 @@ redirect(union node *redir, int flags)
 			continue; /* redirect from/to same file descriptor */
 
 		newfd = openredirect(n);
+
+		if (sv) {
+			p = &sv->renamed[fd];
+			i = *p;
+
+			if (likely(i == EMPTY)) {
+				i = CLOSED;
+				if (fd != newfd) {
+					i = savefd(fd);
+					fd = -1;
+				}
+			}
+
+			if (i == newfd)
+				/* Can only happen if i == newfd == CLOSED */
+				i = REALLY_CLOSED;
+
+			*p = i;
+		}
+
 		if (fd == newfd)
 			continue;
-		if (sv && *(p = &sv->renamed[fd]) == EMPTY) {
-			int i = savefd(fd);
 
-			if (i >= 0)
-				*p = i;
-		}
 #ifdef notyet
 		dupredirect(n, newfd, memory);
 #else
@@ -204,7 +222,7 @@ openredirect(union node *redir)
 		/* Fall through to eliminate warning. */
 	case NTOFD:
 	case NFROMFD:
-		f = -1;
+		f = redir->ndup.dupfd;
 		break;
 	case NHERE:
 	case NXHERE:
@@ -239,9 +257,10 @@ dupredirect(redir, f)
 	memory[fd] = 0;
 #endif
 	if (redir->nfile.type == NTOFD || redir->nfile.type == NFROMFD) {
-		if (redir->ndup.dupfd >= 0) {	/* if not ">&-" */
+		/* if not ">&-" */
+		if (f >= 0) {
 #ifdef notyet
-			if (memory[redir->ndup.dupfd])
+			if (memory[f])
 				memory[fd] = 1;
 			else
 #endif
@@ -324,10 +343,19 @@ popredir(int drop)
 	INTOFF;
 	rp = redirlist;
 	for (i = 0 ; i < 10 ; i++) {
-		if (rp->renamed[i] != EMPTY) {
+		switch (rp->renamed[i]) {
+		case CLOSED:
+			if (!drop)
+				close(i);
+			break;
+		case EMPTY:
+		case REALLY_CLOSED:
+			break;
+		default:
 			if (!drop)
 				dup2(rp->renamed[i], i);
 			close(rp->renamed[i]);
+			break;
 		}
 	}
 	redirlist = rp->next;
