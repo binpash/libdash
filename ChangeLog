@@ -1,6 +1,7 @@
 2007-05-12  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix redirect restore on closed file descriptors.
+	* Size optimisations in redir.c.
 
 2007-05-06  Herbert Xu <herbert@gondor.apana.org.au>
 

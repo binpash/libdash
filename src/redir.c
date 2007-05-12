@@ -119,7 +119,7 @@ redirect(union node *redir, int flags)
 	}
 	sv = NULL;
 	INTOFF;
-	if (flags & REDIR_PUSH) {
+	if (likely(flags & REDIR_PUSH)) {
 		struct redirtab *q;
 		q = ckmalloc(sizeof (struct redirtab));
 		q->next = redirlist;
@@ -132,12 +132,11 @@ redirect(union node *redir, int flags)
 	}
 	n = redir;
 	do {
-		fd = n->nfile.fd;
-		if ((n->nfile.type == NTOFD || n->nfile.type == NFROMFD) &&
-		    n->ndup.dupfd == fd)
-			continue; /* redirect from/to same file descriptor */
-
 		newfd = openredirect(n);
+		if (newfd < -1)
+			continue;
+
+		fd = n->nfile.fd;
 
 		if (sv) {
 			p = &sv->renamed[fd];
@@ -174,7 +173,7 @@ redirect(union node *redir, int flags)
 	if (memory[2])
 		out2 = &memout;
 #endif
-	if (flags & REDIR_SAVEFD2 && sv && sv->renamed[2] >= 0)
+	if (flags & REDIR_SAVEFD2 && sv->renamed[2] >= 0)
 		preverrout.fd = sv->renamed[2];
 }
 
@@ -215,15 +214,17 @@ openredirect(union node *redir)
 		if ((f = open64(fname, O_WRONLY|O_CREAT|O_APPEND, 0666)) < 0)
 			goto ecreate;
 		break;
+	case NTOFD:
+	case NFROMFD:
+		f = redir->ndup.dupfd;
+		if (f == redir->nfile.fd)
+			f = -2;
+		break;
 	default:
 #ifdef DEBUG
 		abort();
 #endif
 		/* Fall through to eliminate warning. */
-	case NTOFD:
-	case NFROMFD:
-		f = redir->ndup.dupfd;
-		break;
 	case NHERE:
 	case NXHERE:
 		f = openhere(redir);
