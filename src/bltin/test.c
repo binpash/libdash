@@ -157,8 +157,8 @@ testcmd(int argc, char **argv)
 {
 	int res;
 
-	if (strcmp(argv[0], "[") == 0) {
-		if (strcmp(argv[--argc], "]"))
+	if (*argv[0] == '[') {
+		if (*argv[--argc] != ']')
 			error("missing ]");
 		argv[argc] = NULL;
 	}
