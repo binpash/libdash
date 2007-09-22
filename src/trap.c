@@ -357,7 +357,7 @@ exitshell(void)
 	TRACE(("pid %d, exitshell(%d)\n", getpid(), status));
 	if (setjmp(loc.loc)) {
 		if (exception == EXEXIT)
-			_exit(exitstatus);
+			status = exitstatus;
 		goto out;
 	}
 	handler = &loc;
@@ -367,6 +367,12 @@ exitshell(void)
 	}
 	flushall();
 out:
+	/*
+	 * Disable job control so that whoever had the foreground before we
+	 * started can get it back.
+	 */
+	if (likely(!setjmp(loc.loc)))
+		setjobctl(0);
 	_exit(status);
 	/* NOTREACHED */
 }
