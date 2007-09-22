@@ -1,3 +1,7 @@
+2007-09-22  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Move flushall to the point just before _exit.
+
 2007-09-21  Denis Vlasenko <vda.linux@googlemail.com>
 
 	* Restore foreground process group on exit.

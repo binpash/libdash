@@ -365,7 +365,6 @@ exitshell(void)
 		trap[0] = NULL;
 		evalstring(p, 0);
 	}
-	flushall();
 out:
 	/*
 	 * Disable job control so that whoever had the foreground before we
@@ -373,6 +372,7 @@ out:
 	 */
 	if (likely(!setjmp(loc.loc)))
 		setjobctl(0);
+	flushall();
 	_exit(status);
 	/* NOTREACHED */
 }
