@@ -250,7 +250,7 @@ primary(enum token n)
 
 	if (t_lex(t_wp[1]), t_wp_op && t_wp_op->op_type == BINOP) {
 		return binop();
-	}	  
+	}
 
 	return strlen(*t_wp) > 0;
 }
@@ -267,7 +267,7 @@ binop(void)
 
 	if ((opnd2 = *++t_wp) == (char *)0)
 		syntax(op->op_text, "argument expected");
-		
+
 	switch (op->op_num) {
 	default:
 #ifdef DEBUG
@@ -389,8 +389,8 @@ isoperand(void)
 		return 0;
 	while (op->op_text) {
 		if (strcmp(s, op->op_text) == 0)
-	    		return op->op_type == BINOP &&
-	    		    (t[0] != ')' || t[1] != '\0'); 
+			return op->op_type == BINOP &&
+			    (t[0] != ')' || t[1] != '\0');
 		op++;
 	}
 	return 0;
@@ -407,13 +407,13 @@ getn(const char *s)
 	r = strtol(s, &p, 10);
 
 	if (errno != 0)
-	      error("%s: out of range", s);
+		error("%s: out of range", s);
 
 	while (isspace((unsigned char)*p))
 	      p++;
-	
+
 	if (*p)
-	      error("%s: bad number", s);
+		error("%s: bad number", s);
 
 	return (int) r;
 }

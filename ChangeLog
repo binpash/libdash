@@ -1,3 +1,7 @@
+2007-09-22  Oleg Verych <olecom@flower.upol.cz>
+
+	* White space fixes for test(1).
+
 2007-09-22  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Move flushall to the point just before _exit.
