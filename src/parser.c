@@ -932,10 +932,9 @@ quotemark:
 				dblquote = 1;
 				goto quotemark;
 			case CENDQUOTE:
-				if (eofmark != NULL && arinest == 0 &&
-				    varnest == 0) {
+				if (eofmark && !varnest)
 					USTPUTC(c, out);
-				} else {
+				else {
 					if (dqvarnest == 0) {
 						syntax = BASESYNTAX;
 						dblquote = 0;
