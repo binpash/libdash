@@ -970,10 +970,6 @@ quotemark:
 						if (--arinest == 0) {
 							USTPUTC(CTLENDARI, out);
 							syntax = prevsyntax;
-							if (syntax == DQSYNTAX)
-								dblquote = 1;
-							else
-								dblquote = 0;
 						} else
 							USTPUTC(')', out);
 					} else {

@@ -4,6 +4,7 @@
 	* Perform tilde expansion in all parameter expansion words.
 	* Remove superfluous arinest test in CENDQUOTE.
 	* Remove superfluous arinest test for dqvarnest.
+	* Remove superfluous dblquote settings when ending arith.
 
 2007-09-22  Oleg Verych <olecom@flower.upol.cz>
 
