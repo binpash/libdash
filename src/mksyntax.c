@@ -53,6 +53,7 @@ struct synclass synclass[] = {
 	{ "CWORD",	"character is nothing special" },
 	{ "CNL",	"newline character" },
 	{ "CBACK",	"a backslash character" },
+	{ "CDBACK",	"a backslash character in double quotes" },
 	{ "CSQUOTE",	"single quote" },
 	{ "CDQUOTE",	"double quote" },
 	{ "CENDQUOTE",	"a terminating quote" },
@@ -175,7 +176,7 @@ main(int argc, char **argv)
 	init();
 	fputs("\n/* syntax table used when in double quotes */\n", cfile);
 	add("\n", "CNL");
-	add("\\", "CBACK");
+	add("\\", "CDBACK");
 	add("\"", "CENDQUOTE");
 	add("`", "CBQUOTE");
 	add("$", "CVAR");
@@ -193,7 +194,7 @@ main(int argc, char **argv)
 	init();
 	fputs("\n/* syntax table used when in arithmetic */\n", cfile);
 	add("\n", "CNL");
-	add("\\", "CBACK");
+	add("\\", "CDBACK");
 	add("`", "CBQUOTE");
 	add("$", "CVAR");
 	add("}", "CENDVAR");

@@ -1,3 +1,7 @@
+2007-09-24  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Do not quote back slashes in parameter expansions outside quotes.
+
 2007-09-22  Oleg Verych <olecom@flower.upol.cz>
 
 	* White space fixes for test(1).

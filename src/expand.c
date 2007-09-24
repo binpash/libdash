@@ -895,7 +895,7 @@ memtodest(const char *p, size_t len, const char *syntax, int quotes) {
 		int c = (signed char)*p++;
 		if (c) {
 			if ((quotes & QUOTES_ESC) &&
-			    (syntax[c] == CCTL || syntax[c] == CBACK))
+			    (syntax[c] == CCTL || syntax[c] == CDBACK))
 				USTPUTC(CTLESC, q);
 		} else if (!(quotes & QUOTES_KEEPNUL))
 			continue;
@@ -1671,9 +1671,8 @@ _rmescapes(char *str, int flag)
 		}
 		if (*p == (char)CTLESC) {
 			p++;
-			if (notescaped && inquotes && *p != '/') {
+			if (notescaped && inquotes)
 				*q++ = '\\';
-			}
 		}
 		notescaped = globbing;
 copy:
