@@ -683,7 +683,8 @@ subevalvar(char *p, char *str, int strloc, int subtype, int startloc, int varfla
 	char *(*scan)(char *, char *, char *, char *, int , int);
 
 	herefd = -1;
-	argstr(p, subtype != VSASSIGN && subtype != VSQUESTION ? EXP_CASE : 0);
+	argstr(p, EXP_TILDE | (subtype != VSASSIGN && subtype != VSQUESTION ?
+			       EXP_CASE : 0));
 	STPUTC('\0', expdest);
 	herefd = saveherefd;
 	argbackq = saveargbackq;
