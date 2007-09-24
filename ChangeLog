@@ -5,6 +5,7 @@
 	* Remove superfluous arinest test in CENDQUOTE.
 	* Remove superfluous arinest test for dqvarnest.
 	* Remove superfluous dblquote settings when ending arith.
+	* Remove arithmetic expansion collapsing at parse time.
 
 2007-09-22  Oleg Verych <olecom@flower.upol.cz>
 

@@ -967,11 +967,9 @@ quotemark:
 					--parenlevel;
 				} else {
 					if (pgetc() == ')') {
-						if (--arinest == 0) {
-							USTPUTC(CTLENDARI, out);
+						USTPUTC(CTLENDARI, out);
+						if (!--arinest)
 							syntax = prevsyntax;
-						} else
-							USTPUTC(')', out);
 					} else {
 						/*
 						 * unbalanced parens
@@ -1373,18 +1371,12 @@ parsearith: {
 	if (++arinest == 1) {
 		prevsyntax = syntax;
 		syntax = ARISYNTAX;
-		USTPUTC(CTLARI, out);
-		if (dblquote)
-			USTPUTC('"',out);
-		else
-			USTPUTC(' ',out);
-	} else {
-		/*
-		 * we collapse embedded arithmetic expansion to
-		 * parenthesis, which should be equivalent
-		 */
-		USTPUTC('(', out);
 	}
+	USTPUTC(CTLARI, out);
+	if (dblquote)
+		USTPUTC('"',out);
+	else
+		USTPUTC(' ',out);
 	goto parsearith_return;
 }
 
