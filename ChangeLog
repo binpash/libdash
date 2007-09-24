@@ -3,6 +3,7 @@
 	* Do not quote back slashes in parameter expansions outside quotes.
 	* Perform tilde expansion in all parameter expansion words.
 	* Remove superfluous arinest test in CENDQUOTE.
+	* Remove superfluous arinest test for dqvarnest.
 
 2007-09-22  Oleg Verych <olecom@flower.upol.cz>
 

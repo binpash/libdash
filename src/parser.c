@@ -1232,9 +1232,8 @@ badsub:			synerror("Bad substitution");
 		*((char *)stackblock() + typeloc) = subtype | flags;
 		if (subtype != VSNORMAL) {
 			varnest++;
-			if (dblquote || arinest) {
+			if (dblquote)
 				dqvarnest++;
-			}
 		}
 	}
 	goto parsesub_return;
