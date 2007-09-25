@@ -640,17 +640,20 @@ repeat until the exit status of the first list is zero.
 .Pp
 The syntax of the for command is
 .Bd -literal -offset indent
-for variable in word ...
+for variable [ in [ word ... ] ]
 do   list
 done
 .Ed
 .Pp
-The words are expanded, and then the list is executed repeatedly with the
+The words following
+.Pa in
+are expanded, and then the list is executed repeatedly with the
 variable set to each word in turn.
 do and done may be replaced with
 .Dq {
 and
 .Dq } .
+Omitting in word ... is equivalent to in "$@".
 .Pp
 The syntax of the break and continue command is
 .Bd -literal -offset indent

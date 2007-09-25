@@ -1,6 +1,7 @@
 2007-09-25  Gerrit Pape <pape@smarden.org>
 
 	* Clarify description of -nt, -ot options to test builtin.
+	* Clarify syntax of the for command.
 
 2007-09-25  Herbert Xu <herbert@gondor.apana.org.au>
 
