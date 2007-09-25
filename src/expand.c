@@ -278,7 +278,7 @@ argstr(char *p, int flag)
 	const char *reject = spclchars;
 	int c;
 	int quotes = flag & QUOTES_ESC;
-	int breakall = flag & EXP_WORD;
+	int breakall = (flag & (EXP_WORD | EXP_QUOTED)) == EXP_WORD;
 	int inquotes;
 	size_t length;
 	int startloc;
@@ -296,8 +296,6 @@ argstr(char *p, int flag)
 		flag &= ~EXP_TILDE;
 tilde:
 		q = p;
-		if (*q == (char)CTLESC && (flag & EXP_QWORD))
-			q++;
 		if (*q == '~')
 			p = exptilde(p, q, flag);
 	}
@@ -780,10 +778,8 @@ again:
 	if (subtype == VSMINUS) {
 vsplus:
 		if (varlen < 0) {
-			argstr(
-				p, flag | EXP_TILDE |
-					(quoted ?  EXP_QWORD : EXP_WORD)
-			);
+			argstr(p, flag | EXP_TILDE | EXP_WORD |
+				  (quoted ? EXP_QUOTED : 0));
 			goto end;
 		}
 		if (easy)
