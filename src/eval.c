@@ -377,7 +377,7 @@ evalfor(union node *n, int flags)
 	setstackmark(&smark);
 	arglist.lastp = &arglist.list;
 	for (argp = n->nfor.args ; argp ; argp = argp->narg.next) {
-		expandarg(argp, &arglist, EXP_FULL | EXP_TILDE | EXP_RECORD);
+		expandarg(argp, &arglist, EXP_FULL | EXP_TILDE);
 		/* XXX */
 		if (evalskip)
 			goto out;

@@ -222,7 +222,6 @@ sharg(union node *arg, FILE *fp)
 		     putc('}', fp);
 		     break;
 		case CTLBACKQ:
-		case CTLBACKQ|CTLQUOTE:
 			putc('$', fp);
 			putc('(', fp);
 			shtree(bqlist->n, -1, NULL, fp);
@@ -314,9 +313,7 @@ trstring(char *s)
 		case '\\':  c = '\\';  goto backslash;
 		case CTLESC:  c = 'e';  goto backslash;
 		case CTLVAR:  c = 'v';  goto backslash;
-		case CTLVAR+CTLQUOTE:  c = 'V';  goto backslash;
 		case CTLBACKQ:  c = 'q';  goto backslash;
-		case CTLBACKQ+CTLQUOTE:  c = 'Q';  goto backslash;
 backslash:	  putc('\\', tracefile);
 			putc(c, tracefile);
 			break;

@@ -159,7 +159,6 @@ special codes defined in parser.h.  The special codes are:
         CTLVAR              Variable substitution
         CTLENDVAR           End of variable substitution
         CTLBACKQ            Command substitution
-        CTLBACKQ|CTLQUOTE   Command substitution inside double quotes
         CTLESC              Escape next character
 
 A variable substitution contains the following elements:
@@ -179,16 +178,13 @@ stitution.  The possible types are:
         VSASSIGN            ${var=text}
         VSASSIGN|VSNUL      ${var=text}
 
-In addition, the type field will have the VSQUOTE flag set if the
-variable is enclosed in double quotes.  The name of the variable
-comes next, terminated by an equals sign.  If the type is not
-VSNORMAL, then the text field in the substitution follows, ter-
-minated by a CTLENDVAR byte.
+The name of the variable comes next, terminated by an equals
+sign.  If the type is not VSNORMAL, then the text field in the
+substitution follows, terminated by a CTLENDVAR byte.
 
 Commands in back quotes are parsed and stored in a linked list.
 The locations of these commands in the string are indicated by
-CTLBACKQ and CTLBACKQ+CTLQUOTE characters, depending upon whether
-the back quotes were enclosed in double quotes.
+the CTLBACKQ character.
 
 The character CTLESC escapes the next character, so that in case
 any of the CTL characters mentioned above appear in the input,

@@ -40,8 +40,6 @@
 #define CTLVAR -126		/* variable defn */
 #define CTLENDVAR -125
 #define CTLBACKQ -124
-#define CTLQUOTE 01		/* ored with CTLBACKQ code if in quotes */
-/*	CTLBACKQ | CTLQUOTE == -123 */
 #define	CTLARI -122		/* arithmetic expression */
 #define	CTLENDARI -121
 #define	CTLQUOTEMARK -120
@@ -50,7 +48,6 @@
 /* variable substitution byte (follows CTLVAR) */
 #define VSTYPE	0x0f		/* type of variable substitution */
 #define VSNUL	0x10		/* colon--treat the empty string as unset */
-#define VSQUOTE 0x80		/* inside double quotes--suppress splitting */
 
 /* values of VSTYPE field */
 #define VSNORMAL	0x1		/* normal variable:  $var or ${var} */

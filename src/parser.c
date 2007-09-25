@@ -911,11 +911,9 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 							eofmark != NULL
 						)
 					) {
-						USTPUTC(CTLESC, out);
 						USTPUTC('\\', out);
 					}
-					if (SQSYNTAX[c] == CCTL)
-						USTPUTC(CTLESC, out);
+					USTPUTC(CTLESC, out);
 					USTPUTC(c, out);
 					quotef++;
 				}
@@ -1221,8 +1219,6 @@ badsub:			synerror("Bad substitution");
 		} else {
 			pungetc();
 		}
-		if (dblquote || arinest)
-			flags |= VSQUOTE;
 		*((char *)stackblock() + typeloc) = subtype | flags;
 		if (subtype != VSNORMAL) {
 			varnest++;
@@ -1353,10 +1349,7 @@ done:
 		memcpy(out, str, savelen);
 		STADJUST(savelen, out);
 	}
-	if (arinest || dblquote)
-		USTPUTC(CTLBACKQ | CTLQUOTE, out);
-	else
-		USTPUTC(CTLBACKQ, out);
+	USTPUTC(CTLBACKQ, out);
 	if (oldstyle)
 		goto parsebackq_oldreturn;
 	else
@@ -1373,10 +1366,6 @@ parsearith: {
 		syntax = ARISYNTAX;
 	}
 	USTPUTC(CTLARI, out);
-	if (dblquote)
-		USTPUTC('"',out);
-	else
-		USTPUTC(' ',out);
 	goto parsearith_return;
 }
 
@@ -1503,7 +1492,7 @@ expandstr(const char *ps)
 	n.narg.text = wordtext;
 	n.narg.backquote = backquotelist;
 
-	expandarg(&n, NULL, 0);
+	expandarg(&n, NULL, EXP_QUOTED);
 	return stackblock();
 }
 

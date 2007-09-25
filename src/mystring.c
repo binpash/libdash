@@ -55,7 +55,8 @@
 char nullstr[1];		/* zero length string */
 const char spcstr[] = " ";
 const char snlfmt[] = "%s\n";
-const char dolatstr[] = { CTLVAR, VSNORMAL|VSQUOTE, '@', '=', '\0' };
+const char dolatstr[] = { CTLQUOTEMARK, CTLVAR, VSNORMAL, '@', '=',
+			  CTLQUOTEMARK, '\0' };
 const char illnum[] = "Illegal number: %s";
 const char homestr[] = "HOME";
 

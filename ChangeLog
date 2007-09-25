@@ -1,6 +1,7 @@
 2007-09-25  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Do not expand tilde in parameter expansion within quotes.
+	* Move parse-time quote flag detection to run-time.
 
 2007-09-24  Herbert Xu <herbert@gondor.apana.org.au>
 
