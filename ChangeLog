@@ -1,3 +1,7 @@
+2007-09-26  Roy Marples <uberlord@gentoo.org>
+
+	* Refresh stack pointers after makestrspace in _rmescapes.
+
 2007-09-25  Gerrit Pape <pape@smarden.org>
 
 	* Clarify description of -nt, -ot options to test builtin.

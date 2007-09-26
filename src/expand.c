@@ -1631,7 +1631,11 @@ _rmescapes(char *str, int flag)
 		size_t fulllen = len + strlen(p) + 1;
 
 		if (flag & RMESCAPE_GROW) {
+			int strloc = str - (char *)stackblock();
+
 			r = makestrspace(fulllen, expdest);
+			str = (char *)stackblock() + strloc;
+			p = str + len;
 		} else if (flag & RMESCAPE_HEAP) {
 			r = ckmalloc(fulllen);
 		} else {
