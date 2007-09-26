@@ -1,3 +1,7 @@
+2007-09-26  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Recognise here-doc delimiters terminated by EOF.
+
 2007-09-26  Roy Marples <uberlord@gentoo.org>
 
 	* Refresh stack pointers after makestrspace in _rmescapes.

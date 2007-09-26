@@ -1049,8 +1049,14 @@ checkend: {
 				char *p, *q;
 
 				p = line;
-				for (q = eofmark + 1 ; *q && *p == *q ; p++, q++);
-				if (*p == '\n' && *q == '\0') {
+				for (q = eofmark + 1;; p++, q++) {
+					c = *p;
+					if (c == '\n')
+						c = 0;
+					if (!*q || c != *q)
+						break;
+				}
+				if (c == *q) {
 					c = PEOF;
 					plinno++;
 					needprompt = doprompt;
