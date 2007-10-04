@@ -18,6 +18,12 @@ fi
 AC_MSG_RESULT(${CC_FOR_BUILD})
 AC_SUBST(CC_FOR_BUILD)
 
+AC_ARG_ENABLE(static, AS_HELP_STRING(--enable-static, \
+				     [Build statical linked program]))
+if test "$enable_static" = "yes"; then
+	export LDFLAGS="-static -Wl,--fatal-warnings"
+fi
+
 dnl Checks for libraries.
 
 dnl Checks for header files.

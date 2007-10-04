@@ -1,3 +1,7 @@
+2007-10-04  Alexey Gladkov <legion@altlinux.org>
+
+	* Add --enable-static option to configure.
+
 2007-09-26  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Recognise here-doc delimiters terminated by EOF.
