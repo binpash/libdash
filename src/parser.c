@@ -1142,7 +1142,6 @@ parseredir: {
 parsesub: {
 	int subtype;
 	int typeloc;
-	int flags;
 	char *p;
 	static const char types[] = "}-+?=";
 
@@ -1163,18 +1162,18 @@ parsesub: {
 	} else {
 		USTPUTC(CTLVAR, out);
 		typeloc = out - (char *)stackblock();
-		USTPUTC(VSNORMAL, out);
+		STADJUST(1, out);
 		subtype = VSNORMAL;
-		if (c == '{') {
+		if (likely(c == '{')) {
 			c = pgetc();
 			subtype = 0;
 		}
 varname:
-		if (c > PEOA && is_name(c)) {
+		if (is_name(c)) {
 			do {
 				STPUTC(c, out);
 				c = pgetc();
-			} while (c > PEOA && is_in_name(c));
+			} while (is_in_name(c));
 		} else if (is_digit(c)) {
 			do {
 				STPUTC(c, out);
@@ -1208,18 +1207,17 @@ varname:
 badsub:			synerror("Bad substitution");
 
 		STPUTC('=', out);
-		flags = 0;
 		if (subtype == 0) {
 			switch (c) {
 			case ':':
-				flags = VSNUL;
+				subtype = VSNUL;
 				c = pgetc();
 				/*FALLTHROUGH*/
 			default:
 				p = strchr(types, c);
 				if (p == NULL)
 					goto badsub;
-				subtype = p - types + VSNORMAL;
+				subtype |= p - types + VSNORMAL;
 				break;
 			case '%':
 			case '#':
@@ -1238,7 +1236,7 @@ badsub:			synerror("Bad substitution");
 		} else {
 			pungetc();
 		}
-		*((char *)stackblock() + typeloc) = subtype | flags;
+		*((char *)stackblock() + typeloc) = subtype;
 		if (subtype != VSNORMAL) {
 			varnest++;
 			if (dblquote)

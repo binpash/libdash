@@ -1,6 +1,7 @@
 2007-10-04  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix parsing of ${##1}.
+	* Size optimisations in parameter expansion parser.
 
 2007-10-04  Alexey Gladkov <legion@altlinux.org>
 
