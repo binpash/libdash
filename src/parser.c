@@ -1167,15 +1167,9 @@ parsesub: {
 		subtype = VSNORMAL;
 		if (c == '{') {
 			c = pgetc();
-			if (c == '#') {
-				if ((c = pgetc()) == '}')
-					c = '#';
-				else
-					subtype = VSLENGTH;
-			}
-			else
-				subtype = 0;
+			subtype = 0;
 		}
+varname:
 		if (c > PEOA && is_name(c)) {
 			do {
 				STPUTC(c, out);
@@ -1188,8 +1182,27 @@ parsesub: {
 			} while (is_digit(c));
 		}
 		else if (is_special(c)) {
-			USTPUTC(c, out);
+			int cc = c;
+
 			c = pgetc();
+
+			if (!subtype && cc == '#') {
+				subtype = VSLENGTH;
+
+				if (c == '_' || isalnum(c))
+					goto varname;
+
+				cc = c;
+				c = pgetc();
+				if (cc == '}' || c != '}') {
+					pungetc();
+					subtype = 0;
+					c = cc;
+					cc = '#';
+				}
+			}
+
+			USTPUTC(cc, out);
 		}
 		else
 badsub:			synerror("Bad substitution");

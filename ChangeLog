@@ -1,3 +1,7 @@
+2007-10-04  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fix parsing of ${##1}.
+
 2007-10-04  Alexey Gladkov <legion@altlinux.org>
 
 	* Add --enable-static option to configure.
