@@ -1,3 +1,7 @@
+2007-10-06  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Add pushstackmark.
+
 2007-10-05  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Made grabstackblock an inline wrapper for stalloc.

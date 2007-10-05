@@ -40,7 +40,6 @@ struct stackmark {
 	struct stack_block *stackp;
 	char *stacknxt;
 	size_t stacknleft;
-	struct stackmark *marknext;
 };
 
 
@@ -54,6 +53,7 @@ pointer ckrealloc(pointer, size_t);
 char *savestr(const char *);
 pointer stalloc(size_t);
 void stunalloc(pointer);
+void pushstackmark(struct stackmark *mark, size_t len);
 void setstackmark(struct stackmark *);
 void popstackmark(struct stackmark *);
 void growstackblock(void);

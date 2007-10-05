@@ -106,7 +106,6 @@ struct stack_block {
 
 struct stack_block stackbase;
 struct stack_block *stackp = &stackbase;
-struct stackmark *markp;
 char *stacknxt = stackbase.space;
 size_t stacknleft = MINSIZE;
 char *sstrend = stackbase.space + MINSIZE;
@@ -161,14 +160,17 @@ stunalloc(pointer p)
 
 
 
-void
-setstackmark(struct stackmark *mark)
+void pushstackmark(struct stackmark *mark, size_t len)
 {
 	mark->stackp = stackp;
 	mark->stacknxt = stacknxt;
 	mark->stacknleft = stacknleft;
-	mark->marknext = markp;
-	markp = mark;
+	grabstackblock(len);
+}
+
+void setstackmark(struct stackmark *mark)
+{
+	pushstackmark(mark, stacknxt == stackp->space && stackp != &stackbase);
 }
 
 
@@ -178,7 +180,6 @@ popstackmark(struct stackmark *mark)
 	struct stack_block *sp;
 
 	INTOFF;
-	markp = mark->marknext;
 	while (stackp != mark->stackp) {
 		sp = stackp;
 		stackp = sp->prev;
@@ -214,7 +215,6 @@ growstackblock(void)
 
 	if (stacknxt == stackp->space && stackp != &stackbase) {
 		struct stack_block *oldstackp;
-		struct stackmark *xmark;
 		struct stack_block *sp;
 		struct stack_block *prevstackp;
 		size_t grosslen;
@@ -230,18 +230,6 @@ growstackblock(void)
 		stacknxt = sp->space;
 		stacknleft = newlen;
 		sstrend = sp->space + newlen;
-
-		/*
-		 * Stack marks pointing to the start of the old block
-		 * must be relocated to point to the new block 
-		 */
-		xmark = markp;
-		while (xmark != NULL && xmark->stackp == oldstackp) {
-			xmark->stackp = stackp;
-			xmark->stacknxt = stacknxt;
-			xmark->stacknleft = stacknleft;
-			xmark = xmark->marknext;
-		}
 		INTON;
 	} else {
 		char *oldspace = stacknxt;

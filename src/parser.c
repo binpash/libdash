@@ -1487,8 +1487,7 @@ setprompt(int which)
 	show = !el;
 #endif
 	if (show) {
-		setstackmark(&smark);
-		stalloc(stackblocksize());
+		pushstackmark(&smark, stackblocksize());
 		out2str(getprompt(NULL));
 		popstackmark(&smark);
 	}

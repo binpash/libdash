@@ -546,10 +546,8 @@ expbackq(union node *cmd, int flag)
 	struct stackmark smark;
 
 	INTOFF;
-	setstackmark(&smark);
-	dest = expdest;
-	startloc = dest - (char *)stackblock();
-	grabstackstr(dest);
+	startloc = expdest - (char *)stackblock();
+	pushstackmark(&smark, startloc);
 	evalbackcmd(cmd, (struct backcmd *) &in);
 	popstackmark(&smark);
 
