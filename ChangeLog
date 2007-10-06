@@ -1,6 +1,7 @@
 2007-10-06  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Add pushstackmark.
+	* Treat OPTIND=0 in the same way as OPTIND=1.
 
 2007-10-05  Herbert Xu <herbert@gondor.apana.org.au>
 

@@ -377,7 +377,7 @@ void
 getoptsreset(value)
 	const char *value;
 {
-	shellparam.optind = number(value);
+	shellparam.optind = number(value) ?: 1;
 	shellparam.optoff = -1;
 }
 
@@ -424,8 +424,6 @@ getopts(char *optstr, char *optvar, char **optfirst, int *optind, int *optoff)
 	char s[12];
 	char **optnext;
 
-	if (*optind < 1)
-		return 1;
 	optnext = optfirst + *optind - 1;
 
 	if (*optind <= 1 || *optoff < 0 || strlen(optnext[-1]) < *optoff)
