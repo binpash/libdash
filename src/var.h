@@ -138,7 +138,6 @@ int localcmd(int, char **);
 void poplocalvars(void);
 int unsetcmd(int, char **);
 int unsetvar(const char *);
-int setvarsafe(const char *, const char *, int);
 int varcmp(const char *, const char *);
 
 static inline int varequal(const char *a, const char *b) {
