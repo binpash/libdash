@@ -42,6 +42,11 @@
  *	is_number(s)		Return true if s is a string of digits.
  */
 
+#include <ctype.h>
+#include <errno.h>
+#include <inttypes.h>
+#include <limits.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include "shell.h"
 #include "syntax.h"
@@ -105,6 +110,29 @@ prefix(const char *string, const char *pfx)
 
 
 /*
+ * Convert a string into an integer of type intmax_t.  Alow trailing spaces.
+ */
+intmax_t atomax10(const char *s)
+{
+	char *p;
+	intmax_t r;
+
+	errno = 0;
+	r = strtoimax(s, &p, 10);
+
+	if (errno != 0)
+		sh_error(illnum, s);
+
+	while (isspace((unsigned char)*p))
+	      p++;
+
+	if (*p)
+		sh_error(illnum, s);
+
+	return r;
+}
+
+/*
  * Convert a string of digits to an integer, printing an error message on
  * failure.
  */
@@ -112,10 +140,12 @@ prefix(const char *string, const char *pfx)
 int
 number(const char *s)
 {
+	intmax_t n = atomax10(s);
 
-	if (! is_number(s))
+	if (n < 0 || n > INT_MAX)
 		sh_error(illnum, s);
-	return atoi(s);
+
+	return n;
 }
 
 

@@ -11,8 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <ctype.h>
-#include <errno.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -145,12 +144,16 @@ static int binop(void);
 static int filstat(char *, enum token);
 static enum token t_lex(char *);
 static int isoperand(void);
-static int getn(const char *);
 static int newerf(const char *, const char *);
 static int olderf(const char *, const char *);
 static int equalf(const char *, const char *);
 static int test_st_mode(const struct stat64 *, int);
 static int bash_group_member(gid_t);
+
+static inline intmax_t getn(const char *s)
+{
+	return atomax10(s);
+}
 
 int
 testcmd(int argc, char **argv)
@@ -394,28 +397,6 @@ isoperand(void)
 		op++;
 	}
 	return 0;
-}
-
-/* atoi with error detection */
-static int
-getn(const char *s)
-{
-	char *p;
-	long r;
-
-	errno = 0;
-	r = strtol(s, &p, 10);
-
-	if (errno != 0)
-		error("%s: out of range", s);
-
-	while (isspace((unsigned char)*p))
-	      p++;
-
-	if (*p)
-		error("%s: bad number", s);
-
-	return (int) r;
 }
 
 static int
