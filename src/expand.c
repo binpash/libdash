@@ -749,6 +749,10 @@ evalvar(char *p, int flag)
 
 	varflags = *p++;
 	subtype = varflags & VSTYPE;
+
+	if (!subtype)
+		sh_error("Bad substitution");
+
 	quoted = flag & EXP_QUOTED;
 	var = p;
 	easy = (!quoted || (*var == '@' && shellparam.nparam));

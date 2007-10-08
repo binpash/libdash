@@ -1204,9 +1204,8 @@ varname:
 			USTPUTC(cc, out);
 		}
 		else
-badsub:			synerror("Bad substitution");
+			goto badsub;
 
-		STPUTC('=', out);
 		if (subtype == 0) {
 			switch (c) {
 			case ':':
@@ -1216,7 +1215,7 @@ badsub:			synerror("Bad substitution");
 			default:
 				p = strchr(types, c);
 				if (p == NULL)
-					goto badsub;
+					break;
 				subtype |= p - types + VSNORMAL;
 				break;
 			case '%':
@@ -1234,6 +1233,7 @@ badsub:			synerror("Bad substitution");
 				}
 			}
 		} else {
+badsub:
 			pungetc();
 		}
 		*((char *)stackblock() + typeloc) = subtype;
@@ -1242,6 +1242,7 @@ badsub:			synerror("Bad substitution");
 			if (dblquote)
 				dqvarnest++;
 		}
+		STPUTC('=', out);
 	}
 	goto parsesub_return;
 }
