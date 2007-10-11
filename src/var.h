@@ -127,7 +127,7 @@ extern const char defpathvar[];
 
 void initvar(void);
 void setvar(const char *, const char *, int);
-intmax_t setvarint(const char *, intmax_t);
+intmax_t setvarint(const char *, intmax_t, int);
 void setvareq(char *, int);
 struct strlist;
 void listsetvar(struct strlist *, int);

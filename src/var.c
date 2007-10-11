@@ -207,13 +207,13 @@ setvar(const char *name, const char *val, int flags)
  * ored with the flags of the variable.
  */
 
-intmax_t setvarint(const char *name, intmax_t val)
+intmax_t setvarint(const char *name, intmax_t val, int flags)
 {
 	int len = max_int_length(sizeof(val));
 	char buf[len];
 
 	fmtstr(buf, len, "%jd", val);
-	setvar(name, buf, 0);
+	setvar(name, buf, flags);
 	return val;
 }
 

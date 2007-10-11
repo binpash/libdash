@@ -419,7 +419,7 @@ getopts(char *optstr, char *optvar, char **optfirst)
 	char *p, *q;
 	char c = '?';
 	int done = 0;
-	char s[12];
+	char s[2];
 	char **optnext;
 	int ind = shellparam.optind;
 	int off = shellparam.optoff;
@@ -487,8 +487,7 @@ atend:
 
 out:
 	ind = optnext - optfirst + 1;
-	fmtstr(s, sizeof(s), "%d", ind);
-	setvar("OPTIND", s, VNOFUNC);
+	setvarint("OPTIND", ind, VNOFUNC);
 	s[0] = c;
 	s[1] = '\0';
 	setvar(optvar, s, 0);

@@ -3,6 +3,7 @@
 	* Add assignment support in arithmetic expansions.
 	* Size optimisations in arithmetic lexer.
 	* Add likely flags in expari.
+	* Use setvarint to set OPTIND.
 
 2007-10-08  Herbert Xu <herbert@gondor.apana.org.au>
 

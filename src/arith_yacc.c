@@ -280,7 +280,7 @@ static intmax_t assignment(int var, int noeval)
 
 	return setvarint(val.name,
 			 op == ARITH_ASS ? result :
-			 do_binop(op - 11, lookupvarint(val.name), result));
+			 do_binop(op - 11, lookupvarint(val.name), result), 0);
 }
 
 intmax_t arith(const char *s)
