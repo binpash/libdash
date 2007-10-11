@@ -523,7 +523,7 @@ expari(int flag)
 
 	expdest = p;
 
-	if (flag & QUOTES_ESC)
+	if (likely(flag & QUOTES_ESC))
 		rmescapes(p + 1);
 
 	result = arith(p + 1);
@@ -531,7 +531,7 @@ expari(int flag)
 
 	len = cvtnum(result);
 
-	if (!(flag & EXP_QUOTED))
+	if (likely(!(flag & EXP_QUOTED)))
 		recordregion(begoff, begoff + len, 0);
 }
 
