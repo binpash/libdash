@@ -202,6 +202,21 @@ setvar(const char *name, const char *val, int flags)
 	INTON;
 }
 
+/*
+ * Set the given integer as the value of a variable.  The flags argument is
+ * ored with the flags of the variable.
+ */
+
+intmax_t setvarint(const char *name, intmax_t val)
+{
+	int len = max_int_length(sizeof(val));
+	char buf[len];
+
+	fmtstr(buf, len, "%jd", val);
+	setvar(name, buf, 0);
+	return val;
+}
+
 
 
 /*
@@ -291,6 +306,11 @@ lookupvar(const char *name)
 		return strchrnul(v->text, '=') + 1;
 	}
 	return NULL;
+}
+
+intmax_t lookupvarint(const char *name)
+{
+	return atomax(lookupvar(name) ?: nullstr, 0);
 }
 
 

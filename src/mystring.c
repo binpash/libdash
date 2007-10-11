@@ -112,13 +112,13 @@ prefix(const char *string, const char *pfx)
 /*
  * Convert a string into an integer of type intmax_t.  Alow trailing spaces.
  */
-intmax_t atomax10(const char *s)
+intmax_t atomax(const char *s, int base)
 {
 	char *p;
 	intmax_t r;
 
 	errno = 0;
-	r = strtoimax(s, &p, 10);
+	r = strtoimax(s, &p, base);
 
 	if (errno != 0)
 		sh_error(illnum, s);
@@ -130,6 +130,11 @@ intmax_t atomax10(const char *s)
 		sh_error(illnum, s);
 
 	return r;
+}
+
+intmax_t atomax10(const char *s)
+{
+	return atomax(s, 10);
 }
 
 /*

@@ -32,19 +32,28 @@
  * SUCH DAMAGE.
  */
 
+#include <inttypes.h>
 #include <stdlib.h>
-#include "arith.h"
+#include <string.h>
+#include "arith_yacc.h"
 #include "expand.h"
 #include "error.h"
+#include "shell.h"
+#include "memalloc.h"
+#include "syntax.h"
 
-extern int yylval;
-extern const char *arith_buf, *arith_startbuf;
+#if ARITH_BOR + 11 != ARITH_BORASS || ARITH_ASS + 11 != ARITH_EQ
+#error Arithmetic tokens are out of order.
+#endif
+
+extern const char *arith_buf;
 
 int
 yylex()
 {
 	int value;
 	const char *buf = arith_buf;
+	const char *p;
 
 	for (;;) {
 		switch (*buf) {
@@ -54,9 +63,7 @@ yylex()
 			buf++;
 			continue;
 		default:
-err:
-			sh_error("arith: syntax error: \"%s\"", arith_startbuf);
-			/* NOTREACHED */
+			return ARITH_BAD;
 		case '0':
 		case '1':
 		case '2':
@@ -67,13 +74,74 @@ err:
 		case '7':
 		case '8':
 		case '9':
-			yylval = strtoll(buf, (char **) &arith_buf, 0);
+			yylval.val = strtoimax(buf, (char **)&arith_buf, 0);
 			return ARITH_NUM;
+		case 'A':
+		case 'B':
+		case 'C':
+		case 'D':
+		case 'E':
+		case 'F':
+		case 'G':
+		case 'H':
+		case 'I':
+		case 'J':
+		case 'K':
+		case 'L':
+		case 'M':
+		case 'N':
+		case 'O':
+		case 'P':
+		case 'Q':
+		case 'R':
+		case 'S':
+		case 'T':
+		case 'U':
+		case 'V':
+		case 'W':
+		case 'X':
+		case 'Y':
+		case 'Z':
+		case '_':
+		case 'a':
+		case 'b':
+		case 'c':
+		case 'd':
+		case 'e':
+		case 'f':
+		case 'g':
+		case 'h':
+		case 'i':
+		case 'j':
+		case 'k':
+		case 'l':
+		case 'm':
+		case 'n':
+		case 'o':
+		case 'p':
+		case 'q':
+		case 'r':
+		case 's':
+		case 't':
+		case 'u':
+		case 'v':
+		case 'w':
+		case 'x':
+		case 'y':
+		case 'z':
+			p = buf;
+			while (buf++, is_in_name(*buf))
+				;
+			yylval.name = stalloc(buf - p + 1);
+			*(char *)mempcpy(yylval.name, p, buf - p) = 0;
+			value = ARITH_VAR;
+			goto out;
 		case '=':
-			if (*++buf != '=') {
-				goto err;
-			}
-			value = ARITH_EQ;
+			value = ARITH_ASS;
+checkeq:
+			if (*++buf != '=')
+				goto out;
+			value += 11;
 			break;
 		case '>':
 			switch (*++buf) {
@@ -82,7 +150,7 @@ err:
 				break;
 			case '>':
 				value = ARITH_RSHIFT;
-				break;
+				goto checkeq;
 			default:
 				value = ARITH_GT;
 				goto out;
@@ -95,7 +163,7 @@ err:
 				break;
 			case '<':
 				value = ARITH_LSHIFT;
-				break;
+				goto checkeq;
 			default:
 				value = ARITH_LT;
 				goto out;
@@ -104,14 +172,14 @@ err:
 		case '|':
 			if (*++buf != '|') {
 				value = ARITH_BOR;
-				goto out;
+				goto checkeq;
 			}
 			value = ARITH_OR;
 			break;
 		case '&':
 			if (*++buf != '&') {
 				value = ARITH_BAND;
-				goto out;
+				goto checkeq;
 			}
 			value = ARITH_AND;
 			break;
@@ -133,24 +201,30 @@ err:
 			break;
 		case '*':
 			value = ARITH_MUL;
-			break;
+			goto checkeq;
 		case '/':
 			value = ARITH_DIV;
-			break;
+			goto checkeq;
 		case '%':
 			value = ARITH_REM;
-			break;
+			goto checkeq;
 		case '+':
 			value = ARITH_ADD;
-			break;
+			goto checkeq;
 		case '-':
 			value = ARITH_SUB;
-			break;
+			goto checkeq;
 		case '~':
 			value = ARITH_BNOT;
 			break;
 		case '^':
 			value = ARITH_BXOR;
+			goto checkeq;
+		case '?':
+			value = ARITH_QMARK;
+			break;
+		case ':':
+			value = ARITH_COLON;
 			break;
 		}
 		break;

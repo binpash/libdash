@@ -42,6 +42,7 @@
 #endif
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <limits.h>
 #include <string.h>
 #if defined(__GLIBC__)
@@ -142,7 +143,7 @@ STATIC int pmatch(const char *, const char *);
 #else
 #define pmatch(a, b) !fnmatch((a), (b), 0)
 #endif
-STATIC int cvtnum(long);
+STATIC int cvtnum(intmax_t);
 STATIC size_t esclen(const char *, const char *);
 STATIC char *scanleft(char *, char *, char *, char *, int, int);
 STATIC char *scanright(char *, char *, char *, char *, int, int);
@@ -478,9 +479,11 @@ removerecordregions(int endoff)
 void
 expari(int flag)
 {
+	struct stackmark sm;
 	char *p, *start;
 	int begoff;
 	int len;
+	intmax_t result;
 
 	/*	ifsfree(); */
 
@@ -490,8 +493,9 @@ expari(int flag)
 	 * start of arithmetic.
 	 */
 	start = stackblock();
-	p = expdest - 1;
-	*p = '\0';
+	p = expdest;
+	pushstackmark(&sm, p - start);
+	*--p = '\0';
 	p--;
 	do {
 		int esc;
@@ -522,7 +526,10 @@ expari(int flag)
 	if (flag & QUOTES_ESC)
 		rmescapes(p + 1);
 
-	len = cvtnum(arith(p + 1));
+	result = arith(p + 1);
+	popstackmark(&sm);
+
+	len = cvtnum(result);
 
 	if (!(flag & EXP_QUOTED))
 		recordregion(begoff, begoff + len, 0);
@@ -1707,12 +1714,12 @@ casematch(union node *pattern, char *val)
  */
 
 STATIC int
-cvtnum(long num)
+cvtnum(intmax_t num)
 {
-	int len;
+	int len = max_int_length(sizeof(num));
 
-	expdest = makestrspace(32, expdest);
-	len = fmtstr(expdest, 32, "%ld", num);
+	expdest = makestrspace(len, expdest);
+	len = fmtstr(expdest, len, "%jd", num);
 	STADJUST(len, expdest);
 	return len;
 }

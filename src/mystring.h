@@ -48,6 +48,7 @@ extern const char homestr[];
 void scopyn(const char *, char *, int);
 #endif
 char *prefix(const char *, const char *);
+intmax_t atomax(const char *, int);
 intmax_t atomax10(const char *);
 int number(const char *);
 int is_number(const char *);

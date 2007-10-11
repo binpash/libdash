@@ -1,3 +1,7 @@
+2007-10-11  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Add assignment support in arithmetic expansions.
+
 2007-10-08  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Report substition errors at expansion time.

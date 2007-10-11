@@ -92,3 +92,13 @@ extern char nullstr[1];		/* null string */
 
 #define likely(x)	__builtin_expect(!!(x),1)
 #define unlikely(x)	__builtin_expect(!!(x),0)
+
+/*
+ * Hack to calculate maximum length.
+ * (length * 8 - 1) * log10(2) + 1 + 1 + 12
+ * The second 1 is for the minus sign and the 12 is a safety margin.
+ */
+static inline int max_int_length(int bytes)
+{
+	return (bytes * 8 - 1) * 0.30102999566398119521 + 14;
+}

@@ -34,6 +34,8 @@
  *	@(#)expand.h	8.2 (Berkeley) 5/4/95
  */
 
+#include <stdint.h>
+
 struct strlist {
 	struct strlist *next;
 	char *text;
@@ -68,7 +70,7 @@ char *_rmescapes(char *, int);
 int casematch(union node *, char *);
 
 /* From arith.y */
-int arith(const char *);
+intmax_t arith(const char *);
 int expcmd(int , char **);
 #ifdef USE_LEX
 void arith_lex_reset(void);

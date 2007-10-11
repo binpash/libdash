@@ -34,6 +34,8 @@
  *	@(#)var.h	8.2 (Berkeley) 5/4/95
  */
 
+#include <stdint.h>
+
 /*
  * Shell variables.
  */
@@ -125,10 +127,12 @@ extern const char defpathvar[];
 
 void initvar(void);
 void setvar(const char *, const char *, int);
+intmax_t setvarint(const char *, intmax_t);
 void setvareq(char *, int);
 struct strlist;
 void listsetvar(struct strlist *, int);
 char *lookupvar(const char *);
+intmax_t lookupvarint(const char *);
 char *bltinlookup(const char *);
 char **listvars(int, int, char ***);
 #define environment() listvars(VEXPORT, VUNSET, 0)
