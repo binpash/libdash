@@ -56,7 +56,8 @@ yylex()
 	const char *p;
 
 	for (;;) {
-		switch (*buf) {
+		value = *buf;
+		switch (value) {
 		case ' ':
 		case '\t':
 		case '\n':
@@ -137,7 +138,7 @@ yylex()
 			value = ARITH_VAR;
 			goto out;
 		case '=':
-			value = ARITH_ASS;
+			value += ARITH_ASS - '=';
 checkeq:
 			if (*++buf != '=')
 				goto out;
@@ -146,85 +147,84 @@ checkeq:
 		case '>':
 			switch (*++buf) {
 			case '=':
-				value = ARITH_GE;
+				value += ARITH_GE - '>';
 				break;
 			case '>':
-				value = ARITH_RSHIFT;
+				value += ARITH_RSHIFT - '>';
 				goto checkeq;
 			default:
-				value = ARITH_GT;
+				value += ARITH_GT - '>';
 				goto out;
 			}
 			break;
 		case '<':
 			switch (*++buf) {
 			case '=':
-				value = ARITH_LE;
+				value += ARITH_LE - '<';
 				break;
 			case '<':
-				value = ARITH_LSHIFT;
+				value += ARITH_LSHIFT - '<';
 				goto checkeq;
 			default:
-				value = ARITH_LT;
+				value += ARITH_LT - '<';
 				goto out;
 			}
 			break;
 		case '|':
 			if (*++buf != '|') {
-				value = ARITH_BOR;
+				value += ARITH_BOR - '|';
 				goto checkeq;
 			}
-			value = ARITH_OR;
+			value += ARITH_OR - '|';
 			break;
 		case '&':
 			if (*++buf != '&') {
-				value = ARITH_BAND;
+				value += ARITH_BAND - '&';
 				goto checkeq;
 			}
-			value = ARITH_AND;
+			value += ARITH_AND - '&';
 			break;
 		case '!':
 			if (*++buf != '=') {
-				value = ARITH_NOT;
+				value += ARITH_NOT - '!';
 				goto out;
 			}
-			value = ARITH_NE;
+			value += ARITH_NE - '!';
 			break;
 		case 0:
-			value = 0;
 			goto out;
 		case '(':
-			value = ARITH_LPAREN;
+			value += ARITH_LPAREN - '(';
 			break;
 		case ')':
-			value = ARITH_RPAREN;
+			value += ARITH_RPAREN - ')';
 			break;
 		case '*':
-			value = ARITH_MUL;
+			value += ARITH_MUL - '*';
 			goto checkeq;
 		case '/':
-			value = ARITH_DIV;
+			value += ARITH_DIV - '/';
 			goto checkeq;
 		case '%':
-			value = ARITH_REM;
+			value += ARITH_REM - '%';
 			goto checkeq;
 		case '+':
-			value = ARITH_ADD;
+			value += ARITH_ADD - '+';
 			goto checkeq;
 		case '-':
-			value = ARITH_SUB;
+			value += ARITH_SUB - '-';
 			goto checkeq;
 		case '~':
-			value = ARITH_BNOT;
+			value += ARITH_BNOT - '~';
 			break;
 		case '^':
-			value = ARITH_BXOR;
+			value += ARITH_BXOR - '^';
 			goto checkeq;
 		case '?':
-			value = ARITH_QMARK;
+			value += ARITH_QMARK - '?';
 			break;
 		case ':':
-			value = ARITH_COLON;
+			value += ARITH_COLON - ':';
 			break;
 		}
 		break;
