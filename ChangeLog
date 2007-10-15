@@ -1,3 +1,7 @@
+2007-10-15  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed execing of scripts with no hash-bang.
+
 2007-10-11  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Add assignment support in arithmetic expansions.

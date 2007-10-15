@@ -149,11 +149,6 @@ shellexec(char **argv, const char *path, int idx)
 STATIC void
 tryexec(char *cmd, char **argv, char **envp)
 {
-	int repeated = 0;
-#if !defined(BSD) && !defined(linux)
-	char *p;
-#endif
-
 repeat:
 #ifdef SYSV
 	do {
@@ -162,19 +157,9 @@ repeat:
 #else
 	execve(cmd, argv, envp);
 #endif
-	if (repeated++) {
-		ckfree(argv);
-	} else if (errno == ENOEXEC) {
-		char **ap;
-		char **new;
-
-		for (ap = argv; *ap; ap++)
-			;
-		ap = new = ckmalloc((ap - argv + 2) * sizeof(char *));
-		*ap++ = cmd = _PATH_BSHELL;
-		while ((*ap++ = *argv++))
-			;
-		argv = new;
+	if (cmd != _PATH_BSHELL && errno == ENOEXEC) {
+		*argv-- = cmd;
+		*argv = cmd = _PATH_BSHELL;
 		goto repeat;
 	}
 }

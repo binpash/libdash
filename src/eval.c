@@ -727,7 +727,8 @@ evalcommand(union node *cmd, int flags)
 			argc++;
 	}
 
-	argv = nargv = stalloc(sizeof (char *) * (argc + 1));
+	/* Reserve one extra spot at the front for shellexec. */
+	argv = nargv = stalloc(sizeof (char *) * (argc + 2)) + 1;
 	for (sp = arglist.list ; sp ; sp = sp->next) {
 		TRACE(("evalcommand arg: %s\n", sp->text));
 		*nargv++ = sp->text;
