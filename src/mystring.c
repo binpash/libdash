@@ -123,6 +123,13 @@ intmax_t atomax(const char *s, int base)
 	if (errno != 0)
 		sh_error(illnum, s);
 
+	/*
+	 * Disallow completely blank strings in non-arithmetic (base != 0)
+	 * contexts.
+	 */
+	if (base && (p == s))
+		sh_error(illnum, s);
+
 	while (isspace((unsigned char)*p))
 	      p++;
 

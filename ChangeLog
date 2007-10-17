@@ -1,3 +1,7 @@
+2007-10-17  Oleg Verych <olecom@flower.upol.cz>
+
+	* Disallow completely blank strings in non-arithmetic context.
+
 2007-10-15  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fixed execing of scripts with no hash-bang.
