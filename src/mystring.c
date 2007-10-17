@@ -108,6 +108,10 @@ prefix(const char *string, const char *pfx)
 	return (char *) string;
 }
 
+void badnum(const char *s)
+{
+	sh_error(illnum, s);
+}
 
 /*
  * Convert a string into an integer of type intmax_t.  Alow trailing spaces.
@@ -121,20 +125,20 @@ intmax_t atomax(const char *s, int base)
 	r = strtoimax(s, &p, base);
 
 	if (errno != 0)
-		sh_error(illnum, s);
+		badnum(s);
 
 	/*
 	 * Disallow completely blank strings in non-arithmetic (base != 0)
 	 * contexts.
 	 */
-	if (base && (p == s))
-		sh_error(illnum, s);
+	if (p == s && base)
+		badnum(s);
 
 	while (isspace((unsigned char)*p))
 	      p++;
 
 	if (*p)
-		sh_error(illnum, s);
+		badnum(s);
 
 	return r;
 }
@@ -155,7 +159,7 @@ number(const char *s)
 	intmax_t n = atomax10(s);
 
 	if (n < 0 || n > INT_MAX)
-		sh_error(illnum, s);
+		badnum(s);
 
 	return n;
 }

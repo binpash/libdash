@@ -1028,7 +1028,7 @@ breakcmd(int argc, char **argv)
 	int n = argc > 1 ? number(argv[1]) : 1;
 
 	if (n <= 0)
-		sh_error(illnum, argv[1]);
+		badnum(argv[1]);
 	if (n > loopnest)
 		n = loopnest;
 	if (n > 0) {
