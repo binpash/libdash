@@ -45,16 +45,9 @@
 #include <stdint.h>
 #include <limits.h>
 #include <string.h>
-#if defined(__GLIBC__)
-#if !defined(FNMATCH_BROKEN)
 #include <fnmatch.h>
-#if !defined(GLOB_BROKEN)
 #include <glob.h>
-#endif
-#else
 #include <ctype.h>
-#endif
-#endif
 
 /*
  * Routines to expand arguments to commands.  We have to deal with
@@ -127,18 +120,16 @@ STATIC void removerecordregions(int);
 STATIC void ifsbreakup(char *, struct arglist *);
 STATIC void ifsfree(void);
 STATIC void expandmeta(struct strlist *, int);
-#if defined(__GLIBC__) && !defined(FNMATCH_BROKEN) && !defined(GLOB_BROKEN)
+#ifdef HAVE_GLOB
 STATIC void addglob(const glob_t *);
 #else
 STATIC void expmeta(char *, char *);
-#endif
-STATIC void addfname(char *);
-#if !(defined(__GLIBC__) && !defined(FNMATCH_BROKEN) && !defined(GLOB_BROKEN))
 STATIC struct strlist *expsort(struct strlist *);
 STATIC struct strlist *msort(struct strlist *, int);
 #endif
+STATIC void addfname(char *);
 STATIC int patmatch(char *, const char *);
-#if !defined(__GLIBC__) || defined(FNMATCH_BROKEN)
+#ifndef HAVE_FNMATCH
 STATIC int pmatch(const char *, const char *);
 #else
 #define pmatch(a, b) !fnmatch((a), (b), 0)
@@ -1159,7 +1150,7 @@ ifsfree(void)
  * should be escapes.  The results are stored in the list exparg.
  */
 
-#if defined(__GLIBC__) && !defined(FNMATCH_BROKEN) && !defined(GLOB_BROKEN)
+#ifdef HAVE_GLOB
 STATIC void
 expandmeta(str, flag)
 	struct strlist *str;
@@ -1220,7 +1211,7 @@ addglob(pglob)
 }
 
 
-#else	/* defined(__GLIBC__) && !defined(FNMATCH_BROKEN) && !defined(GLOB_BROKEN) */
+#else	/* HAVE_GLOB */
 STATIC char *expdir;
 
 
@@ -1387,7 +1378,7 @@ out:
 	if (! atend)
 		endname[-1] = '/';
 }
-#endif	/* defined(__GLIBC__) && !defined(FNMATCH_BROKEN) && !defined(GLOB_BROKEN) */
+#endif	/* HAVE_GLOB */
 
 
 /*
@@ -1406,7 +1397,7 @@ addfname(char *name)
 }
 
 
-#if !(defined(__GLIBC__) && !defined(FNMATCH_BROKEN) && !defined(GLOB_BROKEN))
+#ifndef HAVE_GLOB
 /*
  * Sort the results of file name expansion.  It calculates the number of
  * strings to sort and then calls msort (short for merge sort) to do the
@@ -1479,7 +1470,7 @@ patmatch(char *pattern, const char *string)
 }
 
 
-#if !defined(__GLIBC__) || defined(FNMATCH_BROKEN)
+#ifndef HAVE_FNMATCH
 STATIC int ccmatch(const char *p, int chr, const char **r)
 {
 	static const struct class {

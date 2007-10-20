@@ -1,4 +1,8 @@
-2007-10-15  Herbert Xu <herbert@gondor.apana.org.au>
+2007-10-20  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Added configure --enable-glob and --enable-fnmatch options.
+
+2007-10-17  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Replace shared illnum message by badnum function.
 

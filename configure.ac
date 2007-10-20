@@ -24,6 +24,10 @@ if test "$enable_static" = "yes"; then
 	export LDFLAGS="-static -Wl,--fatal-warnings"
 fi
 
+AC_ARG_ENABLE(fnmatch, AS_HELP_STRING(--enable-fnmatch, \
+				      [Use fnmatch(3) from libc]))
+AC_ARG_ENABLE(glob, AS_HELP_STRING(--enable-glob, [Use glob(3) from libc]))
+
 dnl Checks for libraries.
 
 dnl Checks for header files.
@@ -31,6 +35,15 @@ dnl Checks for header files.
 dnl Checks for library functions.
 AC_CHECK_FUNCS(bsearch getpwnam getrlimit isalpha killpg mempcpy sigsetmask \
 	       stpcpy strchrnul strsignal strtod strtoimax strtoumax sysconf)
+
+if test "$enable_fnmatch" = yes; then
+	use_fnmatch=
+	AC_CHECK_FUNCS(fnmatch, use_fnmatch=yes)
+fi
+
+if test "$use_fnmatch" = yes && test "$enable_glob" = yes; then
+	AC_CHECK_FUNCS(glob)
+fi
 
 dnl Check for klibc signal.
 AC_CHECK_FUNC(signal)
