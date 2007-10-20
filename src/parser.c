@@ -1047,16 +1047,17 @@ checkend: {
 		if (c == *eofmark) {
 			if (pfgets(line, sizeof line) != NULL) {
 				char *p, *q;
+				int cc;
 
 				p = line;
 				for (q = eofmark + 1;; p++, q++) {
-					c = *p;
-					if (c == '\n')
-						c = 0;
-					if (!*q || c != *q)
+					cc = *p;
+					if (cc == '\n')
+						cc = 0;
+					if (!*q || cc != *q)
 						break;
 				}
-				if (c == *q) {
+				if (cc == *q) {
 					c = PEOF;
 					plinno++;
 					needprompt = doprompt;

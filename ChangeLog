@@ -1,6 +1,7 @@
 2007-10-20  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Added configure --enable-glob and --enable-fnmatch options.
+	* Fix here-doc corruption.
 
 2007-10-17  Herbert Xu <herbert@gondor.apana.org.au>
 
