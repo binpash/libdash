@@ -184,7 +184,6 @@ static inline const char *getpwhome(const char *name)
 void
 expandhere(union node *arg, int fd)
 {
-	herefd = fd;
 	expandarg(arg, (struct arglist *)NULL, EXP_QUOTED);
 	xwrite(fd, stackblock(), expdest - (char *)stackblock());
 }
@@ -663,18 +662,15 @@ subevalvar(char *p, char *str, int strloc, int subtype, int startloc, int varfla
 	int quotes = flag & QUOTES_ESC;
 	char *startp;
 	char *loc;
-	int saveherefd = herefd;
 	struct nodelist *saveargbackq = argbackq;
 	int amount;
 	char *rmesc, *rmescend;
 	int zero;
 	char *(*scan)(char *, char *, char *, char *, int , int);
 
-	herefd = -1;
 	argstr(p, EXP_TILDE | (subtype != VSASSIGN && subtype != VSQUESTION ?
 			       (flag & EXP_QUOTED ? EXP_QPAT : EXP_CASE) : 0));
 	STPUTC('\0', expdest);
-	herefd = saveherefd;
 	argbackq = saveargbackq;
 	startp = stackblock() + startloc;
 

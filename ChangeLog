@@ -1,6 +1,7 @@
 2007-11-11  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed noexpand/length check on eofmark.
+	* Removed herefd hack.
 
 2007-10-20  Herbert Xu <herbert@gondor.apana.org.au>
 

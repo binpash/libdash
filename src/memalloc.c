@@ -109,7 +109,6 @@ struct stack_block *stackp = &stackbase;
 char *stacknxt = stackbase.space;
 size_t stacknleft = MINSIZE;
 char *sstrend = stackbase.space + MINSIZE;
-int herefd = -1;
 
 pointer
 stalloc(size_t nbytes)
@@ -264,10 +263,6 @@ void *
 growstackstr(void)
 {
 	size_t len = stackblocksize();
-	if (herefd >= 0 && len >= 1024) {
-		xwrite(herefd, stackblock(), len);
-		return stackblock();
-	}
 	growstackblock();
 	return stackblock() + len;
 }

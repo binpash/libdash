@@ -577,8 +577,6 @@ evalpipe(union node *n, int flags)
 void
 evalbackcmd(union node *n, struct backcmd *result)
 {
-	int saveherefd;
-
 	result->fd = -1;
 	result->buf = NULL;
 	result->nleft = 0;
@@ -586,9 +584,6 @@ evalbackcmd(union node *n, struct backcmd *result)
 	if (n == NULL) {
 		goto out;
 	}
-
-	saveherefd = herefd;
-	herefd = -1;
 
 #ifdef notyet
 	/*
@@ -636,7 +631,6 @@ evalbackcmd(union node *n, struct backcmd *result)
 		result->fd = pip[0];
 		result->jp = jp;
 	}
-	herefd = saveherefd;
 out:
 	TRACE(("evalbackcmd done: fd=%d buf=0x%x nleft=%d jp=0x%x\n",
 		result->fd, result->buf, result->nleft, result->jp));
