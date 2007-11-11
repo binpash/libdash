@@ -2,6 +2,7 @@
 
 	* Removed noexpand/length check on eofmark.
 	* Removed herefd hack.
+	* Expand here-documents in the current shell environment.
 
 2007-10-20  Herbert Xu <herbert@gondor.apana.org.au>
 

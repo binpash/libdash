@@ -178,18 +178,6 @@ static inline const char *getpwhome(const char *name)
 
 
 /*
- * Expand shell variables and backquotes inside a here document.
- */
-
-void
-expandhere(union node *arg, int fd)
-{
-	expandarg(arg, (struct arglist *)NULL, EXP_QUOTED);
-	xwrite(fd, stackblock(), expdest - (char *)stackblock());
-}
-
-
-/*
  * Perform variable substitution and command substitution on an argument,
  * placing the resulting list of arguments in arglist.  If EXP_FULL is true,
  * perform splitting and file name expansion.  When arglist is NULL, perform
