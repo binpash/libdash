@@ -50,7 +50,6 @@ extern int plinno;
 extern int parsenleft;		/* number of characters left in input buffer */
 extern char *parsenextc;	/* next character in input buffer */
 
-char *pfgets(char *, int);
 int pgetc(void);
 int pgetc2(void);
 int preadbuffer(void);

@@ -59,8 +59,6 @@
  * Shell command parser.
  */
 
-#define EOFMARKLEN 79
-
 /* values returned by readtoken */
 #include "token.h"
 
@@ -101,7 +99,6 @@ STATIC int peektoken(void);
 STATIC int readtoken(void);
 STATIC int xxreadtoken(void);
 STATIC int readtoken1(int, char const *, char *, int);
-STATIC int noexpand(char *);
 STATIC void synexpect(int) __attribute__((__noreturn__));
 STATIC void synerror(const char *) __attribute__((__noreturn__));
 STATIC void setprompt(int);
@@ -596,18 +593,17 @@ parsefname(void)
 {
 	union node *n = redirnode;
 
+	if (n->type == NHERE)
+		checkkwd = CHKEOFMARK;
 	if (readtoken() != TWORD)
 		synexpect(-1);
 	if (n->type == NHERE) {
 		struct heredoc *here = heredoc;
 		struct heredoc *p;
-		int i;
 
 		if (quoteflag == 0)
 			n->type = NXHERE;
 		TRACE(("Here document %d\n", n->type));
-		if (! noexpand(wordtext) || (i = strlen(wordtext)) == 0 || i > EOFMARKLEN)
-			synerror("Illegal eof marker for << redirection");
 		rmescapes(wordtext);
 		here->eofmark = wordtext;
 		here->next = NULL;
@@ -836,7 +832,6 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 	int c = firstc;
 	char *out;
 	int len;
-	char line[EOFMARKLEN + 1];
 	struct nodelist *bqlist;
 	int quotef;
 	int dblquote;
@@ -1036,6 +1031,9 @@ endword:
 
 checkend: {
 	if (eofmark) {
+		int markloc;
+		char *p;
+
 		if (c == PEOA) {
 			c = pgetc2();
 		}
@@ -1044,28 +1042,42 @@ checkend: {
 				c = pgetc2();
 			}
 		}
-		if (c == *eofmark) {
-			if (pfgets(line, sizeof line) != NULL) {
-				char *p, *q;
-				int cc;
 
-				p = line;
-				for (q = eofmark + 1;; p++, q++) {
-					cc = *p;
-					if (cc == '\n')
-						cc = 0;
-					if (!*q || cc != *q)
-						break;
-				}
-				if (cc == *q) {
-					c = PEOF;
-					plinno++;
-					needprompt = doprompt;
-				} else {
-					pushstring(line, NULL);
+		markloc = out - (char *)stackblock();
+		for (p = eofmark; STPUTC(c, out), *p; p++) {
+			if (c != *p)
+				goto more_heredoc;
+
+			c = pgetc2();
+		}
+
+		if (c == '\n' || c == PEOF) {
+			c = PEOF;
+			plinno++;
+			needprompt = doprompt;
+		} else {
+			int len;
+
+more_heredoc:
+			p = (char *)stackblock() + markloc + 1;
+			len = out - p;
+
+			if (len) {
+				len -= c < 0;
+				c = p[-1];
+
+				if (len) {
+					char *str;
+
+					str = alloca(len + 1);
+					*(char *)mempcpy(str, p, len) = 0;
+
+					pushstring(str, NULL);
 				}
 			}
 		}
+
+		STADJUST((char *)stackblock() + markloc - out, out);
 	}
 	goto checkend_return;
 }
@@ -1148,6 +1160,7 @@ parsesub: {
 
 	c = pgetc();
 	if (
+		(checkkwd & CHKEOFMARK) ||
 		c <= PEOA  ||
 		(c != '(' && c != '{' && !is_name(c) && !is_special(c))
 	) {
@@ -1399,29 +1412,6 @@ RESET {
 	checkkwd = 0;
 }
 #endif
-
-/*
- * Returns true if the text contains nothing to expand (no dollar signs
- * or backquotes).
- */
-
-STATIC int
-noexpand(char *text)
-{
-	char *p;
-	signed char c;
-
-	p = text;
-	while ((c = *p++) != '\0') {
-		if (c == CTLQUOTEMARK)
-			continue;
-		if (c == CTLESC)
-			p++;
-		else if (BASESYNTAX[(int)c] == CCTL)
-			return 0;
-	}
-	return 1;
-}
 
 
 /*

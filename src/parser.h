@@ -65,6 +65,7 @@
 #define CHKALIAS	0x1
 #define CHKKWD		0x2
 #define CHKNL		0x4
+#define CHKEOFMARK	0x8
 
 
 /*

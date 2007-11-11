@@ -1,3 +1,7 @@
+2007-11-11  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Removed noexpand/length check on eofmark.
+
 2007-10-20  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Added configure --enable-glob and --enable-fnmatch options.

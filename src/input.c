@@ -125,33 +125,6 @@ RESET {
 
 
 /*
- * Read a line from the script.
- */
-
-char *
-pfgets(char *line, int len)
-{
-	char *p = line;
-	int nleft = len;
-	int c;
-
-	while (--nleft > 0) {
-		c = pgetc2();
-		if (c == PEOF) {
-			if (p == line)
-				return NULL;
-			break;
-		}
-		*p++ = c;
-		if (c == '\n')
-			break;
-	}
-	*p = '\0';
-	return line;
-}
-
-
-/*
  * Read a character from the script, returning PEOF on end of file.
  * Nul characters in the input are silently discarded.
  */
