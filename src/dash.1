@@ -1782,6 +1782,11 @@ With no arguments, it lists the values of all shell variables.
 If options are given, it sets the specified option
 flags, or clears them as described in the section called
 .Sx Argument List Processing .
+As a special case, if the option is -o or +o and no argument is
+supplied, the shell prints the settings of all its options.  If the
+option is -o, the settings are printed in a human-readable format; if
+the option is +o, the settings are printed in a format suitable for
+reinput to the shell to affect the same option settings.
 .Pp
 The third use of the set command is to set the values of the shell's
 positional parameters to the specified args.

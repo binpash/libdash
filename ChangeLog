@@ -1,3 +1,7 @@
+2007-12-23  Richard M Kreuter <kreuter@progn.net>
+
+	* Add set +o support.
+
 2007-12-23  Steve Langasek <steve.langasek@canonical.com>
 
 	* Fixed bad pointer arithmetic in evalcommand.

@@ -240,10 +240,18 @@ minus_o(char *name, int val)
 	int i;
 
 	if (name == NULL) {
-		out1str("Current option settings\n");
-		for (i = 0; i < NOPTS; i++)
-			out1fmt("%-16s%s\n", optnames[i],
-				optlist[i] ? "on" : "off");
+		if (val) {
+			out1str("Current option settings\n");
+			for (i = 0; i < NOPTS; i++)
+				out1fmt("%-16s%s\n", optnames[i],
+					optlist[i] ? "on" : "off");
+		} else {
+			for (i = 0; i < NOPTS; i++)
+				out1fmt("set %s %s\n",
+					optlist[i] ? "-o" : "+o",
+					optnames[i]);
+
+		}
 	} else {
 		for (i = 0; i < NOPTS; i++)
 			if (equal(name, optnames[i])) {
