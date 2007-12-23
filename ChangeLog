@@ -1,3 +1,7 @@
+2007-12-23  Steve Langasek <steve.langasek@canonical.com>
+
+	* Fixed bad pointer arithmetic in evalcommand.
+
 2007-11-11  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed noexpand/length check on eofmark.
