@@ -33,8 +33,9 @@ dnl Checks for libraries.
 dnl Checks for header files.
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(bsearch getpwnam getrlimit isalpha killpg mempcpy sigsetmask \
-	       stpcpy strchrnul strsignal strtod strtoimax strtoumax sysconf)
+AC_CHECK_FUNCS(bsearch getpwnam getrlimit imaxdiv isalpha killpg mempcpy \
+	       sigsetmask stpcpy strchrnul strsignal strtod strtoimax \
+	       strtoumax sysconf)
 
 if test "$enable_fnmatch" = yes; then
 	use_fnmatch=

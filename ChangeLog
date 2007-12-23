@@ -1,3 +1,7 @@
+2007-12-23  Gerrit Pape <pape@smarden.org>
+
+	* If imaxdiv() isn't available, use / and % operators.
+
 2007-12-23  Richard M Kreuter <kreuter@progn.net>
 
 	* Add set +o support.
