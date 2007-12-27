@@ -64,6 +64,11 @@
 
 
 
+/* Used by expandstr to get here-doc like behaviour. */
+#define FAKEEOFMARK (char *)1
+
+
+
 struct heredoc {
 	struct heredoc *next;	/* next here document in list */
 	union node *here;		/* redirection node */
@@ -111,6 +116,11 @@ isassignment(const char *p)
 	if (p == q)
 		return 0;
 	return *q == '=';
+}
+
+static inline int realeofmark(const char *eofmark)
+{
+	return eofmark && eofmark != FAKEEOFMARK;
 }
 
 
@@ -1030,7 +1040,7 @@ endword:
  */
 
 checkend: {
-	if (eofmark) {
+	if (realeofmark(eofmark)) {
 		int markloc;
 		char *p;
 
@@ -1492,7 +1502,7 @@ expandstr(const char *ps)
 
 	/* XXX Fix (char *) cast. */
 	setinputstring((char *)ps);
-	readtoken1(pgetc(), DQSYNTAX, nullstr, 0);
+	readtoken1(pgetc(), DQSYNTAX, FAKEEOFMARK, 0);
 	popfile();
 
 	n.narg.type = NARG;
