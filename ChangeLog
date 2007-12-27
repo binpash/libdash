@@ -1,6 +1,7 @@
 2007-12-27  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Add FAKEEOFMARK for expandstr.
+	* Do not show prompts in expandstr.
 
 2007-12-23  Gerrit Pape <pape@smarden.org>
 

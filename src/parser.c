@@ -1499,10 +1499,18 @@ const char *
 expandstr(const char *ps)
 {
 	union node n;
+	int saveprompt;
 
 	/* XXX Fix (char *) cast. */
 	setinputstring((char *)ps);
+
+	saveprompt = doprompt;
+	doprompt = 0;
+
 	readtoken1(pgetc(), DQSYNTAX, FAKEEOFMARK, 0);
+
+	doprompt = saveprompt;
+
 	popfile();
 
 	n.narg.type = NARG;
