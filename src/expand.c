@@ -1287,15 +1287,16 @@ expmeta(char *enddir, char *name)
 					break;
 				}
 			}
-		} else if (*p == '\\')
-			p++;
-		else if (*p == '/') {
-			if (metaflag)
-				goto out;
-			start = p + 1;
+		} else {
+			if (*p == '\\')
+				p++;
+			if (*p == '/') {
+				if (metaflag)
+					break;
+				start = p + 1;
+			}
 		}
 	}
-out:
 	if (metaflag == 0) {	/* we've reached the end of the file name */
 		if (enddir != expdir)
 			metaflag++;
