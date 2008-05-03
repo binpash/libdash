@@ -382,9 +382,7 @@ write_signames (stream)
 }
 
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main(int argc, char **argv)
 {
   char *stream_name;
   FILE *stream;

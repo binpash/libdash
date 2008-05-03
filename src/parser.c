@@ -51,6 +51,7 @@
 #include "alias.h"
 #include "show.h"
 #include "builtins.h"
+#include "system.h"
 #ifndef SMALL
 #include "myhistedit.h"
 #endif

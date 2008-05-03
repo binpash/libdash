@@ -46,7 +46,9 @@
 #include <limits.h>
 #include <string.h>
 #include <fnmatch.h>
+#ifdef HAVE_GLOB
 #include <glob.h>
+#endif
 #include <ctype.h>
 
 /*

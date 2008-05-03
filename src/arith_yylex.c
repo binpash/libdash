@@ -41,6 +41,7 @@
 #include "shell.h"
 #include "memalloc.h"
 #include "syntax.h"
+#include "system.h"
 
 #if ARITH_BOR + 11 != ARITH_BORASS || ARITH_ASS + 11 != ARITH_EQ
 #error Arithmetic tokens are out of order.
