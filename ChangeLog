@@ -1,6 +1,7 @@
 2008-05-03  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fixed _PATH_BSHELL warning.
+	* Test __GLIBC__ instead of _GNU_SOURCE.
 
 2008-05-02  Herbert Xu <herbert@gondor.apana.org.au>
 

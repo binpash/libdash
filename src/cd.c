@@ -249,7 +249,7 @@ inline
 STATIC char *
 getpwd()
 {
-#ifdef _GNU_SOURCE
+#ifdef __GLIBC__
 	char *dir = getcwd(0, 0);
 	return dir ? dir : nullstr;
 #else
