@@ -149,6 +149,8 @@ shellexec(char **argv, const char *path, int idx)
 STATIC void
 tryexec(char *cmd, char **argv, char **envp)
 {
+	char *const path_bshell = _PATH_BSHELL;
+
 repeat:
 #ifdef SYSV
 	do {
@@ -157,9 +159,9 @@ repeat:
 #else
 	execve(cmd, argv, envp);
 #endif
-	if (cmd != _PATH_BSHELL && errno == ENOEXEC) {
+	if (cmd != path_bshell && errno == ENOEXEC) {
 		*argv-- = cmd;
-		*argv = cmd = _PATH_BSHELL;
+		*argv = cmd = path_bshell;
 		goto repeat;
 	}
 }

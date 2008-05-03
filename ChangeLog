@@ -1,3 +1,7 @@
+2008-05-03  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed _PATH_BSHELL warning.
+
 2008-05-02  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Restored non-glibc getcwd support.
