@@ -2,6 +2,7 @@
 
 	* Fixed _PATH_BSHELL warning.
 	* Test __GLIBC__ instead of _GNU_SOURCE.
+	* Restored warning when getcwd fails.
 
 2008-05-02  Herbert Xu <herbert@gondor.apana.org.au>
 
