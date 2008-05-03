@@ -97,3 +97,9 @@ static inline int killpg(pid_t pid, int signal)
 #define _SC_CLK_TCK 2
 long sysconf(int) __attribute__((__noreturn__));
 #endif
+
+/*
+ * A trick to suppress uninitialized variable warning without generating any
+ * code
+ */
+#define uninitialized_var(x) x = x

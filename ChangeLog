@@ -8,6 +8,7 @@
 	* Test __GLIBC__ instead of _GNU_SOURCE.
 	* Restored warning when getcwd fails.
 	* Set default exvwarning2 arg0 for errors during early initialisation.
+	* Use uninitialized_var to silence bogus warnings.
 
 2008-05-02  Herbert Xu <herbert@gondor.apana.org.au>
 

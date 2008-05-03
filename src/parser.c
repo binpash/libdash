@@ -851,7 +851,8 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 	int parenlevel;	/* levels of parens in arithmetic */
 	int dqvarnest;	/* levels of variables expansion within double quotes */
 	int oldstyle;
-	char const *prevsyntax;	/* syntax before arithmetic */
+	/* syntax before arithmetic */
+	char const *uninitialized_var(prevsyntax);
 
 	startlinno = plinno;
 	dblquote = 0;
@@ -1285,7 +1286,7 @@ parsebackq: {
 	union node *n;
 	char *str;
 	size_t savelen;
-	int saveprompt;
+	int uninitialized_var(saveprompt);
 
 	str = NULL;
 	savelen = out - (char *)stackblock();
