@@ -1,6 +1,7 @@
 2008-05-03  Dan McGee <dpmcgee@gmail.com>
 
 	* Fixed klibc/klcc build problems.
+	* Added gitignore.
 
 2008-05-03  Herbert Xu <herbert@gondor.apana.org.au>
 
