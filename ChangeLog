@@ -1,3 +1,7 @@
+2008-05-07  Gerrit Pape <pape@smarden.org>
+
+	* Fixed lexical error in arithmetic expansion of & and |.
+
 2008-05-03  Dan McGee <dpmcgee@gmail.com>
 
 	* Fixed klibc/klcc build problems.

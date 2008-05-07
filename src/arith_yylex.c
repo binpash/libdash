@@ -141,7 +141,9 @@ yylex()
 		case '=':
 			value += ARITH_ASS - '=';
 checkeq:
-			if (*++buf != '=')
+			buf++;
+checkeqcur:
+			if (*buf != '=')
 				goto out;
 			value += 11;
 			break;
@@ -174,14 +176,14 @@ checkeq:
 		case '|':
 			if (*++buf != '|') {
 				value += ARITH_BOR - '|';
-				goto checkeq;
+				goto checkeqcur;
 			}
 			value += ARITH_OR - '|';
 			break;
 		case '&':
 			if (*++buf != '&') {
 				value += ARITH_BAND - '&';
-				goto checkeq;
+				goto checkeqcur;
 			}
 			value += ARITH_AND - '&';
 			break;
