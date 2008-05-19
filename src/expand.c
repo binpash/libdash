@@ -1269,10 +1269,11 @@ expmeta(char *enddir, char *name)
 	struct dirent *dp;
 	int atend;
 	int matchdot;
+	int esc;
 
 	metaflag = 0;
 	start = name;
-	for (p = name; *p; p++) {
+	for (p = name; esc = 0, *p; p += esc + 1) {
 		if (*p == '*' || *p == '?')
 			metaflag = 1;
 		else if (*p == '[') {
@@ -1291,11 +1292,11 @@ expmeta(char *enddir, char *name)
 			}
 		} else {
 			if (*p == '\\')
-				p++;
-			if (*p == '/') {
+				esc++;
+			if (p[esc] == '/') {
 				if (metaflag)
 					break;
-				start = p + 1;
+				start = p + esc + 1;
 			}
 		}
 	}
@@ -1337,7 +1338,8 @@ expmeta(char *enddir, char *name)
 		atend = 1;
 	} else {
 		atend = 0;
-		*endname++ = '\0';
+		*endname = '\0';
+		endname += esc + 1;
 	}
 	matchdot = 0;
 	p = start;
@@ -1363,7 +1365,7 @@ expmeta(char *enddir, char *name)
 	}
 	closedir(dirp);
 	if (! atend)
-		endname[-1] = '/';
+		endname[-esc - 1] = esc ? '\\' : '/';
 }
 #endif	/* HAVE_GLOB */
 

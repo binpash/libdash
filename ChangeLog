@@ -1,3 +1,7 @@
+2008-05-19  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed non-leading slash treatment in expmeta.
+
 2008-05-07  Gerrit Pape <pape@smarden.org>
 
 	* Fixed lexical error in arithmetic expansion of & and |.
