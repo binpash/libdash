@@ -1,3 +1,7 @@
+2008-06-13  Gerrit Pape <pape@smarden.org>
+
+	* Added missing right parenthesis in manual page.
+
 2008-06-13  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fixed 3,4-argument cases for test per POSIX.
