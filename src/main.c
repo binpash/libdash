@@ -154,7 +154,7 @@ main(int argc, char **argv)
 		read_profile("/etc/profile");
 state1:
 		state = 2;
-		read_profile(".profile");
+		read_profile("$HOME/.profile");
 	}
 state2:
 	state = 3;
@@ -168,6 +168,7 @@ state2:
 			read_profile(shinit);
 		}
 	}
+	popstackmark(&smark);
 state3:
 	state = 4;
 	if (minusc)
@@ -259,6 +260,7 @@ read_profile(const char *name)
 {
 	int skip;
 
+	name = expandstr(name);
 	if (setinputfile(name, INPUT_PUSH_FILE | INPUT_NOFILE_OK) < 0)
 		return;
 

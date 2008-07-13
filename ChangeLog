@@ -4,6 +4,7 @@
 	* Made aexpr/oexpr non-recursive.
 	* Made t_lex reentrant.
 	* Made setinputfd static.
+	* Expand ENV before using it.
 
 2008-05-19  Herbert Xu <herbert@gondor.apana.org.au>
 
