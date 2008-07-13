@@ -232,24 +232,31 @@ syntax(const char *op, const char *msg)
 static int
 oexpr(enum token n)
 {
-	int res;
+	int res = 0;
 
-	res = aexpr(n);
-	if (t_lex(*++t_wp) == BOR)
-		return oexpr(t_lex(*++t_wp)) || res;
-	t_wp--;
+	for (;;) {
+		res |= aexpr(n);
+		n = t_lex(t_wp[1]);
+		if (n != BOR)
+			break;
+		n = t_lex(*(t_wp += 2));
+	}
 	return res;
 }
 
 static int
 aexpr(enum token n)
 {
-	int res;
+	int res = 1;
 
-	res = nexpr(n);
-	if (t_lex(*++t_wp) == BAND)
-		return aexpr(t_lex(*++t_wp)) && res;
-	t_wp--;
+	for (;;) {
+		if (!nexpr(n))
+			res = 0;
+		n = t_lex(t_wp[1]);
+		if (n != BAND)
+			break;
+		n = t_lex(*(t_wp += 2));
+	}
 	return res;
 }
 
