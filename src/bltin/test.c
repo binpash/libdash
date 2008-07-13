@@ -142,8 +142,8 @@ static int nexpr(enum token);
 static int primary(enum token);
 static int binop(void);
 static int filstat(char *, enum token);
-static enum token t_lex(char *);
-static int isoperand(void);
+static enum token t_lex(char **);
+static int isoperand(char **);
 static int newerf(const char *, const char *);
 static int olderf(const char *, const char *);
 static int equalf(const char *, const char *);
@@ -207,7 +207,7 @@ testcmd(int argc, char **argv)
 		}
 	}
 
-	n = t_lex(*argv);
+	n = t_lex(argv);
 
 eval:
 	t_wp = argv;
@@ -236,10 +236,10 @@ oexpr(enum token n)
 
 	for (;;) {
 		res |= aexpr(n);
-		n = t_lex(t_wp[1]);
+		n = t_lex(t_wp + 1);
 		if (n != BOR)
 			break;
-		n = t_lex(*(t_wp += 2));
+		n = t_lex(t_wp += 2);
 	}
 	return res;
 }
@@ -252,10 +252,10 @@ aexpr(enum token n)
 	for (;;) {
 		if (!nexpr(n))
 			res = 0;
-		n = t_lex(t_wp[1]);
+		n = t_lex(t_wp + 1);
 		if (n != BAND)
 			break;
-		n = t_lex(*(t_wp += 2));
+		n = t_lex(t_wp += 2);
 	}
 	return res;
 }
@@ -264,7 +264,7 @@ static int
 nexpr(enum token n)
 {
 	if (n == UNOT)
-		return !nexpr(t_lex(*++t_wp));
+		return !nexpr(t_lex(++t_wp));
 	return primary(n);
 }
 
@@ -277,10 +277,10 @@ primary(enum token n)
 	if (n == EOI)
 		return 0;		/* missing expression */
 	if (n == LPAREN) {
-		if ((nn = t_lex(*++t_wp)) == RPAREN)
+		if ((nn = t_lex(++t_wp)) == RPAREN)
 			return 0;	/* missing expression */
 		res = oexpr(nn);
-		if (t_lex(*++t_wp) != RPAREN)
+		if (t_lex(++t_wp) != RPAREN)
 			syntax(NULL, "closing paren expected");
 		return res;
 	}
@@ -300,7 +300,7 @@ primary(enum token n)
 		}
 	}
 
-	if (t_lex(t_wp[1]), t_wp_op && t_wp_op->op_type == BINOP) {
+	if (t_lex(t_wp + 1), t_wp_op && t_wp_op->op_type == BINOP) {
 		return binop();
 	}
 
@@ -314,7 +314,7 @@ binop(void)
 	struct t_op const *op;
 
 	opnd1 = *t_wp;
-	(void) t_lex(*++t_wp);
+	(void) t_lex(++t_wp);
 	op = t_wp_op;
 
 	if ((opnd2 = *++t_wp) == (char *)0)
@@ -403,10 +403,10 @@ filstat(char *nm, enum token mode)
 	}
 }
 
-static enum token
-t_lex(char *s)
+static enum token t_lex(char **tp)
 {
 	struct t_op const *op;
+	char *s = *tp;
 
 	if (s == 0) {
 		t_wp_op = (struct t_op *)0;
@@ -414,8 +414,8 @@ t_lex(char *s)
 	}
 
 	op = getop(s);
-	if (op && !(op->op_type == UNOP && isoperand()) &&
-	    !(op->op_num == LPAREN && *(t_wp+1) == 0)) {
+	if (op && !(op->op_type == UNOP && isoperand(tp)) &&
+	    !(op->op_num == LPAREN && !tp[1])) {
 		t_wp_op = op;
 		return op->op_num;
 	}
@@ -424,15 +424,14 @@ t_lex(char *s)
 	return OPERAND;
 }
 
-static int
-isoperand(void)
+static int isoperand(char **tp)
 {
 	struct t_op const *op;
-	char *s, *t;
+	char *s;
 
-	if ((s  = *(t_wp+1)) == 0)
+	if (!(s = tp[1]))
 		return 1;
-	if ((t = *(t_wp+2)) == 0)
+	if (!tp[2])
 		return 0;
 
 	op = getop(s);
