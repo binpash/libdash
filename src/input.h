@@ -57,7 +57,6 @@ void pungetc(void);
 void pushstring(char *, void *);
 void popstring(void);
 int setinputfile(const char *, int);
-void setinputfd(int, int);
 void setinputstring(char *);
 void popfile(void);
 void popallfiles(void);
