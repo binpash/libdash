@@ -155,9 +155,23 @@ static inline intmax_t getn(const char *s)
 	return atomax10(s);
 }
 
+static const struct t_op *getop(const char *s)
+{
+	const struct t_op *op;
+
+	for (op = ops; op->op_text; op++) {
+		if (strcmp(s, op->op_text) == 0)
+			return op;
+	}
+
+	return NULL;
+}
+
 int
 testcmd(int argc, char **argv)
 {
+	const struct t_op *op;
+	enum token n;
 	int res;
 
 	if (*argv[0] == '[') {
@@ -166,14 +180,42 @@ testcmd(int argc, char **argv)
 		argv[argc] = NULL;
 	}
 
-	if (argc < 2)
+	argv++;
+	argc--;
+
+	if (argc < 1)
 		return 1;
 
-	t_wp = &argv[1];
-	res = !oexpr(t_lex(*t_wp));
+	/*
+	 * POSIX prescriptions: he who wrote this deserves the Nobel
+	 * peace prize.
+	 */
+	switch (argc) {
+	case 3:
+		op = getop(argv[1]);
+		if (op && op->op_type == BINOP) {
+			n = OPERAND;
+			goto eval;
+		}
+		/* fall through */
 
-	if (*t_wp != NULL && *++t_wp != NULL)
-		syntax(*t_wp, "unexpected operator");
+	case 4:
+		if (!strcmp(argv[0], "(") && !strcmp(argv[argc - 1], ")")) {
+			argv[--argc] = NULL;
+			argv++;
+			argc--;
+		}
+	}
+
+	n = t_lex(*argv);
+
+eval:
+	t_wp = argv;
+	res = !oexpr(n);
+	argv = t_wp;
+
+	if (argv[0] != NULL && argv[1] != NULL)
+		syntax(argv[0], "unexpected operator");
 
 	return res;
 }
@@ -359,22 +401,18 @@ t_lex(char *s)
 {
 	struct t_op const *op;
 
-	op = ops;
-
 	if (s == 0) {
 		t_wp_op = (struct t_op *)0;
 		return EOI;
 	}
-	while (op->op_text) {
-		if (strcmp(s, op->op_text) == 0) {
-			if ((op->op_type == UNOP && isoperand()) ||
-			    (op->op_num == LPAREN && *(t_wp+1) == 0))
-				break;
-			t_wp_op = op;
-			return op->op_num;
-		}
-		op++;
+
+	op = getop(s);
+	if (op && !(op->op_type == UNOP && isoperand()) &&
+	    !(op->op_num == LPAREN && *(t_wp+1) == 0)) {
+		t_wp_op = op;
+		return op->op_num;
 	}
+
 	t_wp_op = (struct t_op *)0;
 	return OPERAND;
 }
@@ -385,18 +423,13 @@ isoperand(void)
 	struct t_op const *op;
 	char *s, *t;
 
-	op = ops;
 	if ((s  = *(t_wp+1)) == 0)
 		return 1;
 	if ((t = *(t_wp+2)) == 0)
 		return 0;
-	while (op->op_text) {
-		if (strcmp(s, op->op_text) == 0)
-			return op->op_type == BINOP &&
-			    (t[0] != ')' || t[1] != '\0');
-		op++;
-	}
-	return 0;
+
+	op = getop(s);
+	return op && op->op_type == BINOP;
 }
 
 static int

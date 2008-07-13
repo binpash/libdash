@@ -1,3 +1,7 @@
+2008-06-13  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed 3,4-argument cases for test per POSIX.
+
 2008-05-19  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fixed non-leading slash treatment in expmeta.
