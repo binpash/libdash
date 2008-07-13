@@ -170,7 +170,7 @@ positional parameters of the shell ($1, $2, etc).
 Otherwise, the shell
 reads commands from its standard input.
 .Ss Argument List Processing
-All of the single letter options have a corresponding name that can be
+All of the single letter options that have a corresponding name can be
 used as an argument to the
 .Fl o
 option.
@@ -235,6 +235,8 @@ Useful for debugging.
 Ignore EOF's from input when interactive.
 .It Fl i Em interactive
 Force the shell to behave interactively.
+.It Fl l
+Make dash act as if it had been invoked as a login shell.
 .It Fl m Em monitor
 Turn on job control (set automatically when interactive).
 .It Fl s Em stdin

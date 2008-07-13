@@ -5,6 +5,7 @@
 	* Made t_lex reentrant.
 	* Made setinputfd static.
 	* Expand ENV before using it.
+	* Added support for -l.
 
 2008-05-19  Herbert Xu <herbert@gondor.apana.org.au>
 

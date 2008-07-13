@@ -96,6 +96,7 @@ main(int argc, char **argv)
 	volatile int state;
 	struct jmploc jmploc;
 	struct stackmark smark;
+	int login;
 
 #ifdef __GLIBC__
 	dash_errno = __errno_location();
@@ -148,8 +149,8 @@ main(int argc, char **argv)
 	rootpid = getpid();
 	init();
 	setstackmark(&smark);
-	procargs(argc, argv);
-	if (argv[0] && argv[0][0] == '-') {
+	login = procargs(argc, argv);
+	if (login) {
 		state = 1;
 		read_profile("/etc/profile");
 state1:

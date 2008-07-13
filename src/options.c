@@ -106,7 +106,7 @@ const char optletters[NOPTS] = {
 char optlist[NOPTS];
 
 
-STATIC void options(int);
+static int options(int);
 STATIC void minus_o(char *, int);
 STATIC void setoption(int, int);
 STATIC int getopts(char *, char *, char **);
@@ -116,21 +116,23 @@ STATIC int getopts(char *, char *, char **);
  * Process the shell command line arguments.
  */
 
-void
+int
 procargs(int argc, char **argv)
 {
 	int i;
 	const char *xminusc;
 	char **xargv;
+	int login;
 
 	xargv = argv;
+	login = xargv[0] && xargv[0][0] == '-';
 	arg0 = xargv[0];
 	if (argc > 0)
 		xargv++;
 	for (i = 0; i < NOPTS; i++)
 		optlist[i] = 2;
 	argptr = xargv;
-	options(1);
+	login |= options(1);
 	xargv = argptr;
 	xminusc = minusc;
 	if (*xargv == NULL) {
@@ -169,6 +171,8 @@ setarg0:
 		xargv++;
 	}
 	optschanged();
+
+	return login;
 }
 
 
@@ -190,12 +194,13 @@ optschanged(void)
  * to the argument list; we advance it past the options.
  */
 
-STATIC void
+STATIC int
 options(int cmdline)
 {
 	char *p;
 	int val;
 	int c;
+	int login = 0;
 
 	if (cmdline)
 		minusc = NULL;
@@ -223,6 +228,8 @@ options(int cmdline)
 		while ((c = *p++) != '\0') {
 			if (c == 'c' && cmdline) {
 				minusc = p;	/* command is after shell args*/
+			} else if (c == 'l' && cmdline) {
+				login = 1;
 			} else if (c == 'o') {
 				minus_o(*argptr, val);
 				if (*argptr)
@@ -232,6 +239,8 @@ options(int cmdline)
 			}
 		}
 	}
+
+	return login;
 }
 
 STATIC void
