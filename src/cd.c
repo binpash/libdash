@@ -258,7 +258,7 @@ getpwd()
 #else
 	char buf[PATH_MAX];
 
-	if (getcwd(buf, sizeof(buf))
+	if (getcwd(buf, sizeof(buf)))
 		return savestr(buf);
 #endif
 

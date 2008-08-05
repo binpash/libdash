@@ -1,3 +1,7 @@
+2008-08-05  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed getcwd build error for the non-glibc case.
+
 2008-06-13  Gerrit Pape <pape@smarden.org>
 
 	* Added missing right parenthesis in manual page.
