@@ -37,7 +37,7 @@
 
 tempfile=tempfile
 if ! type tempfile > /dev/null 2>&1; then
-	tempfile=mktemp
+	tempfile='mktemp /tmp/mkbuiltins.XXXXXX'
 fi
 
 trap 'rm -f $temp $temp2' EXIT

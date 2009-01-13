@@ -1,3 +1,7 @@
+2008-12-26  Aleksey Cheusov <vle@gmx.net>
+
+	* Fixed build on NetBSD.
+
 2008-10-17  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed obsolete for loop syntax in manual.
