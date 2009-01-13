@@ -1,4 +1,4 @@
-AC_INIT(dash, 0.5.5)
+AC_INIT(dash, 0.5.5.1)
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src/main.c])
 

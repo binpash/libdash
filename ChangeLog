@@ -1,6 +1,7 @@
 2009-01-14  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Add arith_yacc.h to dash_SOURCES.
+	* Release 0.5.5.1.
 
 2009-01-13  Herbert Xu <herbert@gondor.apana.org.au>
 
