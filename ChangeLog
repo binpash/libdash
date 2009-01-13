@@ -1,3 +1,7 @@
+2009-01-13  Mark Mentovai <mmentovai@gmail.com>
+
+	* Fixed build on OS X.
+
 2008-12-26  Aleksey Cheusov <vle@gmx.net>
 
 	* Fixed build on NetBSD.

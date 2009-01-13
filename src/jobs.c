@@ -361,7 +361,14 @@ fgcmd(int argc, char **argv)
 	return retval;
 }
 
-int bgcmd(int, char **) __attribute__((__alias__("fgcmd")));
+int bgcmd(int argc, char **argv)
+#ifdef HAVE_ALIAS_ATTRIBUTE
+	__attribute__((__alias__("fgcmd")));
+#else
+{
+	return fgcmd(argc, argv);
+}
+#endif
 
 
 STATIC int

@@ -326,7 +326,15 @@ exexit:
 #if !defined(__alpha__) || (defined(__GNUC__) && __GNUC__ >= 3)
 STATIC
 #endif
-void evaltreenr(union node *, int) __attribute__ ((alias("evaltree")));
+void evaltreenr(union node *n, int flags)
+#ifdef HAVE_ATTRIBUTE_ALIAS
+	__attribute__ ((alias("evaltree")));
+#else
+{
+	evaltree(n, flags);
+	abort();
+}
+#endif
 
 
 STATIC void
