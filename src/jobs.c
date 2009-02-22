@@ -195,6 +195,9 @@ setjobctl(int on)
 			while (!isatty(fd))
 				if (--fd < 0)
 					goto out;
+			fd = dup(fd);
+			if (fd < 0)
+				goto out;
 		}
 		fd = savefd(fd);
 		do { /* while we are in the background */

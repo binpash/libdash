@@ -2,6 +2,7 @@
 
 	* Fix dowait signal race.
 	* Remove EXSIG.
+	* Do not close stderr when /dev/tty fails to open.
 
 2009-01-14  Herbert Xu <herbert@gondor.apana.org.au>
 
