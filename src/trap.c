@@ -71,7 +71,7 @@
 /* trap handler commands */
 char *trap[NSIG];
 /* current value of signal */
-static char sigmode[NSIG - 1];
+char sigmode[NSIG - 1];
 /* indicates specified signal received */
 char gotsig[NSIG - 1];
 /* last pending signal */
@@ -82,9 +82,10 @@ int exsig;
 extern char *signal_names[];
 
 #ifdef mkinit
-INCLUDE <signal.h>
+INCLUDE "trap.h"
 INIT {
-	signal(SIGCHLD, SIG_DFL);
+	sigmode[SIGCHLD - 1] = S_DFL;
+	setsignal(SIGCHLD);
 }
 #endif
 
@@ -206,6 +207,9 @@ setsignal(int signo)
 #endif
 		}
 	}
+
+	if (signo == SIGCHLD)
+		action = S_CATCH;
 
 	t = &sigmode[signo - 1];
 	tsig = *t;

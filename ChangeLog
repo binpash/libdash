@@ -1,3 +1,7 @@
+2009-02-22  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fix dowait signal race.
+
 2009-01-14  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Add arith_yacc.h to dash_SOURCES.
