@@ -51,7 +51,6 @@
 #include "show.h"
 #include "eval.h"
 #include "parser.h"
-#include "trap.h"
 #include "system.h"
 
 
@@ -98,19 +97,14 @@ exraise(int e)
 
 void
 onint(void) {
-	int i;
 
 	intpending = 0;
 	sigclearmask();
-	i = EXSIG;
-	if (gotsig[SIGINT - 1] && !trap[SIGINT]) {
-		if (!(rootshell && iflag)) {
-			signal(SIGINT, SIG_DFL);
-			raise(SIGINT);
-		}
-		i = EXINT;
+	if (!(rootshell && iflag)) {
+		signal(SIGINT, SIG_DFL);
+		raise(SIGINT);
 	}
-	exraise(i);
+	exraise(EXINT);
 	/* NOTREACHED */
 }
 

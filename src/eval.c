@@ -863,20 +863,13 @@ bail:
 		}
 		if (evalbltin(cmdentry.u.cmd, argc, argv)) {
 			int status;
-			int i, j;
+			int i;
 
 			i = exception;
 			if (i == EXEXIT)
 				goto raise;
 
-			status = 2;
-			j = 0;
-			if (i == EXINT)
-				j = SIGINT;
-			if (i == EXSIG)
-				j = pendingsigs;
-			if (j)
-				status = j + 128;
+			status = (i == EXINT) ? SIGINT + 128 : 2;
 			exitstatus = status;
 
 			if (i == EXINT || spclbltin > 0) {
@@ -926,7 +919,6 @@ cmddone:
 	exitstatus |= outerr(out1);
 	freestdout();
 	commandname = savecmdname;
-	exsig = 0;
 	handler = savehandler;
 
 	return i;

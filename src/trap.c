@@ -73,11 +73,9 @@ char *trap[NSIG];
 /* current value of signal */
 char sigmode[NSIG - 1];
 /* indicates specified signal received */
-char gotsig[NSIG - 1];
+static char gotsig[NSIG - 1];
 /* last pending signal */
 volatile sig_atomic_t pendingsigs;
-/* do we generate EXSIG events */
-int exsig;
 
 extern char *signal_names[];
 
@@ -278,7 +276,7 @@ onsig(int signo)
 	gotsig[signo - 1] = 1;
 	pendingsigs = signo;
 
-	if (exsig || (signo == SIGINT && !trap[SIGINT])) {
+	if (signo == SIGINT && !trap[SIGINT]) {
 		if (!suppressint)
 			onint();
 		intpending = 1;
