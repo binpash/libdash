@@ -34,9 +34,9 @@
 .\"
 .Dd January 19, 2003
 .Os
-.Dt SH 1
+.Dt DASH 1
 .Sh NAME
-.Nm sh
+.Nm dash
 .Nd command interpreter (shell)
 .Sh SYNOPSIS
 .Nm
@@ -93,9 +93,6 @@ but it is not a Korn shell clone (see
 Only features designated by
 .Tn POSIX ,
 plus a few Berkeley extensions, are being incorporated into this shell.
-We expect
-.Tn POSIX
-conformance by the time 4.4 BSD is released.
 This man page is not intended
 to be a tutorial or a complete specification of the shell.
 .Ss Overview
@@ -2333,11 +2330,15 @@ The process ID of the parent process of the shell.
 .Xr environ 7 ,
 .Xr sysctl 8
 .Sh HISTORY
-A
 .Nm
-command appeared in
-.At v1 .
-It was, however, unmaintainable so we wrote this one.
+is a POSIX-compliant implementation of /bin/sh that aims to be as small as
+possible.
+.Nm
+is a direct descendant of the NetBSD version of ash (the Almquist SHell),
+ported to Linux in early 1997.
+It was renamed to
+.Nm
+in 2002.
 .Sh BUGS
 Setuid shell scripts should be avoided at all costs, as they are a
 significant security risk.

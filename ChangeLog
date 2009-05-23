@@ -6,6 +6,10 @@
 	* Allow newlines after var name in for statements.
 	* Use CHKNL to parse case statements.
 
+2009-02-22  Gerrit Pape <pape@smarden.org>
+
+	* Update manual page to differentiate dash from ash.
+
 2009-01-14  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Add arith_yacc.h to dash_SOURCES.
