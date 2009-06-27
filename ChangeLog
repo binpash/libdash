@@ -1,3 +1,7 @@
+2009-05-23  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fix incorrect savefd conversions.
+
 2009-02-22  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix dowait signal race.

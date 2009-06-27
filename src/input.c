@@ -410,7 +410,7 @@ setinputfile(const char *fname, int flags)
 		sh_error("Can't open %s", fname);
 	}
 	if (fd < 10)
-		fd = savefd(fd);
+		fd = savefd(fd, fd);
 	setinputfd(fd, flags & INPUT_PUSH_FILE);
 out:
 	INTON;

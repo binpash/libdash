@@ -189,17 +189,15 @@ setjobctl(int on)
 	if (on == jobctl || rootshell == 0)
 		return;
 	if (on) {
-		fd = open(_PATH_TTY, O_RDWR);
+		int ofd;
+		ofd = fd = open(_PATH_TTY, O_RDWR);
 		if (fd < 0) {
 			fd += 3;
 			while (!isatty(fd))
 				if (--fd < 0)
 					goto out;
-			fd = dup(fd);
-			if (fd < 0)
-				goto out;
 		}
-		fd = savefd(fd);
+		fd = savefd(fd, ofd);
 		do { /* while we are in the background */
 			if ((pgrp = tcgetpgrp(fd)) < 0) {
 out:
