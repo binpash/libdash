@@ -869,7 +869,9 @@ memtodest(const char *p, size_t len, const char *syntax, int quotes) {
 		int c = (signed char)*p++;
 		if (c) {
 			if ((quotes & QUOTES_ESC) &&
-			    (syntax[c] == CCTL || syntax[c] == CDBACK))
+			    ((syntax[c] == CCTL) ||
+			     (((quotes & EXP_FULL) || syntax != BASESYNTAX) &&
+			      syntax[c] == CBACK)))
 				USTPUTC(CTLESC, q);
 		} else if (!(quotes & QUOTES_KEEPNUL))
 			continue;

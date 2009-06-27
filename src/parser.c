@@ -901,7 +901,6 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 				break;
 			/* backslash */
 			case CBACK:
-			case CDBACK:
 				c = pgetc2();
 				if (c == PEOF) {
 					USTPUTC(CTLESC, out);

@@ -1,3 +1,7 @@
+2009-06-27  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fix quoted pattern patch breakage.
+
 2009-05-23  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix incorrect savefd conversions.
