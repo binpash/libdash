@@ -55,14 +55,73 @@
 #include "miscbltin.h"
 #include "mystring.h"
 #include "main.h"
+#include "expand.h"
+#include "parser.h"
 
 #undef rflag
 
 
+/** handle one line of the read command.
+ *  more fields than variables -> remainder shall be part of last variable.
+ *  less fields than variables -> remaining variables unset.
+ *
+ *  @param line complete line of input
+ *  @param ap argument (variable) list
+ *  @param len length of line including trailing '\0'
+ */
+static void
+readcmd_handle_line(char *line, char **ap, size_t len)
+{
+	struct arglist arglist;
+	struct strlist *sl;
+	char *s, *backup;
+
+	/* ifsbreakup will fiddle with stack region... */
+	s = grabstackstr(line + len);
+
+	/* need a copy, so that delimiters aren't lost
+	 * in case there are more fields than variables */
+	backup = sstrdup(line);
+
+	arglist.lastp = &arglist.list;
+	recordregion(0, len, 0);
+	
+	ifsbreakup(s, &arglist);
+	*arglist.lastp = NULL;
+	removerecordregions(0);
+
+	for (sl = arglist.list; sl; sl = sl->next) {
+		/* remaining fields present, but no variables left. */
+		if (!ap[1]) {
+			size_t offset;
+			char *remainder;
+
+			/* FIXME little bit hacky, assuming that ifsbreakup 
+			 * will not modify the length of the string */
+			offset = sl->text - s;
+			remainder = backup + offset;
+			rmescapes(remainder);
+			setvar(*ap, remainder, 0);
+
+			return;
+		}
+		
+		/* set variable to field */
+		rmescapes(sl->text);
+		setvar(*ap, sl->text, 0);
+		ap++;
+	}
+
+	/* nullify remaining arguments */
+	do {
+		setvar(*ap, nullstr, 0);
+	} while (*++ap);
+}
 
 /*
  * The read builtin.  The -e option causes backslashes to escape the
- * following character.
+ * following character. The -p option followed by an argument prompts
+ * with the argument.
  *
  * This uses unbuffered input, which may be avoidable in some cases.
  */
@@ -75,9 +134,7 @@ readcmd(int argc, char **argv)
 	char c;
 	int rflag;
 	char *prompt;
-	const char *ifs;
 	char *p;
-	int startword;
 	int status;
 	int i;
 
@@ -97,10 +154,7 @@ readcmd(int argc, char **argv)
 	}
 	if (*(ap = argptr) == NULL)
 		sh_error("arg count");
-	if ((ifs = bltinlookup("IFS")) == NULL)
-		ifs = defifs;
 	status = 0;
-	startword = 1;
 	backslash = 0;
 	STARTSTACKSTR(p);
 	for (;;) {
@@ -111,10 +165,10 @@ readcmd(int argc, char **argv)
 		if (c == '\0')
 			continue;
 		if (backslash) {
-			backslash = 0;
-			if (c != '\n')
-				goto put;
-			continue;
+			if (c == '\n')
+				goto resetbs;
+			STPUTC(CTLESC, p);
+			goto put;
 		}
 		if (!rflag && c == '\\') {
 			backslash++;
@@ -122,28 +176,13 @@ readcmd(int argc, char **argv)
 		}
 		if (c == '\n')
 			break;
-		if (startword && *ifs == ' ' && strchr(ifs, c)) {
-			continue;
-		}
-		startword = 0;
-		if (ap[1] != NULL && strchr(ifs, c) != NULL) {
-			STACKSTRNUL(p);
-			setvar(*ap, stackblock(), 0);
-			ap++;
-			startword = 1;
-			STARTSTACKSTR(p);
-		} else {
 put:
-			STPUTC(c, p);
-		}
+		STPUTC(c, p);
+resetbs:
+		backslash = 0;
 	}
 	STACKSTRNUL(p);
-	/* Remove trailing blanks */
-	while ((char *)stackblock() <= --p && strchr(ifs, *p) != NULL)
-		*p = '\0';
-	setvar(*ap, stackblock(), 0);
-	while (*++ap != NULL)
-		setvar(*ap, nullstr, 0);
+	readcmd_handle_line(stackblock(), ap, p - (char *)stackblock());
 	return status;
 }
 

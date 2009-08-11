@@ -1,3 +1,7 @@
+2009-08-11  Stefan Potyra <stefan.potyra@informatik.uni-erlangen.de>
+
+	* Honor tab as IFS whitespace when splitting fields in readcmd.
+
 2009-06-27  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix quoted pattern patch breakage.

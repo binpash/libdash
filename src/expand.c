@@ -117,9 +117,6 @@ STATIC char *evalvar(char *, int);
 STATIC size_t strtodest(const char *, const char *, int);
 STATIC void memtodest(const char *, size_t, const char *, int);
 STATIC ssize_t varvalue(char *, int, int);
-STATIC void recordregion(int, int, int);
-STATIC void removerecordregions(int); 
-STATIC void ifsbreakup(char *, struct arglist *);
 STATIC void ifsfree(void);
 STATIC void expandmeta(struct strlist *, int);
 #ifdef HAVE_GLOB
@@ -412,7 +409,7 @@ lose:
 }
 
 
-STATIC void 
+void 
 removerecordregions(int endoff)
 {
 	if (ifslastp == NULL)
@@ -1001,7 +998,7 @@ value:
  * string for IFS characters.
  */
 
-STATIC void
+void
 recordregion(int start, int end, int nulonly)
 {
 	struct ifsregion *ifsp;
@@ -1028,7 +1025,7 @@ recordregion(int start, int end, int nulonly)
  * strings to the argument list.  The regions of the string to be
  * searched for IFS characters have been stored by recordregion.
  */
-STATIC void
+void
 ifsbreakup(char *string, struct arglist *arglist)
 {
 	struct ifsregion *ifsp;

@@ -67,6 +67,9 @@ void expari(int);
 #define rmescapes(p) _rmescapes((p), 0)
 char *_rmescapes(char *, int);
 int casematch(union node *, char *);
+void recordregion(int, int, int);
+void removerecordregions(int); 
+void ifsbreakup(char *, struct arglist *);
 
 /* From arith.y */
 intmax_t arith(const char *);
