@@ -776,7 +776,7 @@ xxreadtoken(void)
 			continue;
 		case '\\':
 			if (pgetc() == '\n') {
-				startlinno = ++plinno;
+				startlinno = lineno_inc();
 				if (doprompt)
 					setprompt(2);
 				continue;
@@ -784,7 +784,7 @@ xxreadtoken(void)
 			pungetc();
 			goto breakloop;
 		case '\n':
-			plinno++;
+			lineno_inc();
 			needprompt = doprompt;
 			RETURN(TNL);
 		case PEOF:
@@ -886,7 +886,7 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 				if (syntax == BASESYNTAX)
 					goto endword;	/* exit outer loop */
 				USTPUTC(c, out);
-				plinno++;
+				lineno_inc();
 				if (doprompt)
 					setprompt(2);
 				c = pgetc();
@@ -1065,7 +1065,7 @@ checkend: {
 
 		if (c == '\n' || c == PEOF) {
 			c = PEOF;
-			plinno++;
+			lineno_inc();
 			needprompt = doprompt;
 		} else {
 			int len;
@@ -1315,7 +1315,7 @@ parsebackq: {
 
 			case '\\':
                                 if ((pc = pgetc()) == '\n') {
-					plinno++;
+					lineno_inc();
 					if (doprompt)
 						setprompt(2);
 					/*
@@ -1340,7 +1340,7 @@ parsebackq: {
 				synerror("EOF in backquote substitution");
 
 			case '\n':
-				plinno++;
+				lineno_inc();
 				needprompt = doprompt;
 				break;
 

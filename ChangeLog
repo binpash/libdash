@@ -1,3 +1,7 @@
+2009-08-11  Rocky Bernstein <rocky.bernstein@gmail.com>
+
+	* Add preliminary LINENO support.
+
 2009-08-11  Stefan Potyra <stefan.potyra@informatik.uni-erlangen.de>
 
 	* Honor tab as IFS whitespace when splitting fields in readcmd.
