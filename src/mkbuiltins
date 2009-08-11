@@ -71,7 +71,8 @@ awk '{	for (i = 2 ; i <= NF ; i++) {
 			opt = substr($2, 2)
 			$2 = $3
 		}
-		printf "\t{ \"%s\", %s, %d },\n", $1, $2,
+		printf "\t{ \"%s\", %s, %d },\n", $1,
+			(opt ~ /n/) ? "NULL" : $2,
 			(opt ~ /s/) + (opt ~ /[su]/) * 2 + (opt ~ /a/) * 4
 	}'
 echo '};'

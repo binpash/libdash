@@ -97,7 +97,7 @@ STATIC void evalcommand(union node *, int, struct backcmd *);
 #else
 STATIC void evalcommand(union node *, int);
 #endif
-STATIC int evalbltin(const struct builtincmd *, int, char **);
+STATIC int evalbltin(const struct builtincmd *, int, char **, int);
 STATIC int evalfun(struct funcnode *, int, char **, int);
 STATIC void prehash(union node *);
 STATIC int eprintlist(struct output *, struct strlist *, int);
@@ -129,8 +129,7 @@ RESET {
  * The eval commmand.
  */
 
-int
-evalcmd(int argc, char **argv)
+static int evalcmd(int argc, char **argv, int flags)
 {
         char *p;
         char *concat;
@@ -150,7 +149,7 @@ evalcmd(int argc, char **argv)
                         STPUTC('\0', concat);
                         p = grabstackstr(concat);
                 }
-                return evalstring(p, ~SKIPEVAL);
+                return evalstring(p, flags & EV_TESTED);
         }
         return 0;
 }
@@ -161,7 +160,7 @@ evalcmd(int argc, char **argv)
  */
 
 int
-evalstring(char *s, int mask)
+evalstring(char *s, int flags)
 {
 	union node *n;
 	struct stackmark smark;
@@ -172,7 +171,7 @@ evalstring(char *s, int mask)
 
 	status = 0;
 	while ((n = parsecmd(0)) != NEOF) {
-		evaltree(n, 0);
+		evaltree(n, flags);
 		status = exitstatus;
 		popstackmark(&smark);
 		if (evalskip)
@@ -180,7 +179,6 @@ evalstring(char *s, int mask)
 	}
 	popfile();
 
-	evalskip &= mask;
 	return status;
 }
 
@@ -861,7 +859,7 @@ bail:
 			}
 			listsetvar(list, i);
 		}
-		if (evalbltin(cmdentry.u.cmd, argc, argv)) {
+		if (evalbltin(cmdentry.u.cmd, argc, argv, flags)) {
 			int status;
 			int i;
 
@@ -899,10 +897,12 @@ out:
 }
 
 STATIC int
-evalbltin(const struct builtincmd *cmd, int argc, char **argv) {
+evalbltin(const struct builtincmd *cmd, int argc, char **argv, int flags)
+{
 	char *volatile savecmdname;
 	struct jmploc *volatile savehandler;
 	struct jmploc jmploc;
+	int status;
 	int i;
 
 	savecmdname = commandname;
@@ -913,10 +913,14 @@ evalbltin(const struct builtincmd *cmd, int argc, char **argv) {
 	commandname = argv[0];
 	argptr = argv + 1;
 	optptr = NULL;			/* initialize nextopt */
-	exitstatus = (*cmd->builtin)(argc, argv);
+	if (cmd == EVALCMD)
+		status = evalcmd(argc, argv, flags);
+	else
+		status = (*cmd->builtin)(argc, argv);
 	flushall();
+	status |= outerr(out1);
+	exitstatus = status;
 cmddone:
-	exitstatus |= outerr(out1);
 	freestdout();
 	commandname = savecmdname;
 	handler = savehandler;

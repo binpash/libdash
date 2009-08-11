@@ -310,7 +310,7 @@ dotrap(void)
 		p = trap[i + 1];
 		if (!p)
 			continue;
-		evalstring(p, SKIPEVAL);
+		evalstring(p, 0);
 		exitstatus = savestatus;
 		if (evalskip)
 			return evalskip;
@@ -365,6 +365,7 @@ exitshell(void)
 	handler = &loc;
 	if ((p = trap[0])) {
 		trap[0] = NULL;
+		evalskip = 0;
 		evalstring(p, 0);
 	}
 out:
