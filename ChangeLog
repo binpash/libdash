@@ -1,6 +1,7 @@
 2009-08-11  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Pass EV_TESTED into evalcmd.
+	* Revert SKIPEVAL into EXEXIT.
 
 2009-08-11  Rocky Bernstein <rocky.bernstein@gmail.com>
 

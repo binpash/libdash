@@ -309,15 +309,10 @@ setstatus:
 		break;
 	}
 out:
-	if ((checkexit & exitstatus))
-		evalskip |= SKIPEVAL;
-	else if (pendingsigs && dotrap())
-		goto exexit;
-
-	if (flags & EV_EXIT) {
-exexit:
+	if ((checkexit & exitstatus) ||
+	    (pendingsigs && dotrap()) ||
+	    (flags & EV_EXIT))
 		exraise(EXEXIT);
-	}
 }
 
 

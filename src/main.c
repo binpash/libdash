@@ -243,7 +243,7 @@ cmdloop(int top)
 		skip = evalskip;
 		if (skip) {
 			evalskip = 0;
-			return skip & SKIPEVAL;
+			break;
 		}
 	}
 
@@ -259,17 +259,12 @@ cmdloop(int top)
 STATIC void
 read_profile(const char *name)
 {
-	int skip;
-
 	name = expandstr(name);
 	if (setinputfile(name, INPUT_PUSH_FILE | INPUT_NOFILE_OK) < 0)
 		return;
 
-	skip = cmdloop(0);
+	cmdloop(0);
 	popfile();
-
-	if (skip)
-		exitshell();
 }
 
 
