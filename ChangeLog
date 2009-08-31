@@ -1,3 +1,7 @@
+2009-08-31  Eric Blake <ebb9@byu.net>
+
+	* Avoid compiler warnings on isdigit.
+
 2009-08-31  Matthew Burgess <matthew@linuxfromscratch.org>
 
 	* Add another missing LC_COLLATE to mkbuiltins.

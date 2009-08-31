@@ -237,7 +237,7 @@ umaskcmd(int argc, char **argv)
 	} else {
 		int new_mask;
 
-		if (isdigit(*ap)) {
+		if (isdigit((unsigned char) *ap)) {
 			new_mask = 0;
 			do {
 				if (*ap >= '8' || *ap < '0')
