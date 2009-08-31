@@ -9,6 +9,7 @@
 2009-08-31  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix NUL termination in readcmd.
+	* Lookup PWD after going through CDPATH.
 
 2009-08-11  Herbert Xu <herbert@gondor.apana.org.au>
 

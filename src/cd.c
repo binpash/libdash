@@ -106,7 +106,7 @@ cdcmd(int argc, char **argv)
 	if (!dest)
 		dest = nullstr;
 	if (*dest == '/')
-		goto step7;
+		goto step6;
 	if (*dest == '.') {
 		c = dest[1];
 dotdot:
@@ -122,13 +122,8 @@ dotdot:
 	}
 	if (!*dest)
 		dest = ".";
-	if (!(path = bltinlookup("CDPATH"))) {
-step6:
-step7:
-		p = dest;
-		goto docd;
-	}
-	do {
+	path = bltinlookup("CDPATH");
+	while (path) {
 		c = *path;
 		p = padvance(&path, dest);
 		if (stat(p, &statb) >= 0 && S_ISDIR(statb.st_mode)) {
@@ -137,9 +132,15 @@ step7:
 docd:
 			if (!docd(p, flags))
 				goto out;
-			break;
+			goto err;
 		}
-	} while (path);
+	}
+
+step6:
+	p = dest;
+	goto docd;
+
+err:
 	sh_error("can't cd to %s", dest);
 	/* NOTREACHED */
 out:
