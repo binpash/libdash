@@ -182,7 +182,7 @@ resetbs:
 		backslash = 0;
 	}
 	STACKSTRNUL(p);
-	readcmd_handle_line(stackblock(), ap, p - (char *)stackblock());
+	readcmd_handle_line(stackblock(), ap, p + 1 - (char *)stackblock());
 	return status;
 }
 
