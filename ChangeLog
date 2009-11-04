@@ -1,3 +1,16 @@
+2009-09-28  Jim Meyering  <meyering@redhat.com>
+
+	don't read-uninitialized for \177 in a here-doc
+	A DEL (0177, dec 127) byte in a here-document would cause dash to
+	access uninitialized memory at the end of one of the syntax.c tables,
+	since those tables are sized to accommodate a maximum index of
+	BASESYNTAX + 126.  Make the generated tables one byte larger.
+	printf ':<<\\E\n\200y\nE'|./dash
+	* src/mksyntax.c (filltable): Use 258, not 257 as the size,
+	so that BASESYNTAX(=130) + 127 is a valid index.
+	(print): Likewise.
+	Don't emit explicit array dimension in declaration.
+
 2009-08-31  Eric Blake <ebb9@byu.net>
 
 	* Avoid compiler warnings on isdigit.
