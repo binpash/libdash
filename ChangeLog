@@ -1,3 +1,7 @@
+2009-11-26  Herbert Xu <herbert@gondor.apana.org.au>
+
+	Fix off-by-one recordregion in readcmd.
+
 2009-09-28  Jim Meyering  <meyering@redhat.com>
 
 	don't read-uninitialized for \177 in a here-doc

@@ -84,7 +84,7 @@ readcmd_handle_line(char *line, char **ap, size_t len)
 	backup = sstrdup(line);
 
 	arglist.lastp = &arglist.list;
-	recordregion(0, len, 0);
+	recordregion(0, len - 1, 0);
 	
 	ifsbreakup(s, &arglist);
 	*arglist.lastp = NULL;
