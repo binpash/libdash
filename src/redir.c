@@ -192,7 +192,7 @@ openredirect(union node *redir)
 		break;
 	case NFROMTO:
 		fname = redir->nfile.expfname;
-		if ((f = open64(fname, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+		if ((f = open64(fname, O_RDWR|O_CREAT, 0666)) < 0)
 			goto ecreate;
 		break;
 	case NTO:

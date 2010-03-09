@@ -45,6 +45,10 @@
 
 	* Honor tab as IFS whitespace when splitting fields in readcmd.
 
+2009-06-30  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Do not truncate file for FROMTO redirection.
+
 2009-06-27  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix quoted pattern patch breakage.
