@@ -74,6 +74,8 @@ static const char prec[ARITH_BINOP_MAX - ARITH_BINOP_MIN] = {
 	ARITH_PRECEDENCE(ARITH_BOR, 7),
 };
 
+#define ARITH_MAX_PREC 8
+
 static void yyerror(const char *s) __attribute__ ((noreturn));
 static void yyerror(const char *s)
 {
@@ -81,9 +83,14 @@ static void yyerror(const char *s)
 	/* NOTREACHED */
 }
 
+static inline int arith_prec(int op)
+{
+	return prec[op - ARITH_BINOP_MIN];
+}
+
 static inline int higher_prec(int op1, int op2)
 {
-	return prec[op1 - ARITH_BINOP_MIN] < prec[op2 - ARITH_BINOP_MIN];
+	return arith_prec(op1) < arith_prec(op2);
 }
 
 static intmax_t do_binop(int op, intmax_t a, intmax_t b)
@@ -174,7 +181,7 @@ again:
 	}
 }
 
-static intmax_t binop2(intmax_t a, int op, int noeval)
+static intmax_t binop2(intmax_t a, int op, int prec, int noeval)
 {
 	for (;;) {
 		union yystype val;
@@ -188,15 +195,18 @@ static intmax_t binop2(intmax_t a, int op, int noeval)
 		b = primary(token, &val, yylex(), noeval);
 
 		op2 = last_token;
-		if (op2 < ARITH_BINOP_MIN || op2 >= ARITH_BINOP_MAX)
-			return noeval ? b : do_binop(op, a, b);
-
-		if (higher_prec(op2, op)) {
-			b = binop2(b, op2, noeval);
-			return noeval ? b : do_binop(op, a, b);
+		if (op2 >= ARITH_BINOP_MIN && op2 < ARITH_BINOP_MAX &&
+		    higher_prec(op2, op)) {
+			b = binop2(b, op2, arith_prec(op), noeval);
+			op2 = last_token;
 		}
 
-		a = do_binop(op, a, b);
+		a = noeval ? b : do_binop(op, a, b);
+
+		if (op2 < ARITH_BINOP_MIN || op2 >= ARITH_BINOP_MAX ||
+		    arith_prec(op2) >= prec)
+			return a;
+
 		op = op2;
 	}
 }
@@ -209,7 +219,7 @@ static intmax_t binop(int token, union yystype *val, int op, int noeval)
 	if (op < ARITH_BINOP_MIN || op >= ARITH_BINOP_MAX)
 		return a;
 
-	return binop2(a, op, noeval);
+	return binop2(a, op, ARITH_MAX_PREC, noeval);
 }
 
 static intmax_t and(int token, union yystype *val, int op, int noeval)
