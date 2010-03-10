@@ -253,7 +253,7 @@ static intmax_t or(int token, union yystype *val, int op, int noeval)
 
 	b = or(token, val, yylex(), noeval | !!a);
 
-	return a | b;
+	return a || b;
 }
 
 static intmax_t cond(int token, union yystype *val, int op, int noeval)

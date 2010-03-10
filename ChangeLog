@@ -1,3 +1,7 @@
+2010-03-10  Jilles Tjoelker <jilles@stack.nl>
+
+	* Fix logical or result value.
+
 2010-03-09  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix binary operator parsing.
