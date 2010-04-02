@@ -1,6 +1,7 @@
 2010-04-02  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Make trap signal name/number errors non-fatal.
+	* Release 0.5.6.
 
 2010-04-02  maximilian attems <max@stro.at>
 
