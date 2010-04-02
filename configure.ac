@@ -46,7 +46,8 @@ dnl Checks for header files.
 AC_CHECK_HEADERS(alloca.h)
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(bsearch getpwnam getrlimit imaxdiv isalpha killpg mempcpy \
+AC_CHECK_FUNCS(bsearch faccessat getpwnam getrlimit imaxdiv isalpha killpg \
+	       mempcpy \
 	       sigsetmask stpcpy strchrnul strsignal strtod strtoimax \
 	       strtoumax sysconf)
 

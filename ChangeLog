@@ -1,5 +1,9 @@
 2010-04-02  Herbert Xu <herbert@gondor.apana.org.au>
 
+	* Use faccessat if available.
+
+2010-04-02  Herbert Xu <herbert@gondor.apana.org.au>
+
 	* Make trap signal name/number errors non-fatal.
 	* Release 0.5.6.
 
