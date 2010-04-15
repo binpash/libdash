@@ -105,5 +105,5 @@ int waitforjob(struct job *);
 int stoppedjobs(void);
 
 #if ! JOBS
-#define setjobctl(on)	/* do nothing */
+#define setjobctl(on) ((void)(on))	/* do nothing */
 #endif
