@@ -651,7 +651,8 @@ parse_command_args(char **argv, const char **path)
 		if (!(c = *cp++))
 			break;
 		if (c == '-' && !*cp) {
-			argv++;
+			if (!*++argv)
+				return 0;
 			break;
 		}
 		do {
