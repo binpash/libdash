@@ -64,7 +64,12 @@
 #define VTABSIZE 39
 
 
-struct localvar *localvars;
+struct localvar_list {
+	struct localvar_list *next;
+	struct localvar *lv;
+};
+
+MKINIT struct localvar_list *localvar_stack;
 
 const char defpathvar[] =
 	"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
@@ -138,6 +143,11 @@ INIT {
 		    st1.st_dev != st2.st_dev || st1.st_ino != st2.st_ino)
 			p = 0;
 	setpwd(p, 0);
+}
+
+RESET {
+	while (localvar_stack)
+		poplocalvars();
 }
 #endif
 
@@ -446,6 +456,9 @@ localcmd(int argc, char **argv)
 {
 	char *name;
 
+	if (!localvar_stack)
+		sh_error("not in a function");
+
 	argv = argptr;
 	while ((name = *argv++) != NULL) {
 		mklocal(name);
@@ -497,8 +510,8 @@ mklocal(char *name)
 		}
 	}
 	lvp->vp = vp;
-	lvp->next = localvars;
-	localvars = lvp;
+	lvp->next = localvar_stack->lv;
+	localvar_stack->lv = lvp;
 	INTON;
 }
 
@@ -511,11 +524,19 @@ mklocal(char *name)
 void
 poplocalvars(void)
 {
-	struct localvar *lvp;
+	struct localvar_list *ll;
+	struct localvar *lvp, *next;
 	struct var *vp;
 
-	while ((lvp = localvars) != NULL) {
-		localvars = lvp->next;
+	INTOFF;
+	ll = localvar_stack;
+	localvar_stack = ll->next;
+
+	next = ll->lv;
+	ckfree(ll);
+
+	while ((lvp = next) != NULL) {
+		next = lvp->next;
 		vp = lvp->vp;
 		TRACE(("poplocalvar %s", vp ? vp->text : "-"));
 		if (vp == NULL) {	/* $- saved */
@@ -534,6 +555,23 @@ poplocalvars(void)
 		}
 		ckfree(lvp);
 	}
+	INTON;
+}
+
+
+/*
+ * Create a new localvar environment.
+ */
+void pushlocalvars(void)
+{
+	struct localvar_list *ll;
+
+	INTOFF;
+	ll = ckmalloc(sizeof(*ll));
+	ll->lv = NULL;
+	ll->next = localvar_stack;
+	localvar_stack = ll;
+	INTON;
 }
 
 

@@ -928,20 +928,17 @@ STATIC int
 evalfun(struct funcnode *func, int argc, char **argv, int flags)
 {
 	volatile struct shparam saveparam;
-	struct localvar *volatile savelocalvars;
 	struct jmploc *volatile savehandler;
 	struct jmploc jmploc;
 	int e;
 
 	saveparam = shellparam;
-	savelocalvars = localvars;
 	if ((e = setjmp(jmploc.loc))) {
 		goto funcdone;
 	}
 	INTOFF;
 	savehandler = handler;
 	handler = &jmploc;
-	localvars = NULL;
 	shellparam.malloc = 0;
 	func->count++;
 	funcnest++;
@@ -950,13 +947,13 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
 	shellparam.p = argv + 1;
 	shellparam.optind = 1;
 	shellparam.optoff = -1;
+	pushlocalvars();
 	evaltree(&func->n, flags & EV_TESTED);
+	poplocalvars();
 funcdone:
 	INTOFF;
 	funcnest--;
 	freefunc(func);
-	poplocalvars();
-	localvars = savelocalvars;
 	freeparam(&shellparam);
 	shellparam = saveparam;
 	handler = savehandler;

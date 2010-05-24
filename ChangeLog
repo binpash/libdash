@@ -1,3 +1,7 @@
+2010-05-24  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Add localvars nesting.
+
 2010-05-03  Gerrit Pape <pape@smarden.org>
 
 	* Fix command -- crash.

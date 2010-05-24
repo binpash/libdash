@@ -139,6 +139,7 @@ char **listvars(int, int, char ***);
 int showvars(const char *, int, int);
 int exportcmd(int, char **);
 int localcmd(int, char **);
+void pushlocalvars(void);
 void poplocalvars(void);
 int unsetcmd(int, char **);
 int unsetvar(const char *);
