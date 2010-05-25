@@ -1,6 +1,7 @@
 2010-05-25  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix poplocalvar leak.
+	* Move unsetvar functionality into setvareq.
 
 2010-05-24  Herbert Xu <herbert@gondor.apana.org.au>
 
