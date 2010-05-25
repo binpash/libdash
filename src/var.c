@@ -543,7 +543,8 @@ poplocalvars(void)
 			memcpy(optlist, lvp->text, sizeof(optlist));
 			ckfree(lvp->text);
 			optschanged();
-		} else if ((lvp->flags & (VUNSET|VSTRFIXED)) == VUNSET) {
+		} else if (lvp->flags == VUNSET) {
+			vp->flags &= ~(VSTRFIXED|VREADONLY);
 			unsetvar(vp->text);
 		} else {
 			if (vp->func)
@@ -627,8 +628,6 @@ unsetvar(const char *s)
 		retval = 1;
 		if (flags & VREADONLY)
 			goto out;
-		if (flags & VUNSET)
-			goto ok;
 		if ((flags & VSTRFIXED) == 0) {
 			INTOFF;
 			if ((flags & (VTEXTFIXED|VSTACK)) == 0)
@@ -636,11 +635,10 @@ unsetvar(const char *s)
 			*vpp = vp->next;
 			ckfree(vp);
 			INTON;
-		} else {
+		} else if (!(flags & VUNSET)) {
 			setvar(s, 0, 0);
 			vp->flags &= ~VEXPORT;
 		}
-ok:
 		retval = 0;
 	}
 
