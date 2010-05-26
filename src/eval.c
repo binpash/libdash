@@ -77,7 +77,6 @@ static int funcnest;		/* depth of function calls */
 
 
 char *commandname;
-struct strlist *cmdenviron;
 int exitstatus;			/* exit status of last command */
 int back_exitstatus;		/* exit status of backquoted command */
 
@@ -704,6 +703,7 @@ evalcommand(union node *cmd, int flags)
 	/* First expand the arguments. */
 	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
 	setstackmark(&smark);
+	pushlocalvars();
 	back_exitstatus = 0;
 
 	cmdentry.cmdtype = CMDBUILTIN;
@@ -747,6 +747,8 @@ evalcommand(union node *cmd, int flags)
 
 		spp = varlist.lastp;
 		expandarg(argp, &varlist, EXP_VARTILDE);
+
+		mklocal((*spp)->text);
 
 		/*
 		 * Modify the command lookup path, if a PATH= assignment
@@ -835,6 +837,7 @@ bail:
 			if (forkshell(jp, cmd, FORK_FG) != 0) {
 				exitstatus = waitforjob(jp);
 				INTON;
+				poplocalvars(0);
 				break;
 			}
 			FORCEINTON;
@@ -844,17 +847,9 @@ bail:
 		/* NOTREACHED */
 
 	case CMDBUILTIN:
-		cmdenviron = varlist.list;
-		if (cmdenviron) {
-			struct strlist *list = cmdenviron;
-			int i = VNOSET;
-			if (spclbltin > 0 || argc == 0) {
-				i = 0;
-				if (execcmd && argc > 1)
-					i = VEXPORT;
-			}
-			listsetvar(list, i);
-		}
+		poplocalvars(spclbltin > 0 || argc == 0);
+		if (execcmd && argc > 1)
+			listsetvar(varlist.list, VEXPORT);
 		if (evalbltin(cmdentry.u.cmd, argc, argv, flags)) {
 			int status;
 			int i;
@@ -875,7 +870,7 @@ raise:
 		break;
 
 	case CMDFUNCTION:
-		listsetvar(varlist.list, 0);
+		poplocalvars(1);
 		if (evalfun(cmdentry.u.func, argc, argv, flags))
 			goto raise;
 		break;
@@ -949,7 +944,7 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
 	shellparam.optoff = -1;
 	pushlocalvars();
 	evaltree(&func->n, flags & EV_TESTED);
-	poplocalvars();
+	poplocalvars(0);
 funcdone:
 	INTOFF;
 	funcnest--;

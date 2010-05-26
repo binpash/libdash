@@ -133,14 +133,14 @@ struct strlist;
 void listsetvar(struct strlist *, int);
 char *lookupvar(const char *);
 intmax_t lookupvarint(const char *);
-char *bltinlookup(const char *);
 char **listvars(int, int, char ***);
 #define environment() listvars(VEXPORT, VUNSET, 0)
 int showvars(const char *, int, int);
 int exportcmd(int, char **);
 int localcmd(int, char **);
+void mklocal(char *);
 void pushlocalvars(void);
-void poplocalvars(void);
+void poplocalvars(int);
 int unsetcmd(int, char **);
 void unsetvar(const char *);
 int varcmp(const char *, const char *);
@@ -148,3 +148,14 @@ int varcmp(const char *, const char *);
 static inline int varequal(const char *a, const char *b) {
 	return !varcmp(a, b);
 }
+
+/*
+ * Search the environment of a builtin command.
+ */
+
+static inline char *bltinlookup(const char *name)
+{
+	return lookupvar(name);
+}
+
+

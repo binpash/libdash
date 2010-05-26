@@ -44,7 +44,6 @@
 #include "output.h"
 #include "expand.h"
 #include "nodes.h"	/* for other headers */
-#include "eval.h"	/* defines cmdenviron */
 #include "exec.h"
 #include "syntax.h"
 #include "options.h"
@@ -104,7 +103,6 @@ struct var varinit[] = {
 
 STATIC struct var *vartab[VTABSIZE];
 
-STATIC void mklocal(char *);
 STATIC struct var **hashvar(const char *);
 STATIC int vpcmp(const void *, const void *);
 STATIC struct var **findvar(struct var **, const char *);
@@ -147,7 +145,7 @@ INIT {
 
 RESET {
 	while (localvar_stack)
-		poplocalvars();
+		poplocalvars(0);
 }
 #endif
 
@@ -339,24 +337,6 @@ intmax_t lookupvarint(const char *name)
 
 
 /*
- * Search the environment of a builtin command.
- */
-
-char *
-bltinlookup(const char *name)
-{
-	struct strlist *sp;
-
-	for (sp = cmdenviron ; sp ; sp = sp->next) {
-		if (varequal(sp->text, name))
-			return strchrnul(sp->text, '=') + 1;
-	}
-	return lookupvar(name);
-}
-
-
-
-/*
  * Generate a list of variables satisfying the given conditions.
  */
 
@@ -486,8 +466,7 @@ localcmd(int argc, char **argv)
  * "-" as a special case.
  */
 
-STATIC void
-mklocal(char *name)
+void mklocal(char *name)
 {
 	struct localvar *lvp;
 	struct var **vpp;
@@ -534,7 +513,7 @@ mklocal(char *name)
  */
 
 void
-poplocalvars(void)
+poplocalvars(int keep)
 {
 	struct localvar_list *ll;
 	struct localvar *lvp, *next;
@@ -551,7 +530,23 @@ poplocalvars(void)
 		next = lvp->next;
 		vp = lvp->vp;
 		TRACE(("poplocalvar %s", vp ? vp->text : "-"));
-		if (vp == NULL) {	/* $- saved */
+		if (keep) {
+			int bits = VSTRFIXED;
+
+			if (lvp->flags != VUNSET) {
+				if (vp->text == lvp->text)
+					bits |= VTEXTFIXED;
+				else if (!(lvp->flags & (VTEXTFIXED|VSTACK)))
+					ckfree(lvp->text);
+			}
+
+			vp->flags &= ~bits;
+			vp->flags |= (lvp->flags & bits);
+
+			if ((vp->flags &
+			     (VEXPORT|VREADONLY|VSTRFIXED|VUNSET)) == VUNSET)
+				unsetvar(vp->text);
+		} else if (vp == NULL) {	/* $- saved */
 			memcpy(optlist, lvp->text, sizeof(optlist));
 			ckfree(lvp->text);
 			optschanged();
