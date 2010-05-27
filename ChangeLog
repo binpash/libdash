@@ -2,6 +2,7 @@
 
 	* Fix poplocalvar on abnormal exit from function.
 	* Do not poplocalvars prematurely on regular utilities.
+	* Move null redirect checks into caller.
 
 2010-05-26  Herbert Xu <herbert@gondor.apana.org.au>
 

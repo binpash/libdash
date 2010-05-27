@@ -224,7 +224,8 @@ evaltree(union node *n, int flags)
 			evaltree(n->nredir.n, flags & EV_TESTED);
 			status = exitstatus;
 		}
-		popredir(0);
+		if (n->nredir.redirect)
+			popredir(0);
 		goto setstatus;
 	case NCMD:
 #ifdef notyet
@@ -879,7 +880,8 @@ raise:
 	}
 
 out:
-	popredir(execcmd);
+	if (cmd->ncmd.redirect)
+		popredir(execcmd);
 	unwindlocalvars(localvar_stop);
 	if (lastarg)
 		/* dsl: I think this is intended to be used to support

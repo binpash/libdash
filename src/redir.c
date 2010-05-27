@@ -72,12 +72,10 @@ MKINIT
 struct redirtab {
 	struct redirtab *next;
 	int renamed[10];
-	int nullredirs;
 };
 
 
 MKINIT struct redirtab *redirlist;
-MKINIT int nullredirs;
 
 STATIC int openredirect(union node *);
 #ifdef notyet
@@ -113,7 +111,6 @@ redirect(union node *redir, int flags)
 		memory[i] = 0;
 	memory[1] = flags & REDIR_BACKQ;
 #endif
-	nullredirs++;
 	if (!redir) {
 		return;
 	}
@@ -124,10 +121,8 @@ redirect(union node *redir, int flags)
 		q = ckmalloc(sizeof (struct redirtab));
 		q->next = redirlist;
 		redirlist = q;
-		q->nullredirs = nullredirs - 1;
 		for (i = 0 ; i < 10 ; i++)
 			q->renamed[i] = EMPTY;
-		nullredirs = 0;
 		sv = q;
 	}
 	n = redir;
@@ -343,8 +338,6 @@ popredir(int drop)
 	struct redirtab *rp;
 	int i;
 
-	if (--nullredirs >= 0)
-		return;
 	INTOFF;
 	rp = redirlist;
 	for (i = 0 ; i < 10 ; i++) {
@@ -364,7 +357,6 @@ popredir(int drop)
 		}
 	}
 	redirlist = rp->next;
-	nullredirs = rp->nullredirs;
 	ckfree(rp);
 	INTON;
 }
@@ -381,12 +373,8 @@ RESET {
 	/*
 	 * Discard all saved file descriptors.
 	 */
-	for (;;) {
-		nullredirs = 0;
-		if (!redirlist)
-			break;
+	while (redirlist)
 		popredir(0);
-	}
 }
 
 #endif
