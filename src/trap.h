@@ -39,6 +39,7 @@
 extern int trapcnt;
 extern char sigmode[];
 extern volatile sig_atomic_t pendingsigs;
+extern int gotsigchld;
 
 int trapcmd(int, char **);
 void clear_traps(void);

@@ -1124,7 +1124,6 @@ waitproc(int block, int *status)
 	sigset_t mask, oldmask;
 	int flags = block == DOWAIT_BLOCK ? 0 : WNOHANG;
 	int err;
-	int sig;
 
 #if JOBS
 	if (jobctl)
@@ -1132,6 +1131,7 @@ waitproc(int block, int *status)
 #endif
 
 	do {
+		gotsigchld = 0;
 		err = wait3(status, flags, NULL);
 		if (err || !block)
 			break;
@@ -1141,11 +1141,11 @@ waitproc(int block, int *status)
 		sigfillset(&mask);
 		sigprocmask(SIG_SETMASK, &mask, &oldmask);
 
-		while (!(sig = pendingsigs))
+		while (!gotsigchld && !pendingsigs)
 			sigsuspend(&oldmask);
 
 		sigclearmask();
-	} while (sig == SIGCHLD);
+	} while (gotsigchld);
 
 	return err;
 }

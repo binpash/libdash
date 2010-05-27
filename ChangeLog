@@ -9,6 +9,7 @@
 	* Do not poplocalvars prematurely on regular utilities.
 	* Move null redirect checks into caller.
 	* Fix popredir on abnormal exit from built-in.
+	* Fix wait regression where it does not wait for all jobs.
 
 2010-05-26  Herbert Xu <herbert@gondor.apana.org.au>
 
