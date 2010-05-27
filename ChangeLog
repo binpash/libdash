@@ -13,7 +13,7 @@
 
 2010-05-24  Herbert Xu <herbert@gondor.apana.org.au>
 
-	* Add localvars nesting.
+	* Add localvars nesting, local now fails outside functions.
 
 2010-05-03  Gerrit Pape <pape@smarden.org>
 
