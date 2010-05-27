@@ -1,6 +1,7 @@
 2010-05-27  Jilles Tjoelker <jilles@stack.nl>
 
 	* Force fork if any trap is set, not just on EXIT.
+	* Fix corruption of redirections with byte 0x81.
 
 2010-05-27  Herbert Xu <herbert@gondor.apana.org.au>
 
