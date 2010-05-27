@@ -847,9 +847,11 @@ bail:
 		/* NOTREACHED */
 
 	case CMDBUILTIN:
-		poplocalvars(spclbltin > 0 || argc == 0);
-		if (execcmd && argc > 1)
-			listsetvar(varlist.list, VEXPORT);
+		if (spclbltin > 0 || argc == 0) {
+			poplocalvars(1);
+			if (execcmd && argc > 1)
+				listsetvar(varlist.list, VEXPORT);
+		}
 		if (evalbltin(cmdentry.u.cmd, argc, argv, flags)) {
 			int status;
 			int i;

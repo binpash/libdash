@@ -71,7 +71,7 @@ falsecmd	-u false
 getoptscmd	-u getopts
 hashcmd		hash
 jobscmd		-u jobs
-localcmd	-a local
+localcmd	-as local
 printfcmd	printf
 pwdcmd		pwd
 readcmd		-u read
