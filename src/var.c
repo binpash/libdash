@@ -144,8 +144,7 @@ INIT {
 }
 
 RESET {
-	while (localvar_stack)
-		poplocalvars(0);
+	unwindlocalvars(0);
 }
 #endif
 
@@ -570,7 +569,7 @@ poplocalvars(int keep)
 /*
  * Create a new localvar environment.
  */
-void pushlocalvars(void)
+struct localvar_list *pushlocalvars(void)
 {
 	struct localvar_list *ll;
 
@@ -580,6 +579,15 @@ void pushlocalvars(void)
 	ll->next = localvar_stack;
 	localvar_stack = ll;
 	INTON;
+
+	return ll->next;
+}
+
+
+void unwindlocalvars(struct localvar_list *stop)
+{
+	while (localvar_stack != stop)
+		poplocalvars(0);
 }
 
 

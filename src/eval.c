@@ -681,6 +681,7 @@ evalcommand(union node *cmd, int flags, struct backcmd *backcmd)
 evalcommand(union node *cmd, int flags)
 #endif
 {
+	struct localvar_list *localvar_stop;
 	struct stackmark smark;
 	union node *argp;
 	struct arglist arglist;
@@ -703,7 +704,7 @@ evalcommand(union node *cmd, int flags)
 	/* First expand the arguments. */
 	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
 	setstackmark(&smark);
-	pushlocalvars();
+	localvar_stop = pushlocalvars();
 	back_exitstatus = 0;
 
 	cmdentry.cmdtype = CMDBUILTIN;
@@ -837,7 +838,6 @@ bail:
 			if (forkshell(jp, cmd, FORK_FG) != 0) {
 				exitstatus = waitforjob(jp);
 				INTON;
-				poplocalvars(0);
 				break;
 			}
 			FORCEINTON;
@@ -878,6 +878,7 @@ raise:
 
 out:
 	popredir(execcmd);
+	unwindlocalvars(localvar_stop);
 	if (lastarg)
 		/* dsl: I think this is intended to be used to support
 		 * '_' in 'vi' command mode during line editing...

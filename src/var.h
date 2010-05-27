@@ -69,6 +69,8 @@ struct localvar {
 	const char *text;		/* saved text */
 };
 
+struct localvar_list;
+
 
 extern struct localvar *localvars;
 extern struct var varinit[];
@@ -139,8 +141,9 @@ int showvars(const char *, int, int);
 int exportcmd(int, char **);
 int localcmd(int, char **);
 void mklocal(char *);
-void pushlocalvars(void);
+struct localvar_list *pushlocalvars(void);
 void poplocalvars(int);
+void unwindlocalvars(struct localvar_list *stop);
 int unsetcmd(int, char **);
 void unsetvar(const char *);
 int varcmp(const char *, const char *);
