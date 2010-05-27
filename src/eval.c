@@ -449,7 +449,7 @@ evalsubshell(union node *n, int flags)
 	int status;
 
 	expredir(n->nredir.redirect);
-	if (!backgnd && flags & EV_EXIT && !trap[0])
+	if (!backgnd && flags & EV_EXIT && !have_traps())
 		goto nofork;
 	INTOFF;
 	jp = makejob(n, 1);
@@ -836,7 +836,7 @@ bail:
 	switch (cmdentry.cmdtype) {
 	default:
 		/* Fork off a child process if necessary. */
-		if (!(flags & EV_EXIT) || trap[0]) {
+		if (!(flags & EV_EXIT) || have_traps()) {
 			INTOFF;
 			jp = makejob(cmd, 1);
 			if (forkshell(jp, cmd, FORK_FG) != 0) {
