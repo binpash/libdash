@@ -41,10 +41,13 @@
 #endif
 #define REDIR_SAVEFD2 03	/* set preverrout */
 
+struct redirtab;
 union node;
 void redirect(union node *, int);
 void popredir(int);
 void clearredir(void);
 int savefd(int, int);
 int redirectsafe(union node *, int);
+void unwindredir(struct redirtab *stop);
+struct redirtab *pushredir(union node *redir);
 

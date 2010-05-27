@@ -111,20 +111,12 @@ redirect(union node *redir, int flags)
 		memory[i] = 0;
 	memory[1] = flags & REDIR_BACKQ;
 #endif
-	if (!redir) {
+	if (!redir)
 		return;
-	}
 	sv = NULL;
 	INTOFF;
-	if (likely(flags & REDIR_PUSH)) {
-		struct redirtab *q;
-		q = ckmalloc(sizeof (struct redirtab));
-		q->next = redirlist;
-		redirlist = q;
-		for (i = 0 ; i < 10 ; i++)
-			q->renamed[i] = EMPTY;
-		sv = q;
-	}
+	if (likely(flags & REDIR_PUSH))
+		sv = redirlist;
 	n = redir;
 	do {
 		newfd = openredirect(n);
@@ -373,8 +365,7 @@ RESET {
 	/*
 	 * Discard all saved file descriptors.
 	 */
-	while (redirlist)
-		popredir(0);
+	unwindredir(0);
 }
 
 #endif
@@ -484,4 +475,32 @@ redirectsafe(union node *redir, int flags)
 		longjmp(handler->loc, 1);
 	RESTOREINT(saveint);
 	return err;
+}
+
+
+void unwindredir(struct redirtab *stop)
+{
+	while (redirlist != stop)
+		popredir(0);
+}
+
+
+struct redirtab *pushredir(union node *redir)
+{
+	struct redirtab *sv;
+	struct redirtab *q;
+	int i;
+
+	q = redirlist;
+	if (!redir)
+		goto out;
+
+	sv = ckmalloc(sizeof (struct redirtab));
+	sv->next = q;
+	redirlist = sv;
+	for (i = 0; i < 10; i++)
+		sv->renamed[i] = EMPTY;
+
+out:
+	return q;
 }

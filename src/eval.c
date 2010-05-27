@@ -219,6 +219,7 @@ evaltree(union node *n, int flags)
 		goto setstatus;
 	case NREDIR:
 		expredir(n->nredir.redirect);
+		pushredir(n->nredir.redirect);
 		status = redirectsafe(n->nredir.redirect, REDIR_PUSH);
 		if (!status) {
 			evaltree(n->nredir.n, flags & EV_TESTED);
@@ -683,6 +684,7 @@ evalcommand(union node *cmd, int flags)
 #endif
 {
 	struct localvar_list *localvar_stop;
+	struct redirtab *redir_stop;
 	struct stackmark smark;
 	union node *argp;
 	struct arglist arglist;
@@ -740,6 +742,7 @@ evalcommand(union node *cmd, int flags)
 
 	preverrout.fd = 2;
 	expredir(cmd->ncmd.redirect);
+	redir_stop = pushredir(cmd->ncmd.redirect);
 	status = redirectsafe(cmd->ncmd.redirect, REDIR_PUSH|REDIR_SAVEFD2);
 
 	path = vpath.text;
@@ -882,6 +885,7 @@ raise:
 out:
 	if (cmd->ncmd.redirect)
 		popredir(execcmd);
+	unwindredir(redir_stop);
 	unwindlocalvars(localvar_stop);
 	if (lastarg)
 		/* dsl: I think this is intended to be used to support
