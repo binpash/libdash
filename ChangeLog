@@ -1,3 +1,7 @@
+2010-05-29  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Continue after EINTR in read(1) with no pending signals.
+
 2010-05-27  Jilles Tjoelker <jilles@stack.nl>
 
 	* Force fork if any trap is set, not just on EXIT.
