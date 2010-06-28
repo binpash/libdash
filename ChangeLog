@@ -1,3 +1,7 @@
+2010-06-28  Gerrit Pape <pape@smarden.org>
+
+	* Don't clear eflag in evalbackcmd.
+
 2010-05-29  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Continue after EINTR in read(1) with no pending signals.
