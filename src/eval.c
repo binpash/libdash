@@ -254,13 +254,7 @@ checkexit:
 		goto calleval;
 	case NPIPE:
 		evalfn = evalpipe;
-#ifdef notyet
-		if (eflag && !(flags & EV_TESTED))
-			checkexit = ~0;
-		goto calleval;
-#else
 		goto checkexit;
-#endif
 	case NCASE:
 		evalfn = evalcase;
 		goto calleval;
