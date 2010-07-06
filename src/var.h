@@ -128,9 +128,9 @@ extern const char defpathvar[];
 #define mpathset()	((vmpath.flags & VUNSET) == 0)
 
 void initvar(void);
-void setvar(const char *, const char *, int);
+struct var *setvar(const char *name, const char *val, int flags);
 intmax_t setvarint(const char *, intmax_t, int);
-void setvareq(char *, int);
+struct var *setvareq(char *s, int flags);
 struct strlist;
 void listsetvar(struct strlist *, int);
 char *lookupvar(const char *);

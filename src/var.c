@@ -180,13 +180,13 @@ initvar(void)
  * flags of the variable.  If val is NULL, the variable is unset.
  */
 
-void
-setvar(const char *name, const char *val, int flags)
+struct var *setvar(const char *name, const char *val, int flags)
 {
 	char *p, *q;
 	size_t namelen;
 	char *nameeq;
 	size_t vallen;
+	struct var *vp;
 
 	q = endofname(name);
 	p = strchrnul(q, '=');
@@ -206,8 +206,10 @@ setvar(const char *name, const char *val, int flags)
 		p = mempcpy(p, val, vallen);
 	}
 	*p = '\0';
-	setvareq(nameeq, flags | VNOSAVE);
+	vp = setvareq(nameeq, flags | VNOSAVE);
 	INTON;
+
+	return vp;
 }
 
 /*
@@ -235,14 +237,14 @@ intmax_t setvarint(const char *name, intmax_t val, int flags)
  * Called with interrupts off.
  */
 
-void
-setvareq(char *s, int flags)
+struct var *setvareq(char *s, int flags)
 {
 	struct var *vp, **vpp;
 
 	vpp = hashvar(s);
 	flags |= (VEXPORT & (((unsigned) (1 - aflag)) - 1));
-	vp = *findvar(vpp, s);
+	vpp = findvar(vpp, s);
+	vp = *vpp;
 	if (vp) {
 		if (vp->flags & VREADONLY) {
 			const char *n;
@@ -255,7 +257,7 @@ setvareq(char *s, int flags)
 		}
 
 		if (flags & VNOSET)
-			return;
+			goto out;
 
 		if (vp->func && (flags & VNOFUNC) == 0)
 			(*vp->func)(strchrnul(s, '=') + 1);
@@ -270,13 +272,13 @@ setvareq(char *s, int flags)
 out_free:
 			if ((flags & (VTEXTFIXED|VSTACK|VNOSAVE)) == VNOSAVE)
 				ckfree(s);
-			return;
+			goto out;
 		}
 
 		flags |= vp->flags & ~(VTEXTFIXED|VSTACK|VNOSAVE|VUNSET);
 	} else {
 		if (flags & VNOSET)
-			return;
+			goto out;
 		if ((flags & (VEXPORT|VREADONLY|VSTRFIXED|VUNSET)) == VUNSET)
 			goto out_free;
 		/* not found */
@@ -289,6 +291,9 @@ out_free:
 		s = savestr(s);
 	vp->text = s;
 	vp->flags = flags;
+
+out:
+	return vp;
 }
 
 
@@ -486,10 +491,9 @@ void mklocal(char *name)
 		eq = strchr(name, '=');
 		if (vp == NULL) {
 			if (eq)
-				setvareq(name, VSTRFIXED);
+				vp = setvareq(name, VSTRFIXED);
 			else
-				setvar(name, NULL, VSTRFIXED);
-			vp = *vpp;	/* the new variable */
+				vp = setvar(name, NULL, VSTRFIXED);
 			lvp->flags = VUNSET;
 		} else {
 			lvp->text = vp->text;

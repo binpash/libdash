@@ -1,3 +1,7 @@
+2010-07-06  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fix loss of variables when hash collides.
+
 2010-06-28  Gerrit Pape <pape@smarden.org>
 
 	* Don't clear eflag in evalbackcmd.
