@@ -1,3 +1,7 @@
+2010-07-06  Gerrit Pape <pape@smarden.org>
+
+	* Check exit for eval NSUBSHELL.
+
 2010-07-06  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix loss of variables when hash collides.
