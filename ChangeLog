@@ -1,3 +1,7 @@
+2010-09-08  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fix ifsfirst/ifslastp leak.
+
 2010-09-08  maximilian attems <max@stro.at>
 
 	* Debug compile fix.

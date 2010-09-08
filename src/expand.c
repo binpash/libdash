@@ -117,7 +117,6 @@ STATIC char *evalvar(char *, int);
 STATIC size_t strtodest(const char *, const char *, int);
 STATIC void memtodest(const char *, size_t, const char *, int);
 STATIC ssize_t varvalue(char *, int, int);
-STATIC void ifsfree(void);
 STATIC void expandmeta(struct strlist *, int);
 #ifdef HAVE_GLOB
 STATIC void addglob(const glob_t *);
@@ -191,8 +190,6 @@ expandarg(union node *arg, struct arglist *arglist, int flag)
 
 	argbackq = arg->narg.backquote;
 	STARTSTACKSTR(expdest);
-	ifsfirst.next = NULL;
-	ifslastp = NULL;
 	argstr(arg->narg.text, flag);
 	p = _STPUTC('\0', expdest);
 	expdest = p - 1;
@@ -215,8 +212,7 @@ expandarg(union node *arg, struct arglist *arglist, int flag)
 		*exparg.lastp = sp;
 		exparg.lastp = &sp->next;
 	}
-	if (ifsfirst.next)
-		ifsfree();
+	ifsfree();
 	*exparg.lastp = NULL;
 	if (exparg.list) {
 		*arglist->lastp = exparg.list;
@@ -1108,22 +1104,25 @@ add:
 	arglist->lastp = &sp->next;
 }
 
-STATIC void
-ifsfree(void)
+void ifsfree(void)
 {
-	struct ifsregion *p;
+	struct ifsregion *p = ifsfirst.next;
+
+	if (!p)
+		goto out;
 
 	INTOFF;
-	p = ifsfirst.next;
 	do {
 		struct ifsregion *ifsp;
 		ifsp = p->next;
 		ckfree(p);
 		p = ifsp;
 	} while (p);
-	ifslastp = NULL;
 	ifsfirst.next = NULL;
 	INTON;
+
+out:
+	ifslastp = NULL;
 }
 
 
@@ -1678,7 +1677,6 @@ casematch(union node *pattern, char *val)
 	setstackmark(&smark);
 	argbackq = pattern->narg.backquote;
 	STARTSTACKSTR(expdest);
-	ifslastp = NULL;
 	argstr(pattern->narg.text, EXP_TILDE | EXP_CASE);
 	STACKSTRNUL(expdest);
 	result = patmatch(stackblock(), val);
@@ -1718,3 +1716,13 @@ varunset(const char *end, const char *var, const char *umsg, int varflags)
 	}
 	sh_error("%.*s: %s%s", end - var - 1, var, msg, tail);
 }
+
+#ifdef mkinit
+
+INCLUDE "expand.h"
+
+RESET {
+	ifsfree();
+}
+
+#endif

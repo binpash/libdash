@@ -89,7 +89,7 @@ readcmd_handle_line(char *line, char **ap, size_t len)
 	
 	ifsbreakup(s, &arglist);
 	*arglist.lastp = NULL;
-	removerecordregions(0);
+	ifsfree();
 
 	for (sl = arglist.list; sl; sl = sl->next) {
 		/* remaining fields present, but no variables left. */
