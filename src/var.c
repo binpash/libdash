@@ -78,6 +78,7 @@ const char defifsvar[] = "IFS= \t\n";
 const char defifs[] = " \t\n";
 #endif
 
+/* Some macros in var.h depend on the order, add new variables to the end. */
 struct var varinit[] = {
 #if ATTY
 	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"ATTY\0",	0 },
@@ -94,11 +95,11 @@ struct var varinit[] = {
 	{ 0,	VSTRFIXED|VTEXTFIXED,		"PS2=> ",	0 },
 	{ 0,	VSTRFIXED|VTEXTFIXED,		"PS4=+ ",	0 },
 	{ 0,	VSTRFIXED|VTEXTFIXED,		"OPTIND=1",	getoptsreset },
-	{ 0,	VSTRFIXED|VTEXTFIXED,		"LINENO=1",	0 },
 #ifndef SMALL
 	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"TERM\0",	0 },
 	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"HISTSIZE\0",	sethistsize },
 #endif
+	{ 0,	VSTRFIXED|VTEXTFIXED,		"LINENO=1",	0 },
 };
 
 STATIC struct var *vartab[VTABSIZE];

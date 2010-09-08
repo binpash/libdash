@@ -1,3 +1,7 @@
+2010-09-08  Jilles Tjoelker <jilles@stack.nl>
+
+	* Fix varinit ordering that broke fc.
+
 2010-07-06  Gerrit Pape <pape@smarden.org>
 
 	* Check exit for eval NSUBSHELL.
