@@ -91,9 +91,20 @@ readcmd_handle_line(char *line, char **ap, size_t len)
 	*arglist.lastp = NULL;
 	ifsfree();
 
-	for (sl = arglist.list; sl; sl = sl->next) {
+	sl = arglist.list;
+
+	do {
+		if (!sl) {
+			/* nullify remaining arguments */
+			do {
+				setvar(*ap, nullstr, 0);
+			} while (*++ap);
+
+			return;
+		}
+
 		/* remaining fields present, but no variables left. */
-		if (!ap[1]) {
+		if (!ap[1] && sl->next) {
 			size_t offset;
 			char *remainder;
 
@@ -110,12 +121,7 @@ readcmd_handle_line(char *line, char **ap, size_t len)
 		/* set variable to field */
 		rmescapes(sl->text);
 		setvar(*ap, sl->text, 0);
-		ap++;
-	}
-
-	/* nullify remaining arguments */
-	do {
-		setvar(*ap, nullstr, 0);
+		sl = sl->next;
 	} while (*++ap);
 }
 

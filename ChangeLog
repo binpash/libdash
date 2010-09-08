@@ -1,6 +1,7 @@
 2010-09-08  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix ifsfirst/ifslastp leak.
+	* Fix trailing field bug in read(1).
 
 2010-09-08  maximilian attems <max@stro.at>
 
