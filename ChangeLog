@@ -1,3 +1,7 @@
+2010-09-08  maximilian attems <max@stro.at>
+
+	* Debug compile fix.
+
 2010-09-08  Jilles Tjoelker <jilles@stack.nl>
 
 	* Fix varinit ordering that broke fc.
