@@ -1,3 +1,7 @@
+2010-10-07  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fix EXEXEC status clobbering.
+
 2010-09-08  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix ifsfirst/ifslastp leak.

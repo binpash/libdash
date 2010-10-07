@@ -854,7 +854,7 @@ bail:
 			int i;
 
 			i = exception;
-			if (i == EXEXIT)
+			if (i == EXEXIT || i == EXEXEC)
 				goto raise;
 
 			status = (i == EXINT) ? SIGINT + 128 : 2;
