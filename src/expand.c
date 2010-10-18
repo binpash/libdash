@@ -1679,6 +1679,7 @@ casematch(union node *pattern, char *val)
 	STARTSTACKSTR(expdest);
 	argstr(pattern->narg.text, EXP_TILDE | EXP_CASE);
 	STACKSTRNUL(expdest);
+	ifsfree();
 	result = patmatch(stackblock(), val);
 	popstackmark(&smark);
 	return result;
