@@ -625,6 +625,7 @@ evalbackcmd(union node *n, struct backcmd *result)
 				dup2(pip[1], 1);
 				close(pip[1]);
 			}
+			ifsfree();
 			evaltreenr(n, EV_EXIT);
 			/* NOTREACHED */
 		}
