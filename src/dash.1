@@ -663,7 +663,7 @@ These are implemented as builtin commands.
 The syntax of the case command is
 .Bd -literal -offset indent
 case word in
-pattern) list ;;
+[(]pattern) list ;;
 \&...
 esac
 .Ed
@@ -673,6 +673,11 @@ The pattern can actually be one or more patterns (see
 described later), separated by
 .Dq \*(Ba
 characters.
+The
+.Do
+(
+.Dc
+character before the pattern is optional.
 .Ss Grouping Commands Together
 Commands may be grouped by writing either
 .Pp

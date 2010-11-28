@@ -1,3 +1,7 @@
+2010-11-28  Philipp Weis <pweis@pweis.com>
+
+	* Document optional open parenthesis for case patterns.
+
 2010-11-28  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fixed trap/return regression due to SKIPEVAL removal.
