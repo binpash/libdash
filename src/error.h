@@ -67,7 +67,6 @@ extern int exception;
 #define EXINT 0		/* SIGINT received */
 #define EXERROR 1	/* a generic error */
 #define EXSHELLPROC 2	/* execute a shell procedure */
-#define EXEXEC 3	/* command execution failed */
 #define EXEXIT 4	/* exit the shell */
 
 

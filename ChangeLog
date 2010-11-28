@@ -1,3 +1,7 @@
+2010-11-28  Jonathan Nieder <jrnieder@gmail.com>
+
+	* Use EXEXIT in place of EXEXEC.
+
 2010-11-28  Gerrit Pape <pape@smarden.org>
 
 	* Use exit status 127 when the script to run does not exist.
