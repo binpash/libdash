@@ -1,6 +1,7 @@
 2010-11-28  Jonathan Nieder <jrnieder@gmail.com>
 
 	* Use EXEXIT in place of EXEXEC.
+	* Stop documenting EXSHELLPROC.
 
 2010-11-28  Gerrit Pape <pape@smarden.org>
 

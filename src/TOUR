@@ -43,10 +43,6 @@ C source files for entries looking like:
                            back to the main command loop */
         }
 
-        SHELLPROC {
-              x = 3;    /* executed when the shell runs a shell procedure */
-        }
-
 It pulls this code out into routines which are when particular
 events occur.  The intent is to improve modularity by isolating
 the information about which modules need to be explicitly
@@ -79,12 +75,7 @@ EXCEPTIONS:  Code for dealing with exceptions appears in
 exceptions.c.  The C language doesn't include exception handling,
 so I implement it using setjmp and longjmp.  The global variable
 exception contains the type of exception.  EXERROR is raised by
-calling error.  EXINT is an interrupt.  EXSHELLPROC is an excep-
-tion which is raised when a shell procedure is invoked.  The pur-
-pose of EXSHELLPROC is to perform the cleanup actions associated
-with other exceptions.  After these cleanup actions, the shell
-can interpret a shell procedure itself without exec'ing a new
-copy of the shell.
+calling error.  EXINT is an interrupt.
 
 INTERRUPTS:  In an interactive shell, an interrupt will cause an
 EXINT exception to return to the main command loop.  (Exception:
