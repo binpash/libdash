@@ -1,3 +1,7 @@
+2010-11-28  Gerrit Pape <pape@smarden.org>
+
+	* Use exit status 127 when the script to run does not exist.
+
 2010-11-28  Philipp Weis <pweis@pweis.com>
 
 	* Document optional open parenthesis for case patterns.
