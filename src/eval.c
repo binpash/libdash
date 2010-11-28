@@ -304,10 +304,16 @@ setstatus:
 		break;
 	}
 out:
-	if ((checkexit & exitstatus) ||
-	    (pendingsigs && dotrap()) ||
-	    (flags & EV_EXIT))
+	if (checkexit & exitstatus)
+		goto exexit;
+
+	if (pendingsigs)
+		dotrap();
+
+	if (flags & EV_EXIT) {
+exexit:
 		exraise(EXEXIT);
+	}
 }
 
 

@@ -1,3 +1,7 @@
+2010-11-28  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fixed trap/return regression due to SKIPEVAL removal.
+
 2010-10-18  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix ifsfirst/ifslastp leak in casematch.
