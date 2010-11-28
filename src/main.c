@@ -113,8 +113,6 @@ main(int argc, char **argv)
 		reset();
 
 		e = exception;
-		if (e == EXERROR)
-			exitstatus = 2;
 
 		s = state;
 		if (e == EXEXIT || s == 0 || iflag == 0 || shlvl)

@@ -823,11 +823,13 @@ evalcommand(union node *cmd, int flags)
 	}
 
 	if (status) {
+bail:
+		exitstatus = status;
+
 		/* We have a redirection error. */
 		if (spclbltin > 0)
 			exraise(EXERROR);
-bail:
-		exitstatus = status;
+
 		goto out;
 	}
 

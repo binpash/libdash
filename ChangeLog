@@ -5,6 +5,7 @@
 2010-11-28  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fixed trap/return regression due to SKIPEVAL removal.
+	* Allow the originator of EXERROR to set the exit status.
 
 2010-10-18  Herbert Xu <herbert@gondor.apana.org.au>
 

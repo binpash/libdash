@@ -163,6 +163,8 @@ sh_error(const char *msg, ...)
 {
 	va_list ap;
 
+	exitstatus = 2;
+
 	va_start(ap, msg);
 	exverror(EXERROR, msg, ap);
 	/* NOTREACHED */
