@@ -366,7 +366,7 @@ exitshell(void)
 {
 	struct jmploc loc;
 	char *p;
-	int status;
+	volatile int status;
 
 #ifdef HETIO
 	hetio_reset_term();

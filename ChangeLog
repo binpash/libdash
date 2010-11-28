@@ -1,3 +1,7 @@
+2010-11-28  Maciej Żenczykowski <zenczykowski@gmail.com>
+
+	* Mark status as volatile in exitshell.
+
 2010-11-28  Jonathan Nieder <jrnieder@gmail.com>
 
 	* Use EXEXIT in place of EXEXEC.
