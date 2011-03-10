@@ -426,9 +426,11 @@ sprint_status(char *s, int status, int sigonly)
 #endif
 		}
 		col = fmtstr(s, 32, strsignal(st));
+#ifdef WCOREDUMP
 		if (WCOREDUMP(status)) {
 			col += fmtstr(s + col, 16, " (core dumped)");
 		}
+#endif
 	} else if (!sigonly) {
 		if (st)
 			col = fmtstr(s, 16, "Done(%d)", st);
