@@ -364,7 +364,6 @@ exptilde(char *startp, char *p, int flag)
 	char *name;
 	const char *home;
 	int quotes = flag & QUOTES_ESC;
-	int startloc;
 
 	name = p + 1;
 
@@ -393,9 +392,7 @@ done:
 	if (!home || !*home)
 		goto lose;
 	*p = c;
-	startloc = expdest - (char *)stackblock();
 	strtodest(home, SQSYNTAX, quotes);
-	recordregion(startloc, expdest - (char *)stackblock(), 0);
 	return (p);
 lose:
 	*p = c;

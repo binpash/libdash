@@ -1,6 +1,7 @@
 2011-03-10  Jilles Tjoelker <jilles@stack.nl>
 
 	* Replace GPL noclobberopen code with the FreeBSD version.
+	* Do not split the result of tilde expansion.
 
 2010-11-28  Maciej Żenczykowski <zenczykowski@gmail.com>
 
