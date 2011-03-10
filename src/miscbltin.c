@@ -178,7 +178,7 @@ readcmd(int argc, char **argv)
 		}
 		if (c == '\0')
 			continue;
-		if (backslash) {
+		if (backslash || c == CTLESC) {
 			if (c == '\n')
 				goto resetbs;
 			STPUTC(CTLESC, p);

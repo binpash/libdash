@@ -1,3 +1,7 @@
+2011-03-10  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Fix CTLESC clobbering by read(1).
+
 2011-03-10  Brian Koropoff <bkoropoff@gmail.com>
 
 	* Port to AIX.
