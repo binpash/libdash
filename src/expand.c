@@ -1597,7 +1597,6 @@ char *
 _rmescapes(char *str, int flag)
 {
 	char *p, *q, *r;
-	static const char qchars[] = { CTLESC, CTLQUOTEMARK, 0 };
 	unsigned inquotes;
 	int notescaped;
 	int globbing;

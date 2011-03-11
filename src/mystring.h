@@ -41,6 +41,7 @@ extern const char snlfmt[];
 extern const char spcstr[];
 extern const char dolatstr[];
 #define DOLATSTRLEN 6
+extern const char qchars[];
 extern const char illnum[];
 extern const char homestr[];
 
