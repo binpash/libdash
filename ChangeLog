@@ -1,3 +1,7 @@
+2011-03-15  Brian Koropoff <bkoropoff@gmail.com>
+
+	* Port to Solaris.
+
 2011-03-11  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix backslash handling in read(1).

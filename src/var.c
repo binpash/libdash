@@ -34,7 +34,9 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#ifdef HAVE_PATHS_H
 #include <paths.h>
+#endif
 
 /*
  * Shell variables.
@@ -223,7 +225,7 @@ intmax_t setvarint(const char *name, intmax_t val, int flags)
 	int len = max_int_length(sizeof(val));
 	char buf[len];
 
-	fmtstr(buf, len, "%jd", val);
+	fmtstr(buf, len, "%" PRIdMAX, val);
 	setvar(name, buf, flags);
 	return val;
 }

@@ -378,6 +378,20 @@ xvsnprintf(char *outbuf, size_t length, const char *fmt, va_list ap)
 {
 	int ret;
 
+#ifdef __sun
+	/*
+	 * vsnprintf() on older versions of Solaris returns -1 when
+	 * passed a length of 0.  To avoid this, use a dummy
+	 * 1-character buffer instead.
+	 */
+	char dummy[1];
+
+	if (length == 0) {
+		outbuf = dummy;
+		length = sizeof(dummy);
+	}
+#endif
+
 	INTOFF;
 	ret = vsnprintf(outbuf, length, fmt, ap);
 	INTON;

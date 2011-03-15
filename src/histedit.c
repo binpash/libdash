@@ -33,7 +33,9 @@
  */
 
 #include <sys/param.h>
+#ifdef HAVE_PATHS_H
 #include <paths.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -37,7 +37,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#ifdef HAVE_PATHS_H
 #include <paths.h>
+#endif
 
 /*
  * When commands are first encountered, they are entered in a hash table.

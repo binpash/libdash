@@ -42,7 +42,7 @@
 #endif
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <string.h>
 #include <fnmatch.h>
@@ -1691,7 +1691,7 @@ cvtnum(intmax_t num)
 	int len = max_int_length(sizeof(num));
 
 	expdest = makestrspace(len, expdest);
-	len = fmtstr(expdest, len, "%jd", num);
+	len = fmtstr(expdest, len, "%" PRIdMAX, num);
 	STADJUST(len, expdest);
 	return len;
 }

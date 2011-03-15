@@ -170,9 +170,11 @@ int isupper(int c) {
 }
 
 
+#if HAVE_DECL_ISBLANK
 int isblank(int c) {
 	return _isblank(c);
 }
+#endif
 
 
 int isgraph(int c) {
@@ -187,5 +189,11 @@ int ispunct(int c) {
 
 int isxdigit(int c) {
 	return _isxdigit(c);
+}
+#endif
+
+#if !HAVE_DECL_ISBLANK
+int isblank(int c) {
+	return c == ' ' || c == '\t';
 }
 #endif

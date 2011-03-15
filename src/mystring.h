@@ -34,7 +34,7 @@
  *	@(#)mystring.h	8.2 (Berkeley) 5/4/95
  */
 
-#include <stdint.h>
+#include <inttypes.h>
 #include <string.h>
 
 extern const char snlfmt[];

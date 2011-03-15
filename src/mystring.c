@@ -46,7 +46,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
-#include <stdint.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include "shell.h"
 #include "syntax.h"

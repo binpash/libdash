@@ -34,7 +34,7 @@
  *	@(#)var.h	8.2 (Berkeley) 5/4/95
  */
 
-#include <stdint.h>
+#include <inttypes.h>
 
 /*
  * Shell variables.

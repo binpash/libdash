@@ -33,7 +33,6 @@
  */
 
 #include <inttypes.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include "arith_yacc.h"
 #include "expand.h"

@@ -36,7 +36,20 @@
 #	@(#)mkbuiltins	8.2 (Berkeley) 5/4/95
 
 tempfile=tempfile
-if ! type tempfile > /dev/null 2>&1; then
+if ! type tempfile > /dev/null 2>&1 && ! type mktemp > /dev/null 2>&1; then
+	_my_tempfile()
+	{
+		local index=0
+		while test -f "${TMPDIR:-/tmp}/builtin.$$.$index"; do
+			index=`expr $index + 1`
+		done
+
+		touch "${TMPDIR:-/tmp}/builtin.$$.$index"
+		echo "${TMPDIR:-/tmp}/builtin.$$.$index"
+	}
+
+	tempfile="_my_tempfile"
+elif ! type tempfile > /dev/null 2>&1; then
 	tempfile="mktemp ${TMPDIR:-/tmp}/builtin.XXXXXX"
 fi
 

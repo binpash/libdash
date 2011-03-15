@@ -98,6 +98,10 @@ static inline int killpg(pid_t pid, int signal)
 long sysconf(int) __attribute__((__noreturn__));
 #endif
 
+#if !HAVE_DECL_ISBLANK
+int isblank(int c);
+#endif
+
 /*
  * A trick to suppress uninitialized variable warning without generating any
  * code
