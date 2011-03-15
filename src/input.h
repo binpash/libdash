@@ -61,7 +61,6 @@ void setinputstring(char *);
 void popfile(void);
 void popallfiles(void);
 void closescript(void);
-int lineno_inc(void);
 
 #define pgetc_macro() \
 	(--parsenleft >= 0 ? (signed char)*parsenextc++ : preadbuffer())

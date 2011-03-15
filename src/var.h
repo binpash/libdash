@@ -88,8 +88,9 @@ extern struct var varinit[];
 #define vps2 (&vps1)[1]
 #define vps4 (&vps2)[1]
 #define voptind (&vps4)[1]
+#define vlineno (&voptind)[1]
 #ifndef SMALL
-#define vterm (&voptind)[1]
+#define vterm (&vlineno)[1]
 #define vhistsize (&vterm)[1]
 #endif
 
@@ -101,6 +102,9 @@ extern const char defifs[];
 #endif
 extern const char defpathvar[];
 #define defpath (defpathvar + 5)
+
+extern int lineno;
+extern char linenovar[];
 
 /*
  * The following macros access the values of the above variables.
@@ -117,6 +121,7 @@ extern const char defpathvar[];
 #define ps2val()	(vps2.text + 4)
 #define ps4val()	(vps4.text + 4)
 #define optindval()	(voptind.text + 7)
+#define linenoval()	(vlineno.text + 7)
 #ifndef SMALL
 #define histsizeval()	(vhistsize.text + 9)
 #define termval()	(vterm.text + 5)

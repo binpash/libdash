@@ -54,7 +54,6 @@
 #include "alias.h"
 #include "parser.h"
 #include "main.h"
-#include "var.h"
 #ifndef SMALL
 #include "myhistedit.h"
 #endif
@@ -530,13 +529,4 @@ closescript(void)
 		close(parsefile->fd);
 		parsefile->fd = 0;
 	}
-}
-
-
-int lineno_inc(void)
-{
-	int lineno = plinno++;
-
-	setvarint("LINENO", lineno, 0);
-	return lineno;
 }

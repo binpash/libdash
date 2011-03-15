@@ -697,7 +697,7 @@ defun(union node *func)
 	INTOFF;
 	entry.cmdtype = CMDFUNCTION;
 	entry.u.func = copyfunc(func);
-	addcmdentry(func->narg.text, &entry);
+	addcmdentry(func->ndefun.text, &entry);
 	INTON;
 }
 

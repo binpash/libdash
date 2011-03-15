@@ -51,6 +51,7 @@
 
 NCMD ncmd			# a simple command
 	type	  int
+	linno	  int
 	assign    nodeptr		# variable assignments
 	args	  nodeptr		# the arguments
 	redirect  nodeptr		# list of file redirections
@@ -62,6 +63,7 @@ NPIPE npipe			# a pipeline
 
 NREDIR nredir			# redirection (of a complex command)
 	type	  int
+	linno	  int
 	n	  nodeptr		# the command
 	redirect  nodeptr		# list of file redirections
 
@@ -87,12 +89,14 @@ NUNTIL nbinary			# the until statement
 
 NFOR nfor			# the for statement
 	type	  int
+	linno	  int
 	args	  nodeptr		# for var in args
 	body	  nodeptr		# do body; done
 	var	  string		# the for variable
 
 NCASE ncase			# a case statement
 	type	  int
+	linno	  int
 	expr	  nodeptr		# the word to switch on
 	cases	  nodeptr		# the list of cases (NCLIST nodes)
 
@@ -103,8 +107,11 @@ NCLIST nclist			# a case
 	body	  nodeptr		# code to execute for this case
 
 
-NDEFUN narg			# define a function.  The "next" field contains
-				# the body of the function.
+NDEFUN ndefun			# a function
+	type	  int
+	linno	  int
+	text	  string
+	body	  nodeptr
 
 NARG narg			# represents a word
 	type	  int

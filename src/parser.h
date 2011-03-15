@@ -77,7 +77,6 @@ extern int tokpushback;
 #define NEOF ((union node *)&tokpushback)
 extern int whichprompt;		/* 1 == PS1, 2 == PS2 */
 extern int checkkwd;
-extern int startlinno;		/* line # where last token started */
 
 
 union node *parsecmd(int);

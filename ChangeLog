@@ -1,6 +1,7 @@
 2011-03-15  Harald van Dijk <harald@gigawatt.nl>
 
 	* Let funcnode refer to a function definition, not its first command.
+	* Improve LINENO support.
 
 2011-03-15  Brian Koropoff <bkoropoff@gmail.com>
 
