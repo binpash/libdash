@@ -1,6 +1,7 @@
 2011-03-15  Jonathan Nieder <jrnieder@gmail.com>
 
 	* Free IFS state after here document expansion.
+	* Use va_copy when reusing a va_list.
 
 2011-03-15  Harald van Dijk <harald@gigawatt.nl>
 

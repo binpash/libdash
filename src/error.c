@@ -143,8 +143,11 @@ exverror(int cond, const char *msg, va_list ap)
 {
 #ifdef DEBUG
 	if (msg) {
+		va_list aq;
 		TRACE(("exverror(%d, \"", cond));
-		TRACEV((msg, ap));
+		va_copy(aq, ap);
+		TRACEV((msg, aq));
+		va_end(aq);
 		TRACE(("\") pid=%d\n", getpid()));
 	} else
 		TRACE(("exverror(%d, NULL) pid=%d\n", cond, getpid()));
