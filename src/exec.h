@@ -71,7 +71,7 @@ void changepath(const char *);
 #ifdef notdef
 void getcmdentry(char *, struct cmdentry *);
 #endif
-void defun(char *, union node *);
+void defun(union node *);
 void unsetfunc(const char *);
 int typecmd(int, char **);
 int commandcmd(int, char **);

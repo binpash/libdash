@@ -296,7 +296,7 @@ calleval:
 		}
 		goto success;
 	case NDEFUN:
-		defun(n->narg.text, n->narg.next);
+		defun(n);
 success:
 		status = 0;
 setstatus:
@@ -954,7 +954,7 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
 	shellparam.optind = 1;
 	shellparam.optoff = -1;
 	pushlocalvars();
-	evaltree(&func->n, flags & EV_TESTED);
+	evaltree(func->n.narg.next, flags & EV_TESTED);
 	poplocalvars(0);
 funcdone:
 	INTOFF;
