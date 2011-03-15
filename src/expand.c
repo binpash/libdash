@@ -194,7 +194,8 @@ expandarg(union node *arg, struct arglist *arglist, int flag)
 	p = _STPUTC('\0', expdest);
 	expdest = p - 1;
 	if (arglist == NULL) {
-		return;			/* here document expanded */
+		/* here document expanded */
+		goto out;
 	}
 	p = grabstackstr(p);
 	exparg.lastp = &exparg.list;
@@ -212,12 +213,14 @@ expandarg(union node *arg, struct arglist *arglist, int flag)
 		*exparg.lastp = sp;
 		exparg.lastp = &sp->next;
 	}
-	ifsfree();
 	*exparg.lastp = NULL;
 	if (exparg.list) {
 		*arglist->lastp = exparg.list;
 		arglist->lastp = exparg.lastp;
 	}
+
+out:
+	ifsfree();
 }
 
 
