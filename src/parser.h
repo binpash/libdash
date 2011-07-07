@@ -34,6 +34,8 @@
  *	@(#)parser.h	8.3 (Berkeley) 5/4/95
  */
 
+#include "token.h"
+
 /* control characters in argument strings */
 #define CTL_FIRST -127		/* first 'special' character */
 #define CTLESC -127		/* escape next character */
@@ -73,6 +75,7 @@
  * must be distinct from NULL, so we use the address of a variable that
  * happens to be handy.
  */
+extern int lasttoken;
 extern int tokpushback;
 #define NEOF ((union node *)&tokpushback)
 extern int whichprompt;		/* 1 == PS1, 2 == PS2 */
@@ -90,4 +93,9 @@ static inline int
 goodname(const char *p)
 {
 	return !*endofname(p);
+}
+
+static inline int parser_eof(void)
+{
+	return tokpushback && lasttoken == TEOF;
 }

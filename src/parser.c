@@ -64,7 +64,7 @@
  */
 
 /* values returned by readtoken */
-#include "token.h"
+#include "token_vars.h"
 
 
 
@@ -86,7 +86,7 @@ struct heredoc *heredoclist;	/* list of here documents to read */
 int doprompt;			/* if set, prompt the user */
 int needprompt;			/* true if interactive and at start of line */
 int lasttoken;			/* last token read */
-MKINIT int tokpushback;		/* last token pushed back */
+int tokpushback;		/* last token pushed back */
 char *wordtext;			/* text of last word returned by readtoken */
 int checkkwd;
 struct nodelist *backquotelist;
@@ -210,6 +210,7 @@ list(int nlflag)
 				parseheredoc();
 			else
 				pungetc();		/* push back EOF on input */
+			tokpushback++;
 			return n1;
 		default:
 			if (nlflag == 1)

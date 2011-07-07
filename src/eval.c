@@ -65,10 +65,6 @@
 #endif
 
 
-/* flags in argument to evaltree */
-#define EV_EXIT 01		/* exit after evaluating tree */
-#define EV_TESTED 02		/* exit status is checked; ignore -e flag */
-
 int evalskip;			/* set if we are skipping commands */
 STATIC int skipcount;		/* number of levels to skip */
 MKINIT int loopnest;		/* current loop nesting level */
@@ -169,7 +165,7 @@ evalstring(char *s, int flags)
 
 	status = 0;
 	while ((n = parsecmd(0)) != NEOF) {
-		evaltree(n, flags);
+		evaltree(n, flags & ~(parser_eof() ? 0 : EV_EXIT));
 		status = exitstatus;
 		popstackmark(&smark);
 		if (evalskip)

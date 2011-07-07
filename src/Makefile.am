@@ -12,7 +12,8 @@ AM_CFLAGS_FOR_BUILD = -g -O2 $(COMMON_CFLAGS)
 AM_CPPFLAGS_FOR_BUILD = $(COMMON_CPPFLAGS)
 
 COMPILE_FOR_BUILD = \
-	$(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) \
+	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(AM_CPPFLAGS_FOR_BUILD) \
+	$(CPPFLAGS_FOR_BUILD) \
 	$(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) 
 
 bin_PROGRAMS = dash
@@ -33,7 +34,7 @@ dash_LDADD = builtins.o init.o nodes.o signames.o syntax.o
 
 HELPERS = mkinit mksyntax mknodes mksignames
 
-BUILT_SOURCES = builtins.h nodes.h syntax.h token.h
+BUILT_SOURCES = builtins.h nodes.h syntax.h token.h token_vars.h
 CLEANFILES = \
 	$(BUILT_SOURCES) $(patsubst %.o,%.c,$(dash_LDADD)) \
 	$(HELPERS) builtins.def
@@ -44,7 +45,7 @@ EXTRA_DIST = \
 	mktokens mkbuiltins builtins.def.in mkinit.c \
 	mknodes.c nodetypes nodes.c.pat mksyntax.c mksignames.c
 
-token.h: mktokens
+token.h token_vars.h: mktokens
 	sh $^
 
 builtins.def: builtins.def.in $(top_builddir)/config.h
@@ -64,6 +65,8 @@ syntax.c syntax.h: mksyntax
 
 signames.c: mksignames
 	./$^
+
+mksyntax: token.h
 
 $(HELPERS): %: %.c
 	$(COMPILE_FOR_BUILD) -o $@ $<

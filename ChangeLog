@@ -1,3 +1,7 @@
+2011-07-07  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Optimize dash -c "command" to avoid a fork.
+
 2011-04-10  Jonathan Nieder <jrnieder@gmail.com>
  
 	* Remove unused EV_BACKCMD flag.
