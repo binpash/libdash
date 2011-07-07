@@ -1,6 +1,7 @@
 2011-07-07  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Optimize dash -c "command" to avoid a fork.
+	* Eliminate unnecessary promotion in echocmd.
 
 2011-05-22  Jonathan Nieder <jrnieder@gmail.com>
 

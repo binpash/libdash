@@ -443,7 +443,7 @@ echocmd(int argc, char **argv)
 	}
 
 	do {
-		char c;
+		int c;
 
 		nonl += conv_escape_str(*argv);
 		outstr(stackblock(), outs);
