@@ -97,10 +97,21 @@ freestdout()
 #define OUTPUT_ERR 01		/* error occurred on output */
 
 #ifdef USE_GLIBC_STDIO
-#define outc(c, o)	putc((c), (o)->stream)
+static inline void outc(int ch, struct output *file)
+{
+	putc(ch, file->stream);
+}
 #define doformat(d, f, a)	vfprintf((d)->stream, (f), (a))
 #else
-#define outc(c, file)	((file)->nextc == (file)->end ? outcslow((c), (file)) : (*(file)->nextc = (c), (file)->nextc++))
+static inline void outc(int ch, struct output *file)
+{
+	if (file->nextc == file->end)
+		outcslow(ch, file);
+	else {
+		*file->nextc = ch;
+		file->nextc++;
+	}
+}
 #endif
 #define out1c(c)	outc((c), out1)
 #define out2c(c)	outcslow((c), out2)

@@ -2,6 +2,10 @@
 
 	* Optimize dash -c "command" to avoid a fork.
 
+2011-05-22  Jonathan Nieder <jrnieder@gmail.com>
+
+	* Make outc an inline function.
+
 2011-05-02  Kalle Olavi Niemitalo <kon@iki.fi>
 
 	* Remove spurious space in descriptions of PS1, PS2, PS4.
