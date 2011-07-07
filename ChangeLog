@@ -1,3 +1,7 @@
+2011-04-10  Jonathan Nieder <jrnieder@gmail.com>
+ 
+	* Remove unused EV_BACKCMD flag.
+
 2011-03-15  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix clobbering of checkkwd.

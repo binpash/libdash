@@ -68,7 +68,6 @@
 /* flags in argument to evaltree */
 #define EV_EXIT 01		/* exit after evaluating tree */
 #define EV_TESTED 02		/* exit status is checked; ignore -e flag */
-#define EV_BACKCMD 04		/* command executing within back quotes */
 
 int evalskip;			/* set if we are skipping commands */
 STATIC int skipcount;		/* number of levels to skip */
@@ -594,6 +593,9 @@ evalpipe(union node *n, int flags)
 void
 evalbackcmd(union node *n, struct backcmd *result)
 {
+	int pip[2];
+	struct job *jp;
+
 	result->fd = -1;
 	result->buf = NULL;
 	result->nleft = 0;
@@ -602,52 +604,24 @@ evalbackcmd(union node *n, struct backcmd *result)
 		goto out;
 	}
 
-#ifdef notyet
-	/*
-	 * For now we disable executing builtins in the same
-	 * context as the shell, because we are not keeping
-	 * enough state to recover from changes that are
-	 * supposed only to affect subshells. eg. echo "`cd /`"
-	 */
-	if (n->type == NCMD) {
-		struct ifsregion saveifs;
-		struct ifsregion *savelastp;
-		struct nodelist *saveargbackq;
-
-		saveifs = ifsfirst;
-		savelastp = ifslastp;
-		saveargbackq = argbackq;
-
-		exitstatus = oexitstatus;
-		evalcommand(n, EV_BACKCMD, result);
-
-		ifsfirst = saveifs;
-		ifslastp = savelastp;
-		argbackq = saveargbackq;
-	} else
-#endif
-	{
-		int pip[2];
-		struct job *jp;
-
-		if (pipe(pip) < 0)
-			sh_error("Pipe call failed");
-		jp = makejob(n, 1);
-		if (forkshell(jp, n, FORK_NOJOB) == 0) {
-			FORCEINTON;
-			close(pip[0]);
-			if (pip[1] != 1) {
-				dup2(pip[1], 1);
-				close(pip[1]);
-			}
-			ifsfree();
-			evaltreenr(n, EV_EXIT);
-			/* NOTREACHED */
+	if (pipe(pip) < 0)
+		sh_error("Pipe call failed");
+	jp = makejob(n, 1);
+	if (forkshell(jp, n, FORK_NOJOB) == 0) {
+		FORCEINTON;
+		close(pip[0]);
+		if (pip[1] != 1) {
+			dup2(pip[1], 1);
+			close(pip[1]);
 		}
-		close(pip[1]);
-		result->fd = pip[0];
-		result->jp = jp;
+		ifsfree();
+		evaltreenr(n, EV_EXIT);
+		/* NOTREACHED */
 	}
+	close(pip[1]);
+	result->fd = pip[0];
+	result->jp = jp;
+
 out:
 	TRACE(("evalbackcmd done: fd=%d buf=0x%x nleft=%d jp=0x%x\n",
 		result->fd, result->buf, result->nleft, result->jp));
