@@ -2,6 +2,10 @@
 
 	* Optimize dash -c "command" to avoid a fork.
 
+2011-05-02  Kalle Olavi Niemitalo <kon@iki.fi>
+
+	* Remove spurious space in descriptions of PS1, PS2, PS4.
+
 2011-04-10  Jonathan Nieder <jrnieder@gmail.com>
  
 	* Remove unused EV_BACKCMD flag.
