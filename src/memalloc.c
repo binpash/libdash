@@ -273,7 +273,7 @@ char *
 makestrspace(size_t newlen, char *p)
 {
 	size_t len = p - stacknxt;
-	size_t size = stackblocksize();
+	size_t size;
 
 	for (;;) {
 		size_t nleft;

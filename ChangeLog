@@ -6,6 +6,7 @@
 2011-05-23  Jim Meyering  <meyering@redhat.com>
 
 	* Avoid gcc warning: variable 'oldstackp' set but not used.
+	* Avoid clang warning about dead store to "size".
 
 2011-05-22  Jonathan Nieder <jrnieder@gmail.com>
 
