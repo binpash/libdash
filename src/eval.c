@@ -897,9 +897,9 @@ evalbltin(const struct builtincmd *cmd, int argc, char **argv, int flags)
 	int i;
 
 	savecmdname = commandname;
+	savehandler = handler;
 	if ((i = setjmp(jmploc.loc)))
 		goto cmddone;
-	savehandler = handler;
 	handler = &jmploc;
 	commandname = argv[0];
 	argptr = argv + 1;
@@ -930,11 +930,11 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
 
 	saveparam = shellparam;
 	savefuncline = funcline;
+	savehandler = handler;
 	if ((e = setjmp(jmploc.loc))) {
 		goto funcdone;
 	}
 	INTOFF;
-	savehandler = handler;
 	handler = &jmploc;
 	shellparam.malloc = 0;
 	func->count++;
