@@ -1,3 +1,7 @@
+2011-07-08  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Release 0.5.7.
+
 2011-07-07  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Optimize dash -c "command" to avoid a fork.
