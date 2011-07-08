@@ -3,6 +3,10 @@
 	* Optimize dash -c "command" to avoid a fork.
 	* Eliminate unnecessary promotion in echocmd.
 
+2011-05-23  Jim Meyering  <meyering@redhat.com>
+
+	* Avoid gcc warning: variable 'oldstackp' set but not used.
+
 2011-05-22  Jonathan Nieder <jrnieder@gmail.com>
 
 	* Make outc an inline function.

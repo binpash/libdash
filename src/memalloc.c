@@ -206,20 +206,18 @@ growstackblock(void)
 {
 	size_t newlen;
 
- 	newlen = stacknleft * 2;
+	newlen = stacknleft * 2;
 	if (newlen < stacknleft)
 		sh_error("Out of space");
 	if (newlen < 128)
 		newlen += 128;
 
 	if (stacknxt == stackp->space && stackp != &stackbase) {
-		struct stack_block *oldstackp;
 		struct stack_block *sp;
 		struct stack_block *prevstackp;
 		size_t grosslen;
 
 		INTOFF;
-		oldstackp = stackp;
 		sp = stackp;
 		prevstackp = sp->prev;
 		grosslen = newlen + sizeof(struct stack_block) - MINSIZE;
