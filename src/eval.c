@@ -1039,7 +1039,7 @@ returncmd(int argc, char **argv)
 	 * If called outside a function, do what ksh does;
 	 * skip the rest of the file.
 	 */
-	evalskip = funcline ? SKIPFUNC : SKIPFILE;
+	evalskip = SKIPFUNC;
 	return argv[1] ? number(argv[1]) : exitstatus;
 }
 

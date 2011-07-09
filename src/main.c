@@ -242,7 +242,7 @@ cmdloop(int top)
 
 		skip = evalskip;
 		if (skip) {
-			evalskip = 0;
+			evalskip &= ~SKIPFUNC;
 			break;
 		}
 	}

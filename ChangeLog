@@ -1,3 +1,7 @@
+2011-07-09  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Merge SKIPFUNC/SKIPFILE and only clear SKIPFUNC when leaving dotcmd.
+
 2011-07-08  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Release 0.5.7.
