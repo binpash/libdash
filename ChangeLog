@@ -1,3 +1,7 @@
+2010-07-09  maximilian attems <max@stro.at>
+
+	* Fix klibc DEBUG compilation.
+
 2011-07-09  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Merge SKIPFUNC/SKIPFILE and only clear SKIPFUNC when leaving dotcmd.
