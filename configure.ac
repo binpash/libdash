@@ -131,5 +131,10 @@ if test "$use_libedit" != "yes"; then
 else
 	export LIBS="$LIBS -ledit"
 fi
+AC_ARG_ENABLE(lineno, AS_HELP_STRING(--disable-lineno, \
+				     [Disable LINENO support]))
+if test "$enable_lineno" != "no"; then
+	AC_DEFINE([WITH_LINENO], 1, [Define if you build with -DWITH_LINENO])
+fi
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

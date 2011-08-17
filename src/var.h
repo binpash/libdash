@@ -88,9 +88,15 @@ extern struct var varinit[];
 #define vps2 (&vps1)[1]
 #define vps4 (&vps2)[1]
 #define voptind (&vps4)[1]
+#ifdef WITH_LINENO
 #define vlineno (&voptind)[1]
+#endif
 #ifndef SMALL
+#ifdef WITH_LINENO
 #define vterm (&vlineno)[1]
+#else
+#define vterm (&voptind)[1]
+#endif
 #define vhistsize (&vterm)[1]
 #endif
 

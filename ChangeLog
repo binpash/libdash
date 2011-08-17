@@ -1,3 +1,7 @@
+2011-08-17  David S. Miller <davem@davemloft.net>
+
+	* Allow building without LINEO support.
+
 2011-07-26  Harald van Dijk <harald@gigawatt.nl>
 
 	* Avoid imaxdiv when only one of the results is wanted.
