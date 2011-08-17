@@ -94,22 +94,13 @@ static inline int higher_prec(int op1, int op2)
 
 static intmax_t do_binop(int op, intmax_t a, intmax_t b)
 {
-#ifdef HAVE_IMAXDIV
-	imaxdiv_t div;
-#endif
-
 	switch (op) {
 	default:
 	case ARITH_REM:
 	case ARITH_DIV:
 		if (!b)
 			yyerror("division by zero");
-#ifdef HAVE_IMAXDIV
-		div = imaxdiv(a, b);
-		return op == ARITH_REM ? div.rem : div.quot;
-#else
 		return op == ARITH_REM ? a % b : a / b;
-#endif
 	case ARITH_MUL:
 		return a * b;
 	case ARITH_ADD:
