@@ -1,6 +1,7 @@
 2011-08-17  David S. Miller <davem@davemloft.net>
 
 	* Allow building without LINEO support.
+	* Add top-level autogen.sh.
 
 2011-07-26  Harald van Dijk <harald@gigawatt.nl>
 
