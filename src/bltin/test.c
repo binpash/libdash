@@ -155,6 +155,14 @@ static int test_st_mode(const struct stat64 *, int);
 static int bash_group_member(gid_t);
 #endif
 
+#ifdef HAVE_FACCESSAT
+# ifdef HAVE_TRADITIONAL_FACCESSAT
+static inline int faccessat_confused_about_superuser(void) { return 1; }
+# else
+static inline int faccessat_confused_about_superuser(void) { return 0; }
+# endif
+#endif
+
 static inline intmax_t getn(const char *s)
 {
 	return atomax10(s);
@@ -493,8 +501,20 @@ equalf (const char *f1, const char *f2)
 }
 
 #ifdef HAVE_FACCESSAT
+static int has_exec_bit_set(const char *path)
+{
+	struct stat64 st;
+
+	if (stat64(path, &st))
+		return 0;
+	return st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH);
+}
+
 static int test_file_access(const char *path, int mode)
 {
+	if (faccessat_confused_about_superuser() &&
+	    mode == X_OK && geteuid() == 0 && !has_exec_bit_set(path))
+		return 0;
 	return !faccessat(AT_FDCWD, path, mode, AT_EACCESS);
 }
 #else	/* HAVE_FACCESSAT */
