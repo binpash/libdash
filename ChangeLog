@@ -1,3 +1,8 @@
+2012-03-11  Jim Meyering  <meyering@redhat.com>
+
+	* Avoid overflow for very long variable name.
+	$ perl -le 'print "v"x(2**31+1) ."=1"' | dash
+
 2012-02-25  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Sanitise environment variable names on entry.

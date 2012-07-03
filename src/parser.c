@@ -853,7 +853,7 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 {
 	int c = firstc;
 	char *out;
-	int len;
+	size_t len;
 	struct nodelist *bqlist;
 	int quotef;
 	int dblquote;
