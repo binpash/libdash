@@ -1,3 +1,7 @@
+2012-06-09  Christoph Mathys <eraserix@gmail.com>
+
+	* Add support for ulimit -r.
+
 2012-03-11  Jim Meyering  <meyering@redhat.com>
 
 	* Avoid overflow for very long variable name.

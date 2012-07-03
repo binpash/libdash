@@ -392,6 +392,9 @@ static const struct limits limits[] = {
 #ifdef RLIMIT_LOCKS
 	{ "locks",			RLIMIT_LOCKS,	   1, 'w' },
 #endif
+#ifdef RLIMIT_RTPRIO
+	{ "rtprio",			RLIMIT_RTPRIO,	   1, 'r' },
+#endif
 	{ (char *) 0,			0,		   0,  '\0' }
 };
 
