@@ -1,6 +1,7 @@
 2013-08-23  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Propagate EXP_QPAT in subevalvar.
+	* Initialise OPTIND after importing environment.
 
 2013-03-12  Peter Rosin <peda@lysator.liu.se>
 

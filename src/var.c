@@ -142,6 +142,8 @@ INIT {
 		}
 	}
 
+	setvarint("OPTIND", 1, 0);
+
 	fmtstr(ppid + 5, sizeof(ppid) - 5, "%ld", (long) getppid());
 	setvareq(ppid, VTEXTFIXED);
 
