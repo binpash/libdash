@@ -1,3 +1,7 @@
+2012-07-20  Kimo Rosenbaum <kimor79@yahoo.com>
+
+	* Fix typo for wait in manual.
+
 2012-06-09  Christoph Mathys <eraserix@gmail.com>
 
 	* Add support for ulimit -r.
