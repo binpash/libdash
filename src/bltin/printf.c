@@ -316,16 +316,24 @@ out:
 static char *
 mklong(const char *str, const char *ch)
 {
+	/*
+	 * Replace a string like "%92.3u" with "%92.3"PRIuMAX.
+	 *
+	 * Although C99 does not guarantee it, we assume PRIiMAX,
+	 * PRIoMAX, PRIuMAX, PRIxMAX, and PRIXMAX are all the same
+	 * as PRIdMAX with the final 'd' replaced by the corresponding
+	 * character.
+	 */
+
 	char *copy;
 	size_t len;	
 
-	len = ch - str + 3;
+	len = ch - str + sizeof(PRIdMAX);
 	STARTSTACKSTR(copy);
 	copy = makestrspace(len, copy);
-	memcpy(copy, str, len - 3);
-	copy[len - 3] = 'j';
+	memcpy(copy, str, len - sizeof(PRIdMAX));
+	memcpy(copy + len - sizeof(PRIdMAX), PRIdMAX, sizeof(PRIdMAX));
 	copy[len - 2] = *ch;
-	copy[len - 1] = '\0';
 	return (copy);	
 }
 
