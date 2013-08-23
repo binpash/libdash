@@ -547,7 +547,7 @@ poplocalvars(int keep)
 	while ((lvp = next) != NULL) {
 		next = lvp->next;
 		vp = lvp->vp;
-		TRACE(("poplocalvar %s", vp ? vp->text : "-"));
+		TRACE(("poplocalvar %s\n", vp ? vp->text : "-"));
 		if (keep) {
 			int bits = VSTRFIXED;
 

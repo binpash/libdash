@@ -2,6 +2,10 @@
 
 	* Propagate EXP_QPAT in subevalvar.
 
+2013-03-12  Peter Rosin <peda@lysator.liu.se>
+
+	* Add newline when tracing in poplocalvars.
+
 2013-01-10  Jérémie Courrèges-Anglas <jca+dash@wxcvbn.org>
 
 	* Markup fixes in manual for mandoc 1.12.1.
