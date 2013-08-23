@@ -2,6 +2,10 @@
 
 	* Propagate EXP_QPAT in subevalvar.
 
+2013-01-10  Jérémie Courrèges-Anglas <jca+dash@wxcvbn.org>
+
+	* Markup fixes in manual for mandoc 1.12.1.
+
 2012-12-03  Harald van Dijk <harald@gigawatt.nl>
 
 	* Use PRIdMAX instead of %j in printf.
