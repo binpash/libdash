@@ -268,9 +268,13 @@ aexpr(enum token n)
 static int
 nexpr(enum token n)
 {
-	if (n == UNOT)
-		return !nexpr(t_lex(++t_wp));
-	return primary(n);
+	if (n != UNOT)
+		return primary(n);
+
+	n = t_lex(t_wp + 1);
+	if (n != EOI)
+		t_wp++;
+	return !nexpr(n);
 }
 
 static int

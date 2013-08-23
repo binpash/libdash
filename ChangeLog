@@ -2,6 +2,7 @@
 
 	* Propagate EXP_QPAT in subevalvar.
 	* Initialise OPTIND after importing environment.
+	* Fixed argument parsing crash in test.
 
 2013-03-12  Peter Rosin <peda@lysator.liu.se>
 
