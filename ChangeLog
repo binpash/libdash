@@ -1,3 +1,7 @@
+2013-08-23  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Propagate EXP_QPAT in subevalvar.
+
 2012-07-20  Kimo Rosenbaum <kimor79@yahoo.com>
 
 	* Fix typo for wait in manual.
