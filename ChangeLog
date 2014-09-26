@@ -3,6 +3,7 @@
 	* Small optimisation of command -pv change.
 	* Set command -p path to /usr/sbin:/usr/bin:/sbin:/bin.
 	* Change "characters" for printf precision to "bytes".
+	* Release 0.5.8.
 
 2014-09-26  Jonathan Nieder <jrnieder@gmail.com>
 
