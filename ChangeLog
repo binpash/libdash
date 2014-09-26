@@ -6,6 +6,7 @@
 2014-09-26  Harald van Dijk <harald@gigawatt.nl>
 
 	* command: allow combining -p with -v.
+	* getjob: Fix off-by-one error for multiple of four job numbers
 
 2013-08-23  Herbert Xu <herbert@gondor.apana.org.au>
 
