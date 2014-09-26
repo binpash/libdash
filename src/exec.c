@@ -96,7 +96,7 @@ STATIC void clearcmdentry(int);
 STATIC struct tblentry *cmdlookup(const char *, int);
 STATIC void delete_cmd_entry(void);
 STATIC void addcmdentry(char *, struct cmdentry *);
-STATIC int describe_command(struct output *, char *, int);
+STATIC int describe_command(struct output *, char *, const char *, int);
 
 
 /*
@@ -727,21 +727,21 @@ typecmd(int argc, char **argv)
 	int err = 0;
 
 	for (i = 1; i < argc; i++) {
-		err |= describe_command(out1, argv[i], 1);
+		err |= describe_command(out1, argv[i], pathval(), 1);
 	}
 	return err;
 }
 
 STATIC int
-describe_command(out, command, verbose)
+describe_command(out, command, path, verbose)
 	struct output *out;
 	char *command;
+	const char *path;
 	int verbose;
 {
 	struct cmdentry entry;
 	struct tblentry *cmdp;
 	const struct alias *ap;
-	const char *path = pathval();
 
 	if (verbose) {
 		outstr(command, out);
@@ -840,20 +840,23 @@ commandcmd(argc, argv)
 		VERIFY_BRIEF = 1,
 		VERIFY_VERBOSE = 2,
 	} verify = 0;
+	const char *path = pathval();
 
 	while ((c = nextopt("pvV")) != '\0')
 		if (c == 'V')
 			verify |= VERIFY_VERBOSE;
 		else if (c == 'v')
 			verify |= VERIFY_BRIEF;
+		else if (c == 'p')
+			path = defpath;
 #ifdef DEBUG
-		else if (c != 'p')
+		else
 			abort();
 #endif
 
 	cmd = *argptr;
 	if (verify && cmd)
-		return describe_command(out1, cmd, verify - VERIFY_BRIEF);
+		return describe_command(out1, cmd, path, verify - VERIFY_BRIEF);
 
 	return 0;
 }
