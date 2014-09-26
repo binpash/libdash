@@ -2076,7 +2076,9 @@ or
 .Li EXIT ,
 the action is executed when the shell exits.
 .Ar action
-may be null, which cause the specified signals to be ignored.
+may be empty
+.Li ( "''" ) ,
+which causes the specified signals to be ignored.
 With
 .Ar action
 omitted or set to `-' the specified signals are set to their default action.

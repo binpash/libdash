@@ -4,6 +4,10 @@
 	* Set command -p path to /usr/sbin:/usr/bin:/sbin:/bin.
 	* Change "characters" for printf precision to "bytes".
 
+2014-09-26  Jonathan Nieder <jrnieder@gmail.com>
+
+	* Clarify "trap '' signals" syntax in manual page.
+
 2014-09-26  Adam Buchbinder <adam.buchbinder@gmail.com>
 
 	* Clarify that 0 and EXIT are both acceptable for exit traps.
