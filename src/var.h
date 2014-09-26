@@ -107,7 +107,7 @@ extern const char defifsvar[];
 extern const char defifs[];
 #endif
 extern const char defpathvar[];
-#define defpath (defpathvar + 5)
+#define defpath (defpathvar + 36)
 
 extern int lineno;
 extern char linenovar[];

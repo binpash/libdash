@@ -1,6 +1,7 @@
 2014-09-26  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Small optimisation of command -pv change.
+	* Set command -p path to /usr/sbin:/usr/bin:/sbin:/bin.
 
 2014-09-26  Harald van Dijk <harald@gigawatt.nl>
 
