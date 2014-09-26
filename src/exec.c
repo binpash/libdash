@@ -727,7 +727,7 @@ typecmd(int argc, char **argv)
 	int err = 0;
 
 	for (i = 1; i < argc; i++) {
-		err |= describe_command(out1, argv[i], pathval(), 1);
+		err |= describe_command(out1, argv[i], NULL, 1);
 	}
 	return err;
 }
@@ -742,6 +742,8 @@ describe_command(out, command, path, verbose)
 	struct cmdentry entry;
 	struct tblentry *cmdp;
 	const struct alias *ap;
+
+	path = path ?: pathval();
 
 	if (verbose) {
 		outstr(command, out);
@@ -840,19 +842,19 @@ commandcmd(argc, argv)
 		VERIFY_BRIEF = 1,
 		VERIFY_VERBOSE = 2,
 	} verify = 0;
-	const char *path = pathval();
+	const char *path = NULL;
 
 	while ((c = nextopt("pvV")) != '\0')
 		if (c == 'V')
 			verify |= VERIFY_VERBOSE;
 		else if (c == 'v')
 			verify |= VERIFY_BRIEF;
-		else if (c == 'p')
-			path = defpath;
 #ifdef DEBUG
-		else
+		else if (c != 'p')
 			abort();
 #endif
+		else
+			path = defpath;
 
 	cmd = *argptr;
 	if (verify && cmd)
