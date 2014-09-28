@@ -177,7 +177,7 @@ testcmd(int argc, char **argv)
 {
 	const struct t_op *op;
 	enum token n;
-	int res;
+	int res = 1;
 
 	if (*argv[0] == '[') {
 		if (*argv[--argc] != ']')
@@ -185,11 +185,12 @@ testcmd(int argc, char **argv)
 		argv[argc] = NULL;
 	}
 
+recheck:
 	argv++;
 	argc--;
 
 	if (argc < 1)
-		return 1;
+		return res;
 
 	/*
 	 * POSIX prescriptions: he who wrote this deserves the Nobel
@@ -209,6 +210,9 @@ testcmd(int argc, char **argv)
 			argv[--argc] = NULL;
 			argv++;
 			argc--;
+		} else if (!strcmp(argv[0], "!")) {
+			res = 0;
+			goto recheck;
 		}
 	}
 
@@ -216,7 +220,7 @@ testcmd(int argc, char **argv)
 
 eval:
 	t_wp = argv;
-	res = !oexpr(n);
+	res ^= oexpr(n);
 	argv = t_wp;
 
 	if (argv[0] != NULL && argv[1] != NULL)
