@@ -1,6 +1,7 @@
 2014-09-29  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Kill pgetc_macro.
+	* Handle backslash newlines properly after dollar sign.
 
 2014-09-28  Herbert Xu <herbert@gondor.apana.org.au>
 

@@ -827,6 +827,24 @@ breakloop:
 #undef RETURN
 }
 
+static int pgetc_eatbnl(void)
+{
+	int c;
+
+	while ((c = pgetc()) == '\\') {
+		if (pgetc() != '\n') {
+			pungetc();
+			break;
+		}
+
+		plinno++;
+		if (doprompt)
+			setprompt(2);
+	}
+
+	return c;
+}
+
 
 
 /*
@@ -1179,7 +1197,7 @@ parsesub: {
 	char *p;
 	static const char types[] = "}-+?=";
 
-	c = pgetc();
+	c = pgetc_eatbnl();
 	if (
 		(checkkwd & CHKEOFMARK) ||
 		c <= PEOA  ||
@@ -1188,7 +1206,7 @@ parsesub: {
 		USTPUTC('$', out);
 		pungetc();
 	} else if (c == '(') {	/* $(command) or $((arith)) */
-		if (pgetc() == '(') {
+		if (pgetc_eatbnl() == '(') {
 			PARSEARITH();
 		} else {
 			pungetc();
@@ -1200,25 +1218,25 @@ parsesub: {
 		STADJUST(1, out);
 		subtype = VSNORMAL;
 		if (likely(c == '{')) {
-			c = pgetc();
+			c = pgetc_eatbnl();
 			subtype = 0;
 		}
 varname:
 		if (is_name(c)) {
 			do {
 				STPUTC(c, out);
-				c = pgetc();
+				c = pgetc_eatbnl();
 			} while (is_in_name(c));
 		} else if (is_digit(c)) {
 			do {
 				STPUTC(c, out);
-				c = pgetc();
+				c = pgetc_eatbnl();
 			} while (is_digit(c));
 		}
 		else if (is_special(c)) {
 			int cc = c;
 
-			c = pgetc();
+			c = pgetc_eatbnl();
 
 			if (!subtype && cc == '#') {
 				subtype = VSLENGTH;
@@ -1227,7 +1245,7 @@ varname:
 					goto varname;
 
 				cc = c;
-				c = pgetc();
+				c = pgetc_eatbnl();
 				if (cc == '}' || c != '}') {
 					pungetc();
 					subtype = 0;
@@ -1245,7 +1263,7 @@ varname:
 			switch (c) {
 			case ':':
 				subtype = VSNUL;
-				c = pgetc();
+				c = pgetc_eatbnl();
 				/*FALLTHROUGH*/
 			default:
 				p = strchr(types, c);
@@ -1259,7 +1277,7 @@ varname:
 					int cc = c;
 					subtype = c == '#' ? VSTRIMLEFT :
 							     VSTRIMRIGHT;
-					c = pgetc();
+					c = pgetc_eatbnl();
 					if (c == cc)
 						subtype++;
 					else
