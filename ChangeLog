@@ -2,6 +2,7 @@
 
 	* Kill pgetc_macro.
 	* Handle backslash newlines properly after dollar sign.
+	* Add nlprompt/nlnoprompt helpers.
 
 2014-09-28  Herbert Xu <herbert@gondor.apana.org.au>
 

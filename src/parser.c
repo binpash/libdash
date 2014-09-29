@@ -743,6 +743,19 @@ out:
 	return (t);
 }
 
+static void nlprompt(void)
+{
+	plinno++;
+	if (doprompt)
+		setprompt(2);
+}
+
+static void nlnoprompt(void)
+{
+	plinno++;
+	needprompt = doprompt;
+}
+
 
 /*
  * Read the next input token.
@@ -786,16 +799,13 @@ xxreadtoken(void)
 			continue;
 		case '\\':
 			if (pgetc() == '\n') {
-				plinno++;
-				if (doprompt)
-					setprompt(2);
+				nlprompt();
 				continue;
 			}
 			pungetc();
 			goto breakloop;
 		case '\n':
-			plinno++;
-			needprompt = doprompt;
+			nlnoprompt();
 			RETURN(TNL);
 		case PEOF:
 			RETURN(TEOF);
@@ -837,9 +847,7 @@ static int pgetc_eatbnl(void)
 			break;
 		}
 
-		plinno++;
-		if (doprompt)
-			setprompt(2);
+		nlprompt();
 	}
 
 	return c;
@@ -913,9 +921,7 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 				if (syntax == BASESYNTAX)
 					goto endword;	/* exit outer loop */
 				USTPUTC(c, out);
-				plinno++;
-				if (doprompt)
-					setprompt(2);
+				nlprompt();
 				c = pgetc();
 				goto loop;		/* continue outer loop */
 			case CWORD:
@@ -934,9 +940,7 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 					USTPUTC('\\', out);
 					pungetc();
 				} else if (c == '\n') {
-					plinno++;
-					if (doprompt)
-						setprompt(2);
+					nlprompt();
 				} else {
 					if (
 						dblquote &&
@@ -1092,8 +1096,7 @@ checkend: {
 
 		if (c == '\n' || c == PEOF) {
 			c = PEOF;
-			plinno++;
-			needprompt = doprompt;
+			nlnoprompt();
 		} else {
 			int len;
 
@@ -1342,9 +1345,7 @@ parsebackq: {
 
 			case '\\':
                                 if ((pc = pgetc()) == '\n') {
-					plinno++;
-					if (doprompt)
-						setprompt(2);
+					nlprompt();
 					/*
 					 * If eating a newline, avoid putting
 					 * the newline into the new character
@@ -1366,8 +1367,7 @@ parsebackq: {
 				synerror("EOF in backquote substitution");
 
 			case '\n':
-				plinno++;
-				needprompt = doprompt;
+				nlnoprompt();
 				break;
 
 			default:
