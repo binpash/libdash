@@ -134,7 +134,10 @@ RESET {
 int
 pgetc(void)
 {
-	return pgetc_macro();
+	if (--parsenleft >= 0)
+		return (signed char)*parsenextc++;
+	else
+		return preadbuffer();
 }
 
 
@@ -147,7 +150,7 @@ pgetc2()
 {
 	int c;
 	do {
-		c = pgetc_macro();
+		c = pgetc();
 	} while (c == PEOA);
 	return c;
 }

@@ -775,7 +775,7 @@ xxreadtoken(void)
 		setprompt(2);
 	}
 	for (;;) {	/* until token or start of word found */
-		c = pgetc_macro();
+		c = pgetc();
 		switch (c) {
 		case ' ': case '\t':
 		case PEOA:
@@ -1009,7 +1009,7 @@ quotemark:
 					USTPUTC(c, out);
 				}
 			}
-			c = pgetc_macro();
+			c = pgetc();
 		}
 	}
 endword:
