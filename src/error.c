@@ -105,6 +105,7 @@ onint(void) {
 		signal(SIGINT, SIG_DFL);
 		raise(SIGINT);
 	}
+	exitstatus = SIGINT + 128;
 	exraise(EXINT);
 	/* NOTREACHED */
 }

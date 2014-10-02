@@ -2,6 +2,7 @@
 
 	* Fix use-after-free in dotrap/evalstring.
 	* Make sure evalskip is zero before running traps.
+	* Set exitstatus in onint.
 
 2014-09-29  Herbert Xu <herbert@gondor.apana.org.au>
 
