@@ -1,6 +1,7 @@
 2014-10-02  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix use-after-free in dotrap/evalstring.
+	* Make sure evalskip is zero before running traps.
 
 2014-09-29  Herbert Xu <herbert@gondor.apana.org.au>
 

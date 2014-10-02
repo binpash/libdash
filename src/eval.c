@@ -197,6 +197,9 @@ evaltree(union node *n, int flags)
 		TRACE(("evaltree(NULL) called\n"));
 		goto out;
 	}
+
+	dotrap();
+
 #ifndef SMALL
 	displayhist = 1;	/* show history substitutions done with fc */
 #endif
@@ -308,8 +311,7 @@ out:
 	if (checkexit & exitstatus)
 		goto exexit;
 
-	if (pendingsigs)
-		dotrap();
+	dotrap();
 
 	if (flags & EV_EXIT) {
 exexit:
