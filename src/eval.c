@@ -160,6 +160,7 @@ evalstring(char *s, int flags)
 	struct stackmark smark;
 	int status;
 
+	s = sstrdup(s);
 	setinputstring(s);
 	setstackmark(&smark);
 
@@ -171,7 +172,9 @@ evalstring(char *s, int flags)
 		if (evalskip)
 			break;
 	}
+	popstackmark(&smark);
 	popfile();
+	stunalloc(s);
 
 	return status;
 }
