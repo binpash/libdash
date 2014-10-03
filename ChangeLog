@@ -1,3 +1,7 @@
+2014-10-03  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Do not clobber exitstatus in evalcommand.
+
 2014-10-02  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Fix use-after-free in dotrap/evalstring.

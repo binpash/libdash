@@ -853,12 +853,9 @@ bail:
 				listsetvar(varlist.list, VEXPORT);
 		}
 		if (evalbltin(cmdentry.u.cmd, argc, argv, flags)) {
-			if (exception == EXERROR) {
-				exitstatus = 2;
-				if (spclbltin <= 0) {
-					FORCEINTON;
-					break;
-				}
+			if (exception == EXERROR && spclbltin <= 0) {
+				FORCEINTON;
+				break;
 			}
 raise:
 			longjmp(handler->loc, 1);
