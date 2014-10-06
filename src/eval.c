@@ -928,9 +928,11 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
 	struct jmploc jmploc;
 	int e;
 	int savefuncline;
+	int saveloopnest;
 
 	saveparam = shellparam;
 	savefuncline = funcline;
+	saveloopnest = loopnest;
 	savehandler = handler;
 	if ((e = setjmp(jmploc.loc))) {
 		goto funcdone;
@@ -940,6 +942,7 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
 	shellparam.malloc = 0;
 	func->count++;
 	funcline = func->n.ndefun.linno;
+	loopnest = 0;
 	INTON;
 	shellparam.nparam = argc - 1;
 	shellparam.p = argv + 1;
@@ -950,6 +953,7 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
 	poplocalvars(0);
 funcdone:
 	INTOFF;
+	loopnest = saveloopnest;
 	funcline = savefuncline;
 	freefunc(func);
 	freeparam(&shellparam);

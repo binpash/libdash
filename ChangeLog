@@ -1,6 +1,7 @@
 2014-10-06  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Exit without arguments in a trap should use status outside traps.
+	* Do not allow break to break across function calls.
 
 2014-10-03  Herbert Xu <herbert@gondor.apana.org.au>
 
