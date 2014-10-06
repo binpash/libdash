@@ -339,27 +339,45 @@ void evaltreenr(union node *n, int flags)
 #endif
 
 
+static int skiploop(void)
+{
+	int skip = evalskip;
+
+	switch (skip) {
+	case 0:
+		break;
+
+	case SKIPBREAK:
+	case SKIPCONT:
+		if (likely(--skipcount <= 0)) {
+			evalskip = 0;
+			break;
+		}
+
+		skip = SKIPBREAK;
+		break;
+	}
+
+	return skip;
+}
+
+
 STATIC void
 evalloop(union node *n, int flags)
 {
+	int skip;
 	int status;
 
 	loopnest++;
 	status = 0;
 	flags &= EV_TESTED;
-	for (;;) {
+	do {
 		int i;
 
 		evaltree(n->nbinary.ch1, EV_TESTED);
-		if (evalskip) {
-skipping:	  if (evalskip == SKIPCONT && --skipcount <= 0) {
-				evalskip = 0;
-				continue;
-			}
-			if (evalskip == SKIPBREAK && --skipcount <= 0)
-				evalskip = 0;
-			break;
-		}
+		skip = skiploop();
+		if (skip)
+			continue;
 		i = exitstatus;
 		if (n->type != NWHILE)
 			i = !i;
@@ -367,9 +385,8 @@ skipping:	  if (evalskip == SKIPCONT && --skipcount <= 0) {
 			break;
 		evaltree(n->nbinary.ch2, flags);
 		status = exitstatus;
-		if (evalskip)
-			goto skipping;
-	}
+		skip = skiploop();
+	} while (!(skip & ~SKIPCONT));
 	loopnest--;
 	exitstatus = status;
 }
@@ -392,9 +409,6 @@ evalfor(union node *n, int flags)
 	arglist.lastp = &arglist.list;
 	for (argp = n->nfor.args ; argp ; argp = argp->narg.next) {
 		expandarg(argp, &arglist, EXP_FULL | EXP_TILDE);
-		/* XXX */
-		if (evalskip)
-			goto out;
 	}
 	*arglist.lastp = NULL;
 
@@ -404,18 +418,10 @@ evalfor(union node *n, int flags)
 	for (sp = arglist.list ; sp ; sp = sp->next) {
 		setvar(n->nfor.var, sp->text, 0);
 		evaltree(n->nfor.body, flags);
-		if (evalskip) {
-			if (evalskip == SKIPCONT && --skipcount <= 0) {
-				evalskip = 0;
-				continue;
-			}
-			if (evalskip == SKIPBREAK && --skipcount <= 0)
-				evalskip = 0;
+		if (skiploop() & ~SKIPCONT)
 			break;
-		}
 	}
 	loopnest--;
-out:
 	popstackmark(&smark);
 }
 
