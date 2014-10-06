@@ -37,6 +37,7 @@
 extern char *commandname;	/* currently executing command */
 extern int exitstatus;		/* exit status of last command */
 extern int back_exitstatus;	/* exit status of backquoted command */
+extern int savestatus;		/* exit status of last command outside traps */
 
 
 struct backcmd {		/* result of evalbackcmd */

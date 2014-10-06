@@ -74,6 +74,7 @@ static int funcline;		/* starting line number of current function, or 0 if not i
 char *commandname;
 int exitstatus;			/* exit status of last command */
 int back_exitstatus;		/* exit status of backquoted command */
+int savestatus = -1;		/* exit status of last command outside traps */
 
 
 #if !defined(__alpha__) || (defined(__GNUC__) && __GNUC__ >= 3)
@@ -114,6 +115,10 @@ INCLUDE "eval.h"
 RESET {
 	evalskip = 0;
 	loopnest = 0;
+	if (savestatus >= 0) {
+		exitstatus = savestatus;
+		savestatus = -1;
+	}
 }
 #endif
 

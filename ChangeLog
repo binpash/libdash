@@ -1,3 +1,7 @@
+2014-10-06  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Exit without arguments in a trap should use status outside traps.
+
 2014-10-03  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Do not clobber exitstatus in evalcommand.
