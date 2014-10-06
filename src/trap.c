@@ -343,7 +343,8 @@ void dotrap(void)
 		if (!p)
 			continue;
 		evalstring(p, 0);
-		exitstatus = status;
+		if (evalskip != SKIPFUNC)
+			exitstatus = status;
 	}
 
 	savestatus = last_status;

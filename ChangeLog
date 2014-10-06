@@ -4,6 +4,7 @@
 	* Do not allow break to break across function calls.
 	* Move common skipcount logic into skiploop.
 	* Allow return in loop conditional to set exit status.
+	* Return without arguments in a trap should use status outside traps.
 
 2014-10-03  Herbert Xu <herbert@gondor.apana.org.au>
 
