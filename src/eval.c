@@ -387,8 +387,9 @@ evalloop(union node *n, int flags)
 		status = exitstatus;
 		skip = skiploop();
 	} while (!(skip & ~SKIPCONT));
+	if (skip != SKIPFUNC)
+		exitstatus = status;
 	loopnest--;
-	exitstatus = status;
 }
 
 
