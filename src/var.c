@@ -80,6 +80,7 @@ const char defifsvar[] = "IFS= \t\n";
 #else
 const char defifs[] = " \t\n";
 #endif
+MKINIT char defoptindvar[] = "OPTIND=1";
 
 int lineno;
 char linenovar[sizeof("LINENO=")+sizeof(int)*CHAR_BIT/3+1] = "LINENO=";
@@ -100,7 +101,7 @@ struct var varinit[] = {
 	{ 0,	VSTRFIXED|VTEXTFIXED,		"PS1=$ ",	0 },
 	{ 0,	VSTRFIXED|VTEXTFIXED,		"PS2=> ",	0 },
 	{ 0,	VSTRFIXED|VTEXTFIXED,		"PS4=+ ",	0 },
-	{ 0,	VSTRFIXED|VTEXTFIXED,		"OPTIND=1",	getoptsreset },
+	{ 0,	VSTRFIXED|VTEXTFIXED,		defoptindvar,	getoptsreset },
 #ifdef WITH_LINENO
 	{ 0,	VSTRFIXED|VTEXTFIXED,		linenovar,	0 },
 #endif
@@ -142,7 +143,7 @@ INIT {
 		}
 	}
 
-	setvarint("OPTIND", 1, 0);
+	setvareq(defoptindvar, VTEXTFIXED);
 
 	fmtstr(ppid + 5, sizeof(ppid) - 5, "%ld", (long) getppid());
 	setvareq(ppid, VTEXTFIXED);

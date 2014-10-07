@@ -1,3 +1,7 @@
+2014-10-07  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Use setvareq to set OPTIND initially.
+
 2014-10-06  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Exit without arguments in a trap should use status outside traps.
