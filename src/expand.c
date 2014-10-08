@@ -753,28 +753,22 @@ vsplus:
 			argstr(p, flag | EXP_TILDE | EXP_WORD);
 			goto end;
 		}
-		if (easy)
-			goto record;
-		goto end;
+		goto record;
 	}
 
 	if (subtype == VSASSIGN || subtype == VSQUESTION) {
-		if (varlen < 0) {
-			if (subevalvar(p, var, 0, subtype, startloc,
-				       varflags, flag & ~QUOTES_ESC)) {
-				varflags &= ~VSNUL;
-				/* 
-				 * Remove any recorded regions beyond 
-				 * start of variable 
-				 */
-				removerecordregions(startloc);
-				goto again;
-			}
-			goto end;
-		}
-		if (easy)
+		if (varlen >= 0)
 			goto record;
-		goto end;
+
+		subevalvar(p, var, 0, subtype, startloc, varflags,
+			   flag & ~QUOTES_ESC);
+		varflags &= ~VSNUL;
+		/* 
+		 * Remove any recorded regions beyond 
+		 * start of variable 
+		 */
+		removerecordregions(startloc);
+		goto again;
 	}
 
 	if (varlen < 0 && uflag)
@@ -786,9 +780,9 @@ vsplus:
 	}
 
 	if (subtype == VSNORMAL) {
+record:
 		if (!easy)
 			goto end;
-record:
 		recordregion(startloc, expdest - (char *)stackblock(), nulonly);
 		goto end;
 	}
