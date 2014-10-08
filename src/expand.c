@@ -116,7 +116,7 @@ STATIC const char *subevalvar(char *, char *, int, int, int, int, int);
 STATIC char *evalvar(char *, int);
 STATIC size_t strtodest(const char *, const char *, int);
 STATIC void memtodest(const char *, size_t, const char *, int);
-STATIC ssize_t varvalue(char *, int, int);
+STATIC ssize_t varvalue(char *, int, int, int *);
 STATIC void expandmeta(struct strlist *, int);
 #ifdef HAVE_GLOB
 STATIC void addglob(const glob_t *);
@@ -722,6 +722,7 @@ evalvar(char *p, int flag)
 	ssize_t varlen;
 	int easy;
 	int quoted;
+	int nulonly;
 
 	varflags = *p++;
 	subtype = varflags & VSTYPE;
@@ -732,11 +733,12 @@ evalvar(char *p, int flag)
 	quoted = flag & EXP_QUOTED;
 	var = p;
 	easy = (!quoted || (*var == '@' && shellparam.nparam));
+	nulonly = easy;
 	startloc = expdest - (char *)stackblock();
 	p = strchr(p, '=') + 1;
 
 again:
-	varlen = varvalue(var, varflags, flag);
+	varlen = varvalue(var, varflags, flag, &nulonly);
 	if (varflags & VSNUL)
 		varlen--;
 
@@ -787,7 +789,7 @@ vsplus:
 		if (!easy)
 			goto end;
 record:
-		recordregion(startloc, expdest - (char *)stackblock(), quoted);
+		recordregion(startloc, expdest - (char *)stackblock(), nulonly);
 		goto end;
 	}
 
@@ -892,7 +894,7 @@ strtodest(p, syntax, quotes)
  */
 
 STATIC ssize_t
-varvalue(char *name, int varflags, int flags)
+varvalue(char *name, int varflags, int flags, int *nulonly)
 {
 	int num;
 	char *p;
@@ -907,7 +909,8 @@ varvalue(char *name, int varflags, int flags)
 	int quotes = (discard ? 0 : (flags & QUOTES_ESC)) | QUOTES_KEEPNUL;
 	ssize_t len = 0;
 
-	sep = quoted ? ((flags & EXP_FULL) << CHAR_BIT) : 0;
+	sep = *nulonly ? (flags & EXP_FULL) << CHAR_BIT : 0;
+	*nulonly = 0;
 	syntax = quoted ? DQSYNTAX : BASESYNTAX;
 
 	switch (*name) {
@@ -938,15 +941,16 @@ numvar:
 		expdest = p;
 		break;
 	case '@':
-		if (sep)
+		if (quoted)
 			goto param;
 		/* fall through */
 	case '*':
-		sep = ifsset() ? ifsval()[0] : ' ';
+		sep |= ifsset() ? ifsval()[0] : ' ';
 param:
 		if (!(ap = shellparam.p))
 			return -1;
 		sepc = sep;
+		*nulonly = !sepc;
 		while ((p = *ap++)) {
 			len += strtodest(p, syntax, quotes);
 

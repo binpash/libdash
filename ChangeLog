@@ -1,3 +1,7 @@
+2014-10-08  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Split unquoted $@/$* correctly when IFS is set but empty.
+
 2014-10-07  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Use setvareq to set OPTIND initially.
