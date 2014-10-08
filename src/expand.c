@@ -722,7 +722,6 @@ evalvar(char *p, int flag)
 	ssize_t varlen;
 	int easy;
 	int quoted;
-	int nulonly;
 
 	varflags = *p++;
 	subtype = varflags & VSTYPE;
@@ -733,12 +732,11 @@ evalvar(char *p, int flag)
 	quoted = flag & EXP_QUOTED;
 	var = p;
 	easy = (!quoted || (*var == '@' && shellparam.nparam));
-	nulonly = easy;
 	startloc = expdest - (char *)stackblock();
 	p = strchr(p, '=') + 1;
 
 again:
-	varlen = varvalue(var, varflags, flag, &nulonly);
+	varlen = varvalue(var, varflags, flag, &quoted);
 	if (varflags & VSNUL)
 		varlen--;
 
@@ -783,7 +781,7 @@ vsplus:
 record:
 		if (!easy)
 			goto end;
-		recordregion(startloc, expdest - (char *)stackblock(), nulonly);
+		recordregion(startloc, expdest - (char *)stackblock(), quoted);
 		goto end;
 	}
 
@@ -888,7 +886,7 @@ strtodest(p, syntax, quotes)
  */
 
 STATIC ssize_t
-varvalue(char *name, int varflags, int flags, int *nulonly)
+varvalue(char *name, int varflags, int flags, int *quotedp)
 {
 	int num;
 	char *p;
@@ -897,14 +895,12 @@ varvalue(char *name, int varflags, int flags, int *nulonly)
 	char sepc;
 	char **ap;
 	char const *syntax;
-	int quoted = flags & EXP_QUOTED;
+	int quoted = *quotedp;
 	int subtype = varflags & VSTYPE;
 	int discard = subtype == VSPLUS || subtype == VSLENGTH;
 	int quotes = (discard ? 0 : (flags & QUOTES_ESC)) | QUOTES_KEEPNUL;
 	ssize_t len = 0;
 
-	sep = *nulonly ? (flags & EXP_FULL) << CHAR_BIT : 0;
-	*nulonly = 0;
 	syntax = quoted ? DQSYNTAX : BASESYNTAX;
 
 	switch (*name) {
@@ -935,16 +931,20 @@ numvar:
 		expdest = p;
 		break;
 	case '@':
+		sep = 0;
 		if (quoted)
 			goto param;
 		/* fall through */
 	case '*':
-		sep |= ifsset() ? ifsval()[0] : ' ';
+		sep = ifsset() ? ifsval()[0] : ' ';
+		if (!quoted) {
 param:
+			sep |= (flags & EXP_FULL) << CHAR_BIT;
+		}
+		sepc = sep;
+		*quotedp = !sepc;
 		if (!(ap = shellparam.p))
 			return -1;
-		sepc = sep;
-		*nulonly = !sepc;
 		while ((p = *ap++)) {
 			len += strtodest(p, syntax, quotes);
 

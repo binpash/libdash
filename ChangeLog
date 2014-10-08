@@ -2,6 +2,7 @@
 
 	* Split unquoted $@/$* correctly when IFS is set but empty.
 	* Do not split quoted VSLENGTH and VSTRIM.
+	* Optimise nulonly away and just use quoted as before.
 
 2014-10-07  Herbert Xu <herbert@gondor.apana.org.au>
 
