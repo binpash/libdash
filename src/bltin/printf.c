@@ -132,10 +132,8 @@ int printfcmd(int argc, char *argv[])
 	argv = argptr;
 	format = *argv;
 
-	if (!format) {
-		warnx("usage: printf format [arg ...]");
-		goto err;
-	}
+	if (!format)
+		error("usage: printf format [arg ...]");
 
 	gargv = ++argv;
 
@@ -190,10 +188,8 @@ pc:
 			fmt += strspn(fmt, SKIP2);
 
 			ch = *fmt;
-			if (!ch) {
-				warnx("missing format character");
-				goto err;
-			}
+			if (!ch)
+				error("missing format character");
 			/* null terminate format string to we can use it
 			   as an argument to printf. */
 			nextch = fmt[1];
@@ -246,8 +242,7 @@ pc:
 				break;
 			}
 			default:
-				warnx("%s: invalid directive", start);
-				goto err;
+				error("%s: invalid directive", start);
 			}
 			*++fmt = nextch;
 		}
@@ -255,8 +250,6 @@ pc:
 
 out:
 	return rval;
-err:
-	return 1;
 }
 
 
