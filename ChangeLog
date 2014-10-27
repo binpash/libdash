@@ -5,6 +5,7 @@
 	* Replace open-coded flushall in preadbuffer.
 	* Add likely tag in outmem.
 	* Add ifdefs around MEM_OUT handling in outmem.
+	* Remove unnecessary restoration of format string in printf.
 
 2014-10-13  Eric Blake <eblake@redhat.com>
 
