@@ -4,6 +4,7 @@
 	* Handle embedded NULs correctly in printf.
 	* Replace open-coded flushall in preadbuffer.
 	* Add likely tag in outmem.
+	* Add ifdefs around MEM_OUT handling in outmem.
 
 2014-10-13  Eric Blake <eblake@redhat.com>
 

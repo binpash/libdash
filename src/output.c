@@ -154,10 +154,13 @@ buffered:
 	if (!bufsize) {
 		;
 	} else if (dest->buf == NULL) {
+#ifdef notyet
 		if (dest->fd == MEM_OUT && len > bufsize) {
 			bufsize = len;
 		}
+#endif
 		offset = 0;
+#ifdef notyet
 		goto alloc;
 	} else if (dest->fd == MEM_OUT) {
 		offset = bufsize;
@@ -169,6 +172,7 @@ buffered:
 		if (bufsize < offset)
 			goto err;
 alloc:
+#endif
 		INTOFF;
 		dest->buf = ckrealloc(dest->buf, bufsize);
 		dest->bufsize = bufsize;
@@ -184,7 +188,9 @@ alloc:
 		goto buffered;
 
 	if ((xwrite(dest->fd, p, len))) {
+#ifdef notyet
 err:
+#endif
 		dest->flags |= OUTPUT_ERR;
 	}
 #endif
