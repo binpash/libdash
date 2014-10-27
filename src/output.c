@@ -99,9 +99,6 @@ struct output *out1 = &output;
 struct output *out2 = &errout;
 
 
-#ifndef USE_GLIBC_STDIO
-static void __outstr(const char *, size_t, struct output *);
-#endif
 static int xvsnprintf(char *, size_t, const char *, va_list);
 
 
@@ -134,10 +131,14 @@ RESET {
 #endif
 
 
-#ifndef USE_GLIBC_STDIO
-static void
-__outstr(const char *p, size_t len, struct output *dest)
+void
+outmem(const char *p, size_t len, struct output *dest)
 {
+#ifdef USE_GLIBC_STDIO
+	INTOFF;
+	fwrite(p, 1, len, dest->stream);
+	INTON;
+#else
 	size_t bufsize;
 	size_t offset;
 	size_t nleft;
@@ -186,8 +187,8 @@ alloc:
 err:
 		dest->flags |= OUTPUT_ERR;
 	}
-}
 #endif
+}
 
 
 void
@@ -201,7 +202,7 @@ outstr(const char *p, struct output *file)
 	size_t len;
 
 	len = strlen(p);
-	__outstr(p, len, file);
+	outmem(p, len, file);
 #endif
 }
 
@@ -213,7 +214,7 @@ void
 outcslow(int c, struct output *dest)
 {
 	char buf = c;
-	__outstr(&buf, 1, dest);
+	outmem(&buf, 1, dest);
 }
 #endif
 
@@ -283,35 +284,58 @@ fmtstr(char *outbuf, size_t length, const char *fmt, ...)
 }
 
 
+static int xvasprintf(char **sp, size_t size, const char *f, va_list ap)
+{
+	char *s;
+	int len;
+	va_list ap2;
+
+	va_copy(ap2, ap);
+	len = xvsnprintf(*sp, size, f, ap2);
+	va_end(ap2);
+	if (len < 0)
+		sh_error("xvsnprintf failed");
+	if (len < size)
+		return len;
+
+	s = stalloc((len >= stackblocksize() ? len : stackblocksize()) + 1);
+	*sp = s;
+	len = xvsnprintf(s, len + 1, f, ap);
+	return len;
+}
+
+
+int xasprintf(char **sp, const char *f, ...)
+{
+	va_list ap;
+	int ret;
+
+	va_start(ap, f);
+	ret = xvasprintf(sp, 0, f, ap);
+	va_end(ap);
+	return ret;
+}
+
+
 #ifndef USE_GLIBC_STDIO
 void
 doformat(struct output *dest, const char *f, va_list ap)
 {
 	struct stackmark smark;
 	char *s;
-	int len, ret;
-	size_t size;
-	va_list ap2;
+	int len;
+	int olen;
 
-	va_copy(ap2, ap);
-	size = dest->end - dest->nextc;
-	len = xvsnprintf(dest->nextc, size, f, ap2);
-	va_end(ap2);
-	if (len < 0) {
-		dest->flags |= OUTPUT_ERR;
-		return;
-	}
-	if (len < size) {
-		dest->nextc += len;
-		return;
-	}
 	setstackmark(&smark);
-	s = stalloc((len >= stackblocksize() ? len : stackblocksize()) + 1);
-	ret = xvsnprintf(s, len + 1, f, ap);
-	if (ret == len)
-		__outstr(s, len, dest);
-	else
-		dest->flags |= OUTPUT_ERR;
+	s = dest->nextc;
+	olen = dest->end - dest->nextc;
+	len = xvasprintf(&s, olen, f, ap);
+	if (likely(olen > len)) {
+		dest->nextc += len;
+		goto out;
+	}
+	outmem(s, len, dest);
+out:
 	popstackmark(&smark);
 }
 #endif

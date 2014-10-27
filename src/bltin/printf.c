@@ -40,7 +40,7 @@
 #include <string.h>
 #include <unistd.h>
 
-static int	 conv_escape_str(char *);
+static int	 conv_escape_str(char *, char **);
 static char	*conv_escape(char *, int *);
 static int	 getchr(void);
 static double	 getdouble(void);
@@ -72,6 +72,53 @@ static char  **gargv;
 		break; \
 	} \
 }
+
+#define ASPF(sp, f, func) ({ \
+	int ret; \
+	switch ((char *)param - (char *)array) { \
+	default: \
+		ret = xasprintf(sp, f, array[0], array[1], func); \
+		break; \
+	case sizeof(*param): \
+		ret = xasprintf(sp, f, array[0], func); \
+		break; \
+	case 0: \
+		ret = xasprintf(sp, f, func); \
+		break; \
+	} \
+	ret; \
+})
+
+
+static int print_escape_str(const char *f, int *param, int *array, char *s)
+{
+	struct stackmark smark;
+	char *p, *q;
+	int done;
+	int len;
+	int total;
+
+	setstackmark(&smark);
+	done = conv_escape_str(s, &p);
+	q = stackblock();
+	len = p - q;
+
+	p = makestrspace(len, p);
+	memset(p, 'X', len - 1);
+	p[len - 1] = 0;
+
+	q = stackblock();
+	total = ASPF(&p, f, p);
+
+	len = strchrnul(p, 'X') - p;
+	memcpy(p + len, q, strchrnul(p + len, ' ') - (p + len));
+
+	out1mem(p, total);
+
+	popstackmark(&smark);
+	return done;
+}
+
 
 int printfcmd(int argc, char *argv[])
 {
@@ -154,17 +201,14 @@ pc:
 			fmt[1] = 0;
 			switch (ch) {
 
-			case 'b': {
-				int done = conv_escape_str(getstr());
-				char *p = stackblock();
+			case 'b':
 				*fmt = 's';
-				PF(start, p);
 				/* escape if a \c was encountered */
-				if (done)
+				if (print_escape_str(start, param, array,
+						     getstr()))
 					goto out;
 				*fmt = 'b';
 				break;
-			}
 			case 'c': {
 				int p = getchr();
 				PF(start, p);
@@ -223,8 +267,9 @@ err:
  *	Halts processing string if a \c escape is encountered.
  */
 static int
-conv_escape_str(char *str)
+conv_escape_str(char *str, char **sp)
 {
+	int c;
 	int ch;
 	char *cp;
 
@@ -232,16 +277,14 @@ conv_escape_str(char *str)
 	STARTSTACKSTR(cp);
 
 	do {
-		int c;
-
-		ch = *str++;
+		c = ch = *str++;
 		if (ch != '\\')
 			continue;
 
 		ch = *str++;
 		if (ch == 'c') {
 			/* \c as in SYSV echo - abort all processing.... */
-			ch = 0x100;
+			c = ch = 0x100;
 			continue;
 		}
 
@@ -253,14 +296,14 @@ conv_escape_str(char *str)
 		if (ch == '0') {
 			unsigned char i;
 			i = 3;
-			ch = 0;
+			c = 0;
 			do {
 				unsigned k = octtobin(*str);
 				if (k > 7)
 					break;
 				str++;
-				ch <<= 3;
-				ch += k;
+				c <<= 3;
+				c += k;
 			} while (--i);
 			continue;
 		}
@@ -268,7 +311,9 @@ conv_escape_str(char *str)
 		/* Finally test for sequences valid in the format string */
 		str = conv_escape(str - 1, &c);
 		ch = c;
-	} while (STPUTC(ch, cp), (char)ch);
+	} while (STPUTC(c, cp), (char)ch);
+
+	*sp = cp;
 
 	return ch;
 }
@@ -456,8 +501,7 @@ echocmd(int argc, char **argv)
 	do {
 		int c;
 
-		nonl += conv_escape_str(*argv);
-		outstr(stackblock(), outs);
+		nonl += print_escape_str("%s", NULL, NULL, *argv);
 		if (nonl > 0)
 			break;
 

@@ -63,6 +63,7 @@ extern struct output memout;
 extern struct output *out1;
 extern struct output *out2;
 
+void outmem(const char *, size_t, struct output *);
 void outstr(const char *, struct output *);
 #ifndef USE_GLIBC_STDIO
 void outcslow(int, struct output *);
@@ -75,6 +76,7 @@ void out1fmt(const char *, ...)
     __attribute__((__format__(__printf__,1,2)));
 int fmtstr(char *, size_t, const char *, ...)
     __attribute__((__format__(__printf__,3,4)));
+int xasprintf(char **, const char *, ...);
 #ifndef USE_GLIBC_STDIO
 void doformat(struct output *, const char *, va_list);
 #endif
@@ -115,6 +117,7 @@ static inline void outc(int ch, struct output *file)
 #endif
 #define out1c(c)	outc((c), out1)
 #define out2c(c)	outcslow((c), out2)
+#define out1mem(s, l)	outmem((s), (l), out1)
 #define out1str(s)	outstr((s), out1)
 #define out2str(s)	outstr((s), out2)
 #define outerr(f)	(f)->flags
