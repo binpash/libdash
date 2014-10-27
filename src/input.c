@@ -245,10 +245,7 @@ preadbuffer(void)
 	}
 	if (unlikely(parsenleft == EOF_NLEFT || parsefile->buf == NULL))
 		return PEOF;
-	flushout(&output);
-#ifdef FLUSHERR
-	flushout(&errout);
-#endif
+	flushall();
 
 	more = parselleft;
 	if (more <= 0) {
