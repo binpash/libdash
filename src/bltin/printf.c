@@ -191,9 +191,12 @@ pc:
 				PF(f, p);
 				break;
 			}
+			case 'a':
+			case 'A':
 			case 'e':
 			case 'E':
 			case 'f':
+			case 'F':
 			case 'g':
 			case 'G': {
 				double p = getdouble();
