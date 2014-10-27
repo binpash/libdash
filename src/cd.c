@@ -38,6 +38,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#ifdef __CYGWIN__
+#include <sys/cygwin.h>
+#endif
 
 /*
  * The cd and pwd commands.
@@ -193,6 +196,17 @@ updatepwd(const char *dir)
 	char *p;
 	char *cdcomppath;
 	const char *lim;
+
+#ifdef __CYGWIN__
+	/* On cygwin, thanks to drive letters, some absolute paths do
+	   not begin with slash; but cygwin includes a function that
+	   forces normalization to the posix form */
+	char pathbuf[PATH_MAX];
+	if (cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_RELATIVE, dir, pathbuf,
+			     sizeof(pathbuf)) < 0)
+		sh_error("can't normalize %s", dir);
+	dir = pathbuf;
+#endif
 
 	cdcomppath = sstrdup(dir);
 	STARTSTACKSTR(new);
