@@ -9,6 +9,7 @@
 	* Remove getintmax in printf.
 	* Use error instead of warnx for fatal errors in printf.
 	* Optimise handling of backslash octals in printf.
+	* Simplify echo command.
 
 2014-10-13  Eric Blake <eblake@redhat.com>
 

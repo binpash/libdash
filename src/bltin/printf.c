@@ -442,33 +442,21 @@ check_conversion(const char *s, const char *ep)
 int
 echocmd(int argc, char **argv)
 {
-	int nonl = 0;
-	struct output *outs = out1;
+	int nonl;
 
-	if (!*++argv)
-		goto end;
-	if (equal(*argv, "-n")) {
-		nonl = ~nonl;
-		if (!*++argv)
-			goto end;
-	}
+	nonl = *++argv ? equal(*argv, "-n") : 0;
+	argv += nonl;
 
 	do {
 		int c;
 
-		nonl += print_escape_str("%s", NULL, NULL, *argv);
+		if (likely(*argv))
+			nonl += print_escape_str("%s", NULL, NULL, *argv++);
 		if (nonl > 0)
 			break;
 
-		c = ' ';
-		if (!*++argv) {
-end:
-			if (nonl) {
-				break;
-			}
-			c = '\n';
-		}
-		outc(c, outs);
+		c = *argv ? ' ' : '\n';
+		out1c(c);
 	} while (*argv);
 	return 0;
 }
