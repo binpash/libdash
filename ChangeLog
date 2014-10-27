@@ -10,6 +10,7 @@
 	* Use error instead of warnx for fatal errors in printf.
 	* Optimise handling of backslash octals in printf.
 	* Simplify echo command.
+	* Handle -- in dotcmd.
 
 2014-10-13  Eric Blake <eblake@redhat.com>
 

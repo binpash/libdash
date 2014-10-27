@@ -321,15 +321,19 @@ dotcmd(int argc, char **argv)
 {
 	int status = 0;
 
-	if (argc >= 2) {		/* That's what SVR2 does */
+	nextopt(nullstr);
+	argv = argptr;
+
+	if (*argv) {
 		char *fullname;
 
-		fullname = find_dot_file(argv[1]);
+		fullname = find_dot_file(*argv);
 		setinputfile(fullname, INPUT_PUSH_FILE);
 		commandname = fullname;
 		status = cmdloop(0);
 		popfile();
 	}
+
 	return status;
 }
 
