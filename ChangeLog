@@ -8,6 +8,7 @@
 	* Remove unnecessary restoration of format string in printf.
 	* Remove getintmax in printf.
 	* Use error instead of warnx for fatal errors in printf.
+	* Optimise handling of backslash octals in printf.
 
 2014-10-13  Eric Blake <eblake@redhat.com>
 

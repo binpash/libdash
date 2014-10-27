@@ -272,8 +272,8 @@ conv_escape_str(char *str, char **sp)
 		if (ch != '\\')
 			continue;
 
-		ch = *str++;
-		if (ch == 'c') {
+		c = *str++;
+		if (c == 'c') {
 			/* \c as in SYSV echo - abort all processing.... */
 			c = ch = 0x100;
 			continue;
@@ -284,24 +284,11 @@ conv_escape_str(char *str, char **sp)
 		 * They start with a \0, and are followed by 0, 1, 2, 
 		 * or 3 octal digits. 
 		 */
-		if (ch == '0') {
-			unsigned char i;
-			i = 3;
-			c = 0;
-			do {
-				unsigned k = octtobin(*str);
-				if (k > 7)
-					break;
-				str++;
-				c <<= 3;
-				c += k;
-			} while (--i);
-			continue;
-		}
+		if (c == '0' && isodigit(*str))
+			str++;
 
 		/* Finally test for sequences valid in the format string */
 		str = conv_escape(str - 1, &c);
-		ch = c;
 	} while (STPUTC(c, cp), (char)ch);
 
 	*sp = cp;
@@ -322,12 +309,11 @@ conv_escape(char *str, int *conv_ch)
 
 	switch (ch) {
 	default:
-	case 0:
-		value = '\\';
-		goto out;
+		if (!isodigit(*str)) {
+			value = '\\';
+			goto out;
+		}
 
-	case '0': case '1': case '2': case '3':
-	case '4': case '5': case '6': case '7':
 		ch = 3;
 		value = 0;
 		do {
