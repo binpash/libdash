@@ -3,6 +3,7 @@
 	* Add printf support for format string a, A, and F.
 	* Handle embedded NULs correctly in printf.
 	* Replace open-coded flushall in preadbuffer.
+	* Add likely tag in outmem.
 
 2014-10-13  Eric Blake <eblake@redhat.com>
 

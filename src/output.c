@@ -144,7 +144,7 @@ outmem(const char *p, size_t len, struct output *dest)
 	size_t nleft;
 
 	nleft = dest->end - dest->nextc;
-	if (nleft >= len) {
+	if (likely(nleft >= len)) {
 buffered:
 		dest->nextc = mempcpy(dest->nextc, p, len);
 		return;
