@@ -1,6 +1,7 @@
 2014-10-28  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed unnecessary pungetc on EOF from parser.
+	* Simplify EOF/newline handling in list parser.
 
 2014-10-27  Herbert Xu <herbert@gondor.apana.org.au>
 

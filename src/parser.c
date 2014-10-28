@@ -135,19 +135,13 @@ static inline int realeofmark(const char *eofmark)
 union node *
 parsecmd(int interact)
 {
-	int t;
-
 	tokpushback = 0;
+	checkkwd = 0;
+	heredoclist = 0;
 	doprompt = interact;
 	if (doprompt)
 		setprompt(doprompt);
 	needprompt = 0;
-	t = readtoken();
-	if (t == TEOF)
-		return NEOF;
-	if (t == TNL)
-		return NULL;
-	tokpushback++;
 	return list(1);
 }
 
@@ -158,11 +152,27 @@ list(int nlflag)
 	union node *n1, *n2, *n3;
 	int tok;
 
-	checkkwd = CHKNL | CHKKWD | CHKALIAS;
-	if (nlflag == 2 && tokendlist[peektoken()])
-		return NULL;
 	n1 = NULL;
 	for (;;) {
+		switch (peektoken()) {
+		case TNL:
+			if (!(nlflag & 1))
+				break;
+			parseheredoc();
+			return n1;
+
+		case TEOF:
+			if (!n1 && (nlflag & 1))
+				n1 = NEOF;
+			parseheredoc();
+			return n1;
+		}
+
+		checkkwd = CHKNL | CHKKWD | CHKALIAS;
+		if (nlflag == 2 && tokendlist[peektoken()])
+			return n1;
+		nlflag |= 2;
+
 		n2 = andor();
 		tok = readtoken();
 		if (tok == TBACKGND) {
@@ -189,29 +199,15 @@ list(int nlflag)
 			n1 = n3;
 		}
 		switch (tok) {
+		case TNL:
+		case TEOF:
+			tokpushback++;
+			/* fall through */
 		case TBACKGND:
 		case TSEMI:
-			tok = readtoken();
-			/* fall through */
-		case TNL:
-			if (tok == TNL) {
-				parseheredoc();
-				if (nlflag == 1)
-					return n1;
-			} else {
-				tokpushback++;
-			}
-			checkkwd = CHKNL | CHKKWD | CHKALIAS;
-			if (tokendlist[peektoken()])
-				return n1;
 			break;
-		case TEOF:
-			if (heredoclist)
-				parseheredoc();
-			tokpushback++;
-			return n1;
 		default:
-			if (nlflag == 1)
+			if ((nlflag & 1))
 				synexpect(-1);
 			tokpushback++;
 			return n1;
@@ -1443,10 +1439,6 @@ parsearith: {
 
 #ifdef mkinit
 INCLUDE "parser.h"
-RESET {
-	tokpushback = 0;
-	checkkwd = 0;
-}
 #endif
 
 
