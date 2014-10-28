@@ -1,3 +1,7 @@
+2014-10-28  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Removed unnecessary pungetc on EOF from parser.
+
 2014-10-27  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Add printf support for format string a, A, and F.

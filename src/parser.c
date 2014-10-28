@@ -208,8 +208,6 @@ list(int nlflag)
 		case TEOF:
 			if (heredoclist)
 				parseheredoc();
-			else
-				pungetc();		/* push back EOF on input */
 			tokpushback++;
 			return n1;
 		default:
