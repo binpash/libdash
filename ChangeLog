@@ -1,3 +1,7 @@
+2014-10-30  Herbert Xu <herbert@gondor.apana.org.au>
+
+	* Catch variable length expansions on non-existant specials.
+
 2014-10-28  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Removed unnecessary pungetc on EOF from parser.

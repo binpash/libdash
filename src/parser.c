@@ -1229,8 +1229,7 @@ varname:
 				STPUTC(c, out);
 				c = pgetc_eatbnl();
 			} while (is_digit(c));
-		}
-		else if (is_special(c)) {
+		} else {
 			int cc = c;
 
 			c = pgetc_eatbnl();
@@ -1251,10 +1250,14 @@ varname:
 				}
 			}
 
+			if (!is_special(cc)) {
+				if (subtype == VSLENGTH)
+					subtype = 0;
+				goto badsub;
+			}
+
 			USTPUTC(cc, out);
 		}
-		else
-			goto badsub;
 
 		if (subtype == 0) {
 			switch (c) {
