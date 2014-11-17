@@ -1,6 +1,7 @@
 2014-11-17  Stéphane Aulery <saulery@free.fr>
 
 	* Correct typo in manual page.
+	* Document redirection file descriptor limitation.
 
 2014-10-30  Herbert Xu <herbert@gondor.apana.org.au>
 
