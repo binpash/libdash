@@ -1,3 +1,7 @@
+2014-11-17  Stéphane Aulery <saulery@free.fr>
+
+	* Correct typo in manual page.
+
 2014-10-30  Herbert Xu <herbert@gondor.apana.org.au>
 
 	* Catch variable length expansions on non-existant specials.
