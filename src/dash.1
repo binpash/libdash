@@ -402,11 +402,13 @@ Append standard output (or n) to file.
 .It [n] Ns \*[Lt] file
 Redirect standard input (or n) from file.
 .It [n1] Ns \*[Lt]& Ns n2
-Duplicate standard input (or n1) from file descriptor n2.
+Copy file descriptor n2 as stdout (or fd n1).
+fd n2.
 .It [n] Ns \*[Lt]&-
 Close standard input (or n).
 .It [n1] Ns \*[Gt]& Ns n2
-Duplicate standard output (or n1) to n2.
+Copy file descriptor n2 as stdin (or fd n1).
+fd n2.
 .It [n] Ns \*[Gt]&-
 Close standard output (or n).
 .It [n] Ns \*[Lt]\*[Gt] file
