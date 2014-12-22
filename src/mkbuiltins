@@ -69,7 +69,7 @@ cat <<\!
 #include "builtins.h"
 
 !
-< $builtins sed '/^#/d; /^$/d' > $temp
+< $builtins sed '/^#/d; /^ *$/d' > $temp
 awk '{	printf "int %s(int, char **);\n", $1}' $temp
 echo '
 const struct builtincmd builtincmd[] = {'
