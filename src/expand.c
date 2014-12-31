@@ -901,6 +901,7 @@ varvalue(char *name, int varflags, int flags, int *quotedp)
 	int quotes = (discard ? 0 : (flags & QUOTES_ESC)) | QUOTES_KEEPNUL;
 	ssize_t len = 0;
 
+	sep = (flags & EXP_FULL) << CHAR_BIT;
 	syntax = quoted ? DQSYNTAX : BASESYNTAX;
 
 	switch (*name) {
@@ -931,16 +932,14 @@ numvar:
 		expdest = p;
 		break;
 	case '@':
-		sep = 0;
-		if (quoted)
+		if (quoted && sep)
 			goto param;
 		/* fall through */
 	case '*':
-		sep = ifsset() ? ifsval()[0] : ' ';
-		if (!quoted) {
+		if (quoted)
+			sep = 0;
+		sep |= ifsset() ? ifsval()[0] : ' ';
 param:
-			sep |= (flags & EXP_FULL) << CHAR_BIT;
-		}
 		sepc = sep;
 		*quotedp = !sepc;
 		if (!(ap = shellparam.p))
