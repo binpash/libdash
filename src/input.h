@@ -52,7 +52,6 @@ extern char *parsenextc;	/* next character in input buffer */
 
 int pgetc(void);
 int pgetc2(void);
-int preadbuffer(void);
 void pungetc(void);
 void pushstring(char *, void *);
 void popstring(void);

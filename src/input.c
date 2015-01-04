@@ -109,6 +109,7 @@ EditLine *el;			/* cookie for editline package */
 STATIC void pushfile(void);
 static int preadfd(void);
 static void setinputfd(int fd, int push);
+static int preadbuffer(void);
 
 #ifdef mkinit
 INCLUDE <stdio.h>
@@ -222,8 +223,7 @@ retry:
  * 4) Process input up to the next newline, deleting nul characters.
  */
 
-int
-preadbuffer(void)
+static int preadbuffer(void)
 {
 	char *q;
 	int more;
