@@ -49,6 +49,12 @@ struct strpush {
 	int prevnleft;
 	struct alias *ap;	/* if push was associated with an alias */
 	char *string;		/* remember the string since it may change */
+
+	/* Remember last two characters for pungetc. */
+	int lastc[2];
+
+	/* Number of outstanding calls to pungetc. */
+	int unget;
 };
 
 /*
@@ -66,6 +72,12 @@ struct parsefile {
 	char *buf;		/* input buffer */
 	struct strpush *strpush; /* for pushing strings at this level */
 	struct strpush basestrpush; /* so pushing one is fast */
+
+	/* Remember last two characters for pungetc. */
+	int lastc[2];
+
+	/* Number of outstanding calls to pungetc. */
+	int unget;
 };
 
 extern struct parsefile *parsefile;

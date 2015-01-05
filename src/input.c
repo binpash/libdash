@@ -102,10 +102,20 @@ RESET {
 int
 pgetc(void)
 {
+	int c;
+
+	if (parsefile->unget)
+		return parsefile->lastc[--parsefile->unget];
+
 	if (--parsefile->nleft >= 0)
-		return (signed char)*parsefile->nextc++;
+		c = (signed char)*parsefile->nextc++;
 	else
-		return preadbuffer();
+		c = preadbuffer();
+
+	parsefile->lastc[1] = parsefile->lastc[0];
+	parsefile->lastc[0] = c;
+
+	return c;
 }
 
 
@@ -194,7 +204,7 @@ static int preadbuffer(void)
 #endif
 	char savec;
 
-	while (unlikely(parsefile->strpush)) {
+	if (unlikely(parsefile->strpush)) {
 		if (
 			parsefile->nleft == -1 &&
 			parsefile->strpush->ap &&
@@ -204,8 +214,7 @@ static int preadbuffer(void)
 			return PEOA;
 		}
 		popstring();
-		if (--parsefile->nleft >= 0)
-			return (signed char)*parsefile->nextc++;
+		return pgetc();
 	}
 	if (unlikely(parsefile->nleft == EOF_NLEFT ||
 		     parsefile->buf == NULL))
@@ -290,15 +299,14 @@ again:
 }
 
 /*
- * Undo the last call to pgetc.  Only one character may be pushed back.
+ * Undo a call to pgetc.  Only two characters may be pushed back.
  * PEOF may be pushed back.
  */
 
 void
 pungetc(void)
 {
-	parsefile->nleft++;
-	parsefile->nextc--;
+	parsefile->unget++;
 }
 
 /*
@@ -322,6 +330,8 @@ pushstring(char *s, void *ap)
 		sp = parsefile->strpush = &(parsefile->basestrpush);
 	sp->prevstring = parsefile->nextc;
 	sp->prevnleft = parsefile->nleft;
+	sp->unget = parsefile->unget;
+	memcpy(sp->lastc, parsefile->lastc, sizeof(sp->lastc));
 	sp->ap = (struct alias *)ap;
 	if (ap) {
 		((struct alias *)ap)->flag |= ALIASINUSE;
@@ -329,6 +339,7 @@ pushstring(char *s, void *ap)
 	}
 	parsefile->nextc = s;
 	parsefile->nleft = len;
+	parsefile->unget = 0;
 	INTON;
 }
 
@@ -353,6 +364,8 @@ popstring(void)
 	}
 	parsefile->nextc = sp->prevstring;
 	parsefile->nleft = sp->prevnleft;
+	parsefile->unget = sp->unget;
+	memcpy(parsefile->lastc, sp->lastc, sizeof(sp->lastc));
 /*dprintf("*** calling popstring: restoring to '%s'\n", parsenextc);*/
 	parsefile->strpush = sp->prev;
 	if (sp != &(parsefile->basestrpush))
@@ -439,6 +452,7 @@ pushfile(void)
 	pf->fd = -1;
 	pf->strpush = NULL;
 	pf->basestrpush.prev = NULL;
+	pf->unget = 0;
 	parsefile = pf;
 }
 
