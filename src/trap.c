@@ -51,10 +51,6 @@
 #include "trap.h"
 #include "mystring.h"
 
-#ifdef HETIO
-#include "hetio.h"
-#endif
-
 /*
  * Sigmode records the current value of the signal handlers for the various
  * modes.  A value of zero means that the current handler is not known.
@@ -382,9 +378,6 @@ exitshell(void)
 	struct jmploc loc;
 	char *p;
 
-#ifdef HETIO
-	hetio_reset_term();
-#endif
 	savestatus = exitstatus;
 	TRACE(("pid %d, exitshell(%d)\n", getpid(), savestatus));
 	if (setjmp(loc.loc))

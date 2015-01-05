@@ -58,10 +58,6 @@
 #include "myhistedit.h"
 #endif
 
-#ifdef HETIO
-#include "hetio.h"
-#endif
-
 #define EOF_NLEFT -99		/* value of parsenleft when EOF pushed back */
 #define IBUFSIZ (BUFSIZ + 1)
 
@@ -187,11 +183,6 @@ retry:
 		}
 
 	} else
-#endif
-
-#ifdef HETIO
-		nr = hetio_read_input(parsefile->fd);
-		if (nr == -255)
 #endif
 		nr = read(parsefile->fd, buf, IBUFSIZ - 1);
 

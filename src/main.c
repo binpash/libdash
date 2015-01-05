@@ -60,10 +60,6 @@
 #include "exec.h"
 #include "cd.h"
 
-#ifdef HETIO
-#include "hetio.h"
-#endif
-
 #define PROFILE 0
 
 int rootpid;
@@ -206,10 +202,6 @@ cmdloop(int top)
 	int numeof = 0;
 
 	TRACE(("cmdloop(%d) called\n", top));
-#ifdef HETIO
-	if(iflag && top)
-		hetio_init();
-#endif
 	for (;;) {
 		int skip;
 
