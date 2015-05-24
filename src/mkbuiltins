@@ -78,7 +78,7 @@ awk '{	for (i = 2 ; i <= NF ; i++) {
 		if ($i ~ /^-/)
 			line = $(++i) "\t" line
 		print line
-	}}' $temp | LC_COLLATE=C sort -k 1,1 | tee $temp2 | awk '{
+	}}' $temp | LC_ALL= LC_COLLATE=C sort -k 1,1 | tee $temp2 | awk '{
 		opt = ""
 		if (NF > 2) {
 			opt = substr($2, 2)
@@ -97,8 +97,9 @@ cat <<\!
  */
 
 !
-sed 's/	-[a-z]*//' $temp2 | nl -b a -v 0 | LC_COLLATE=C sort -u -k 3,3 |
-tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ |
+sed 's/	-[a-z]*//' $temp2 | nl -b a -v 0 |
+	LC_ALL= LC_COLLATE=C sort -u -k 3,3 |
+	tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ |
 	awk '{	printf "#define %s (builtincmd + %d)\n", $3, $1}'
 printf '\n#define NUMBUILTINS %d\n' $(wc -l < $temp2)
 echo '
