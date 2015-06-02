@@ -1402,14 +1402,9 @@ By specifying a colon as the first character of
 .Va optstring
 all errors will be ignored.
 .Pp
-A nonzero value is returned when the last option is reached.
-If there are no remaining arguments,
+After the last option
 .Ic getopts
-will set
-.Va var
-to the special option,
-.Dq -- ,
-otherwise, it will set
+will return a non-zero value and set
 .Va var
 to
 .Dq \&? .
