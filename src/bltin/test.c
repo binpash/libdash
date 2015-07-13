@@ -193,6 +193,8 @@ testcmd(int argc, char **argv)
 		argv[argc] = NULL;
 	}
 
+	t_wp_op = NULL;
+
 recheck:
 	argv++;
 	argc--;
