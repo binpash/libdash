@@ -84,9 +84,13 @@ awk '{	for (i = 2 ; i <= NF ; i++) {
 			opt = substr($2, 2)
 			$2 = $3
 		}
-		printf "\t{ \"%s\", %s, %d },\n", $1,
-			(opt ~ /n/) ? "NULL" : $2,
-			(opt ~ /s/) + (opt ~ /[su]/) * 2 + (opt ~ /a/) * 4
+		mask = 0
+		cmd = $2
+		if (opt ~ /n/) { cmd = "NULL" }
+		if (opt ~ /s/) { mask += 1 }
+		if (opt ~ /[su]/) { mask += 2 }
+		if (opt ~ /a/) { mask += 4 }
+		printf "\t{ \"%s\", %s, %d },\n", $1, cmd, mask
 	}'
 echo '};'
 
@@ -97,7 +101,7 @@ cat <<\!
  */
 
 !
-sed 's/	-[a-z]*//' $temp2 | nl -b a -v 0 |
+sed 's/	-[a-z]*//' $temp2 | nl -ba -v0 |
 	LC_ALL= LC_COLLATE=C sort -u -k 3,3 |
 	tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ |
 	awk '{	printf "#define %s (builtincmd + %d)\n", $3, $1}'

@@ -46,13 +46,13 @@ EXTRA_DIST = \
 	mknodes.c nodetypes nodes.c.pat mksyntax.c mksignames.c
 
 token.h token_vars.h: mktokens
-	sh $^
+	$(SHELL) $^
 
 builtins.def: builtins.def.in $(top_builddir)/config.h
 	$(COMPILE) -E -x c -o $@ $<
 
 builtins.c builtins.h: mkbuiltins builtins.def
-	sh $^
+	$(SHELL) $^
 
 init.c: mkinit $(dash_CFILES)
 	./$^
