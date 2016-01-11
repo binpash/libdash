@@ -2114,7 +2114,7 @@ printed; for commands and tracked aliases the complete pathname of the
 command is printed.
 .It ulimit Xo
 .Op Fl H \*(Ba Fl S
-.Op Fl a \*(Ba Fl tfdscmlpn Op Ar value
+.Op Fl a \*(Ba Fl tfdscmlpnv Op Ar value
 .Xc
 Inquire about or set the hard or soft limits on processes or set new
 limits.
@@ -2164,6 +2164,9 @@ show or set the limit on the number of processes this user can
 have at one time
 .It Fl n
 show or set the limit on the number files a process can have open at once
+.It Fl v
+show or set the limit on the total virtual memory that can be
+in use by a process (in kilobytes)
 .It Fl r
 show or set the limit on the real-time scheduling priority of a process
 .El
