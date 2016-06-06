@@ -79,6 +79,8 @@ int gotsigchld;
 
 extern char *signal_names[];
 
+static int decode_signum(const char *);
+
 #ifdef mkinit
 INCLUDE "trap.h"
 INIT {
@@ -112,7 +114,7 @@ trapcmd(int argc, char **argv)
 		}
 		return 0;
 	}
-	if (!ap[1])
+	if (!ap[1] || decode_signum(*ap) >= 0)
 		action = NULL;
 	else
 		action = *ap++;
@@ -400,17 +402,26 @@ out:
 	/* NOTREACHED */
 }
 
+static int decode_signum(const char *string)
+{
+	int signo = -1;
+
+	if (is_number(string)) {
+		signo = atoi(string);
+		if (signo >= NSIG)
+			signo = -1;
+	}
+
+	return signo;
+}
+
 int decode_signal(const char *string, int minsig)
 {
 	int signo;
 
-	if (is_number(string)) {
-		signo = atoi(string);
-		if (signo >= NSIG) {
-			return -1;
-		}
+	signo = decode_signum(string);
+	if (signo >= 0)
 		return signo;
-	}
 
 	for (signo = minsig; signo < NSIG; signo++) {
 		if (!strcasecmp(string, signal_names[signo])) {
