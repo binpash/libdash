@@ -225,11 +225,13 @@ cmdloop(int top)
 			}
 			numeof++;
 		} else if (nflag == 0) {
+			int i;
+
 			job_warning = (job_warning == 2) ? 1 : 0;
 			numeof = 0;
-			evaltree(n, 0);
+			i = evaltree(n, 0);
 			if (n)
-				status = exitstatus;
+				status = i;
 		}
 		popstackmark(&smark);
 

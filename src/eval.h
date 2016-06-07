@@ -53,7 +53,7 @@ struct backcmd {		/* result of evalbackcmd */
 
 int evalstring(char *, int);
 union node;	/* BLETCH for ansi C */
-void evaltree(union node *, int);
+int evaltree(union node *, int);
 void evalbackcmd(union node *, struct backcmd *);
 
 extern int evalskip;
