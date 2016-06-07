@@ -172,7 +172,8 @@ evalstring(char *s, int flags)
 	status = 0;
 	while ((n = parsecmd(0)) != NEOF) {
 		evaltree(n, flags & ~(parser_eof() ? 0 : EV_EXIT));
-		status = exitstatus;
+		if (n)
+			status = exitstatus;
 		popstackmark(&smark);
 		if (evalskip)
 			break;

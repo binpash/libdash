@@ -228,7 +228,8 @@ cmdloop(int top)
 			job_warning = (job_warning == 2) ? 1 : 0;
 			numeof = 0;
 			evaltree(n, 0);
-			status = exitstatus;
+			if (n)
+				status = exitstatus;
 		}
 		popstackmark(&smark);
 
