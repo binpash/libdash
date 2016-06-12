@@ -69,7 +69,7 @@ char *_rmescapes(char *, int);
 int casematch(union node *, char *);
 void recordregion(int, int, int);
 void removerecordregions(int); 
-void ifsbreakup(char *, struct arglist *);
+void ifsbreakup(char *, int, struct arglist *);
 void ifsfree(void);
 
 /* From arith.y */

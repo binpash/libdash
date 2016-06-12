@@ -50,6 +50,7 @@
 #include <glob.h>
 #endif
 #include <ctype.h>
+#include <stdbool.h>
 
 /*
  * Routines to expand arguments to commands.  We have to deal with
@@ -203,7 +204,7 @@ expandarg(union node *arg, struct arglist *arglist, int flag)
 	 * TODO - EXP_REDIR
 	 */
 	if (flag & EXP_FULL) {
-		ifsbreakup(p, &exparg);
+		ifsbreakup(p, -1, &exparg);
 		*exparg.lastp = NULL;
 		exparg.lastp = &exparg.list;
 		expandmeta(exparg.list, flag);
@@ -1016,15 +1017,18 @@ recordregion(int start, int end, int nulonly)
  * Break the argument string into pieces based upon IFS and add the
  * strings to the argument list.  The regions of the string to be
  * searched for IFS characters have been stored by recordregion.
+ * If maxargs is non-negative, at most maxargs arguments will be created, by
+ * joining together the last arguments.
  */
 void
-ifsbreakup(char *string, struct arglist *arglist)
+ifsbreakup(char *string, int maxargs, struct arglist *arglist)
 {
 	struct ifsregion *ifsp;
 	struct strlist *sp;
 	char *start;
 	char *p;
 	char *q;
+	char *r = NULL;
 	const char *ifs, *realifs;
 	int ifsspc;
 	int nulonly;
@@ -1042,16 +1046,76 @@ ifsbreakup(char *string, struct arglist *arglist)
 			ifs = nulonly ? nullstr : realifs;
 			ifsspc = 0;
 			while (p < string + ifsp->endoff) {
+				int c;
+				bool isifs;
+				bool isdefifs;
+
 				q = p;
-				if (*p == (char)CTLESC)
-					p++;
-				if (strchr(ifs, *p)) {
+				c = *p++;
+				if (c == (char)CTLESC)
+					c = *p++;
+
+				isifs = strchr(ifs, c);
+				isdefifs = false;
+				if (isifs)
+					isdefifs = strchr(defifs, c);
+
+				/* If only reading one more argument:
+				 * If we have exactly one field,
+				 * read that field without its terminator.
+				 * If we have more than one field,
+				 * read all fields including their terminators,
+				 * except for trailing IFS whitespace.
+				 *
+				 * This means that if we have only IFS
+				 * characters left, and at most one
+				 * of them is non-whitespace, we stop
+				 * reading here.
+				 * Otherwise, we read all the remaining
+				 * characters except for trailing
+				 * IFS whitespace.
+				 *
+				 * In any case, r indicates the start
+				 * of the characters to remove, or NULL
+				 * if no characters should be removed.
+				 */
+				if (!maxargs) {
+					if (isdefifs) {
+						if (!r)
+							r = q;
+						continue;
+					}
+
+					if (!(isifs && ifsspc))
+						r = NULL;
+
+					ifsspc = 0;
+					continue;
+				}
+
+				if (ifsspc) {
+					if (isifs)
+						q = p;
+
+					start = q;
+
+					if (isdefifs)
+						continue;
+
+					isifs = false;
+				}
+
+				if (isifs) {
 					if (!nulonly)
-						ifsspc = (strchr(defifs, *p) != NULL);
+						ifsspc = isdefifs;
 					/* Ignore IFS whitespace at start */
 					if (q == start && ifsspc) {
-						p++;
 						start = p;
+						ifsspc = 0;
+						continue;
+					}
+					if (maxargs > 0 && !--maxargs) {
+						r = q;
 						continue;
 					}
 					*q = '\0';
@@ -1059,38 +1123,19 @@ ifsbreakup(char *string, struct arglist *arglist)
 					sp->text = start;
 					*arglist->lastp = sp;
 					arglist->lastp = &sp->next;
-					p++;
-					if (!nulonly) {
-						for (;;) {
-							if (p >= string + ifsp->endoff) {
-								break;
-							}
-							q = p;
-							if (*p == (char)CTLESC)
-								p++;
-							if (strchr(ifs, *p) == NULL ) {
-								p = q;
-								break;
-							} else if (strchr(defifs, *p) == NULL) {
-								if (ifsspc) {
-									p++;
-									ifsspc = 0;
-								} else {
-									p = q;
-									break;
-								}
-							} else
-								p++;
-						}
-					}
 					start = p;
-				} else
-					p++;
+					continue;
+				}
+
+				ifsspc = 0;
 			}
 		} while ((ifsp = ifsp->next) != NULL);
 		if (nulonly)
 			goto add;
 	}
+
+	if (r)
+		*r = '\0';
 
 	if (!*start)
 		return;
