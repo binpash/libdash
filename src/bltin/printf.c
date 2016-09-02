@@ -459,7 +459,7 @@ echocmd(int argc, char **argv)
 
 		if (likely(*argv))
 			nonl += print_escape_str("%s", NULL, NULL, *argv++);
-		if (nonl > 0)
+		if (likely((nonl + !*argv) > 1))
 			break;
 
 		c = *argv ? ' ' : '\n';
