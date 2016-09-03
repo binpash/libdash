@@ -1584,14 +1584,14 @@ pmatch(const char *pattern, const char *string)
 				p++;
 			}
 			found = 0;
-			chr = *q++;
+			chr = *q;
 			if (chr == '\0')
 				return 0;
 			c = *p++;
 			do {
 				if (!c) {
 					p = startp;
-					c = *p;
+					c = '[';
 					goto dft;
 				}
 				if (c == '[') {
@@ -1618,6 +1618,7 @@ pmatch(const char *pattern, const char *string)
 			} while ((c = *p++) != ']');
 			if (found == invert)
 				return 0;
+			q++;
 			break;
 		}
 dft:	        default:
