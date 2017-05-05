@@ -40,3 +40,12 @@ Makefile
 .Spotlight*
 .Trash*
 *[Tt]humbs.db
+
+test
+*.native
+*~
+*.o
+*.cmx
+*.cmi
+_build
+test.err
