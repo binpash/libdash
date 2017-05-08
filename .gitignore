@@ -41,6 +41,10 @@ Makefile
 .Trash*
 *[Tt]humbs.db
 
+
+*.a
+*.cmxa
+
 test
 *.native
 *~
