@@ -24,5 +24,5 @@ dash.cmxa : dash.cmx ast.cmx compile.cmx
 	ocamlopt.opt $(OCAMLINCLUDES) -c -o $@ $<
 
 clean :
-	rm -f *.o test *~ *.cmi *.cmx main.native
+	rm -f *.o test *~ *.cmi *.cmx main.native dash.a dash.cmxa
 	rm -rf _build
