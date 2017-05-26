@@ -743,8 +743,6 @@ describe_command(out, command, path, verbose)
 	struct tblentry *cmdp;
 	const struct alias *ap;
 
-	path = path ?: pathval();
-
 	if (verbose) {
 		outstr(command, out);
 	}
@@ -767,8 +765,17 @@ describe_command(out, command, path, verbose)
 		goto out;
 	}
 
-	/* Then check if it is a tracked alias */
-	if ((cmdp = cmdlookup(command, 0)) != NULL) {
+	/* Then if the standard search path is used, check if it is
+	 * a tracked alias.
+	 */
+	if (path == NULL) {
+		path = pathval();
+		cmdp = cmdlookup(command, 0);
+	} else {
+		cmdp = NULL;
+	}
+
+	if (cmdp != NULL) {
 		entry.cmdtype = cmdp->cmdtype;
 		entry.u = cmdp->param;
 	} else {
