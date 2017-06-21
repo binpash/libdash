@@ -131,6 +131,8 @@ and expand_char (quoted : bool) (a : Ast.arg_char) : expr =
   match a with
   | Ast.C chr -> Str (String.make 1 chr)
   | Ast.E esc -> Str (String.make 1 esc)
+  | Ast.T None -> Str "~"
+  | Ast.T (Some usr) -> Str ("~" ^ usr)
   | Ast.A ari -> Arith (expand quoted ari)
   | Ast.V(fmt,nul,var,arg) -> expand_var quoted fmt nul var arg
   | Ast.Q arg -> expand true arg

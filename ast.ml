@@ -28,6 +28,7 @@ type t =
  and arg_char =
    | C of char
    | E of char (* escape... necessary for expansion *)
+   | T of string option (* tilde *)
    | A of arg (* arith *)
    | V of var_type * bool (* VSNUL? *) * string * arg
    | Q of arg (* quoted *)
@@ -265,10 +266,29 @@ and parse_arg (s : char list) (bqlist : nodelist structure ptr) stack =
      let a,s,bqlist,stack' = parse_arg s bqlist (`CTLQuo::stack) in
      assert (stack' = stack);
      arg_char (Q a) s bqlist stack'
+  (* tildes *)
+  | '~'::s,stack ->
+     let uname,s' = parse_tilde [] s in
+     arg_char (T uname) s' bqlist stack
   (* ordinary character *)
   | c::s,_ ->
      arg_char (C c) s bqlist stack
 
+and parse_tilde acc = 
+  let ret = if acc = [] then None else Some (implode acc) in
+  function
+  | [] -> (ret , [])
+  (* CTLESC *)
+  | '\129'::_ as s -> None, s
+  (* CTLQUOTEMARK *)
+  | '\136'::_ as s -> None, s
+  (* terminal: CTLENDVAR, /, : *)
+  | '\131'::_ as s -> ret, s
+  | ':'::_ as s -> ret, s
+  | '/'::_ as s -> ret, s
+  (* ordinary char *)
+  | c::s' -> parse_tilde (acc @ [c]) s'  
+              
 and arg_char c s bqlist stack =
   let a,s,bqlist,stack = parse_arg s bqlist stack in
   (c::a,s,bqlist,stack)
@@ -364,6 +384,8 @@ and string_of_arg_char = function
   | E ';' -> "\\;" 
   | C c -> String.make 1 c
   | E c -> Char.escaped c
+  | T None -> "~"
+  | T (Some u) -> "~" ^ u
   | A a -> "$((" ^ string_of_arg a ^ "))"
   | V (Length,_,name,_) -> "${#" ^ name ^ "}"
   | V (vt,nul,name,a) ->
