@@ -235,7 +235,7 @@ and parse_arg (s : char list) (bqlist : nodelist structure ptr) stack =
      (* every other VSTYPE takes mods before CTLENDVAR *)
      | vstype,'='::s ->
         let a,s,bqlist,stack' = parse_arg s bqlist (`CTLVar::stack) in
-        V (var_type vstype,t land 0x10 = 1,implode var_name,a), s, bqlist, stack'
+        V (var_type vstype,t land 0x10 = 0x10,implode var_name,a), s, bqlist, stack'
      | _,c::_ -> failwith ("Expected '=' terminating variable name, found " ^ Char.escaped c)
      | _,[] -> failwith "Expected '=' terminating variable name, found EOF"
      in
