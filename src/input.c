@@ -147,8 +147,12 @@ retry:
 		static const char *rl_cp;
 		static int el_len;
 
-		if (rl_cp == NULL)
+		if (rl_cp == NULL) {
+			struct stackmark smark;
+			pushstackmark(&smark, stackblocksize());
 			rl_cp = el_gets(el, &el_len);
+			popstackmark(&smark);
+		}
 		if (rl_cp == NULL)
 			nr = 0;
 		else {
