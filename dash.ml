@@ -34,6 +34,7 @@ let with_handler (k : int -> 'a) : 'a =
     handler <-@ addr jmptgt;
     k 0
   else (* coming from a longjmp *)
+    (* TODO we're never actually landing here, for some reason... *)
     begin 
       fprintf stderr "dash raised exception %d\n" r;
       k r
