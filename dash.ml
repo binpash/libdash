@@ -14,7 +14,31 @@ let () = seal stackmark
 let init_stack () =
   let stack = make stackmark in (* ??? do we want to save this *)
   foreign "setstackmark" (ptr stackmark @-> returning void) (addr stack)
-       
+
+(* on OS X x86_64 *)
+let jmp_buf_t : 'a Ctypes_static.carray typ = array 18 int
+
+type jmploc
+let jmploc : jmploc structure typ = structure "jmploc"
+let jmp_buf = field jmploc "jmp_buf" jmp_buf_t
+let () = seal jmploc
+
+let setjmp : int ptr -> int = foreign "setjmp" (ptr int @-> returning int)
+
+let with_handler (k : int -> 'a) : 'a =  
+  let jmptgt = make jmploc in
+  let r = setjmp (CArray.start (getf jmptgt jmp_buf)) in
+  if r = 0
+  then (* normal return *)
+    let handler = foreign_value "handler" (ptr jmploc) in
+    handler <-@ addr jmptgt;
+    k 0
+  else (* coming from a longjmp *)
+    begin 
+      fprintf stderr "dash raised exception %d\n" r;
+      k r
+    end
+          
 let init : unit -> unit = foreign "init" (void @-> returning void)
 
 let initialize () =
