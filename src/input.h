@@ -112,6 +112,7 @@ void pungetc(void);
 void pungetn(int);
 void pushstring(char *, void *);
 int setinputfile(const char *, int);
+void setinputfd(int fd, int push);
 void setinputstring(char *);
 void pushstdin(void);
 void popfile(void);
