@@ -70,8 +70,8 @@
 
 MKINIT
 struct redirtab {
-	struct redirtab *next;
-	int renamed[10];
+        struct redirtab *next;
+        int renamed[10];
 };
 
 
@@ -97,70 +97,70 @@ STATIC int openhere(union node *);
 void
 redirect(union node *redir, int flags)
 {
-	union node *n;
-	struct redirtab *sv;
-	int i;
-	int fd;
-	int newfd;
-	int *p;
+        union node *n;
+        struct redirtab *sv;
+        int i;
+        int fd;
+        int newfd;
+        int *p;
 #if notyet
-	char memory[10];	/* file descriptors to write to memory */
+        char memory[10];	/* file descriptors to write to memory */
 
-	for (i = 10 ; --i >= 0 ; )
-		memory[i] = 0;
-	memory[1] = flags & REDIR_BACKQ;
+        for (i = 10 ; --i >= 0 ; )
+                memory[i] = 0;
+        memory[1] = flags & REDIR_BACKQ;
 #endif
-	if (!redir)
-		return;
-	sv = NULL;
-	INTOFF;
-	if (likely(flags & REDIR_PUSH))
-		sv = redirlist;
-	n = redir;
-	do {
-		newfd = openredirect(n);
-		if (newfd < -1)
-			continue;
+        if (!redir)
+                return;
+        sv = NULL;
+        INTOFF;
+        if (likely(flags & REDIR_PUSH))
+                sv = redirlist;
+        n = redir;
+        do {
+                newfd = openredirect(n);
+                if (newfd < -1)
+                        continue;
 
-		fd = n->nfile.fd;
+                fd = n->nfile.fd;
 
-		if (sv) {
-			p = &sv->renamed[fd];
-			i = *p;
+                if (sv) {
+                        p = &sv->renamed[fd];
+                        i = *p;
 
-			if (likely(i == EMPTY)) {
-				i = CLOSED;
-				if (fd != newfd) {
-					i = savefd(fd, fd);
-					fd = -1;
-				}
-			}
+                        if (likely(i == EMPTY)) {
+                                i = CLOSED;
+                                if (fd != newfd) {
+                                        i = savefd(fd, fd);
+                                        fd = -1;
+                                }
+                        }
 
-			if (i == newfd)
-				/* Can only happen if i == newfd == CLOSED */
-				i = REALLY_CLOSED;
+                        if (i == newfd)
+                                /* Can only happen if i == newfd == CLOSED */
+                                i = REALLY_CLOSED;
 
-			*p = i;
-		}
+                        *p = i;
+                }
 
-		if (fd == newfd)
-			continue;
+                if (fd == newfd)
+                        continue;
 
 #ifdef notyet
-		dupredirect(n, newfd, memory);
+                dupredirect(n, newfd, memory);
 #else
-		dupredirect(n, newfd);
+                dupredirect(n, newfd);
 #endif
-	} while ((n = n->nfile.next));
-	INTON;
+        } while ((n = n->nfile.next));
+        INTON;
 #ifdef notyet
-	if (memory[1])
-		out1 = &memout;
-	if (memory[2])
-		out2 = &memout;
+        if (memory[1])
+                out1 = &memout;
+        if (memory[2])
+                out2 = &memout;
 #endif
-	if (flags & REDIR_SAVEFD2 && sv->renamed[2] >= 0)
-		preverrout.fd = sv->renamed[2];
+        if (flags & REDIR_SAVEFD2 && sv->renamed[2] >= 0)
+                preverrout.fd = sv->renamed[2];
 }
 
 
@@ -222,20 +222,20 @@ openredirect(union node *redir)
 		break;
 	default:
 #ifdef DEBUG
-		abort();
+                abort();
 #endif
-		/* Fall through to eliminate warning. */
-	case NHERE:
-	case NXHERE:
-		f = openhere(redir);
-		break;
-	}
+                /* Fall through to eliminate warning. */
+        case NHERE:
+        case NXHERE:
+                f = openhere(redir);
+                break;
+        }
 
-	return f;
+        return f;
 ecreate:
-	sh_error("cannot create %s: %s", fname, errmsg(errno, E_CREAT));
+        sh_error("cannot create %s: %s", fname, errmsg(errno, E_CREAT));
 eopen:
-	sh_error("cannot open %s: %s", fname, errmsg(errno, E_OPEN));
+        sh_error("cannot open %s: %s", fname, errmsg(errno, E_OPEN));
 }
 
 
@@ -245,44 +245,44 @@ dupredirect(redir, f, memory)
 #else
 dupredirect(redir, f)
 #endif
-	union node *redir;
-	int f;
+        union node *redir;
+        int f;
 #ifdef notyet
-	char memory[10];
+        char memory[10];
 #endif
-	{
-	int fd = redir->nfile.fd;
-	int err = 0;
+        {
+        int fd = redir->nfile.fd;
+        int err = 0;
 
 #ifdef notyet
-	memory[fd] = 0;
+        memory[fd] = 0;
 #endif
-	if (redir->nfile.type == NTOFD || redir->nfile.type == NFROMFD) {
-		/* if not ">&-" */
-		if (f >= 0) {
+        if (redir->nfile.type == NTOFD || redir->nfile.type == NFROMFD) {
+                /* if not ">&-" */
+                if (f >= 0) {
 #ifdef notyet
-			if (memory[f])
-				memory[fd] = 1;
-			else
+                        if (memory[f])
+                                memory[fd] = 1;
+                        else
 #endif
-				if (dup2(f, fd) < 0) {
-					err = errno;
-					goto err;
-				}
-			return;
-		}
-		f = fd;
-	} else if (dup2(f, fd) < 0)
-		err = errno;
+                                if (dup2(f, fd) < 0) {
+                                        err = errno;
+                                        goto err;
+                                }
+                        return;
+                }
+                f = fd;
+        } else if (dup2(f, fd) < 0)
+                err = errno;
 
-	close(f);
-	if (err < 0)
-		goto err;
+        close(f);
+        if (err < 0)
+                goto err;
 
-	return;
+        return;
 
 err:
-	sh_error("%d: %s", f, strerror(err));
+        sh_error("%d: %s", f, strerror(err));
 }
 
 
@@ -295,40 +295,40 @@ err:
 STATIC int
 openhere(union node *redir)
 {
-	char *p;
-	int pip[2];
-	size_t len = 0;
+        char *p;
+        int pip[2];
+        size_t len = 0;
 
-	if (pipe(pip) < 0)
-		sh_error("Pipe call failed");
+        if (pipe(pip) < 0)
+                sh_error("Pipe call failed");
 
-	p = redir->nhere.doc->narg.text;
-	if (redir->type == NXHERE) {
-		expandarg(redir->nhere.doc, NULL, EXP_QUOTED);
-		p = stackblock();
-	}
+        p = redir->nhere.doc->narg.text;
+        if (redir->type == NXHERE) {
+                expandarg(redir->nhere.doc, NULL, EXP_QUOTED);
+                p = stackblock();
+        }
 
-	len = strlen(p);
-	if (len <= PIPESIZE) {
-		xwrite(pip[1], p, len);
-		goto out;
-	}
+        len = strlen(p);
+        if (len <= PIPESIZE) {
+                xwrite(pip[1], p, len);
+                goto out;
+        }
 
-	if (forkshell((struct job *)NULL, (union node *)NULL, FORK_NOJOB) == 0) {
-		close(pip[0]);
-		signal(SIGINT, SIG_IGN);
-		signal(SIGQUIT, SIG_IGN);
-		signal(SIGHUP, SIG_IGN);
+        if (forkshell((struct job *)NULL, (union node *)NULL, FORK_NOJOB) == 0) {
+                close(pip[0]);
+                signal(SIGINT, SIG_IGN);
+                signal(SIGQUIT, SIG_IGN);
+                signal(SIGHUP, SIG_IGN);
 #ifdef SIGTSTP
-		signal(SIGTSTP, SIG_IGN);
+                signal(SIGTSTP, SIG_IGN);
 #endif
-		signal(SIGPIPE, SIG_DFL);
-		xwrite(pip[1], p, len);
-		_exit(0);
-	}
+                signal(SIGPIPE, SIG_DFL);
+                xwrite(pip[1], p, len);
+                _exit(0);
+        }
 out:
-	close(pip[1]);
-	return pip[0];
+        close(pip[1]);
+        return pip[0];
 }
 
 
@@ -340,30 +340,30 @@ out:
 void
 popredir(int drop)
 {
-	struct redirtab *rp;
-	int i;
+        struct redirtab *rp;
+        int i;
 
-	INTOFF;
-	rp = redirlist;
-	for (i = 0 ; i < 10 ; i++) {
-		switch (rp->renamed[i]) {
-		case CLOSED:
-			if (!drop)
-				close(i);
-			break;
-		case EMPTY:
-		case REALLY_CLOSED:
-			break;
-		default:
-			if (!drop)
-				dup2(rp->renamed[i], i);
-			close(rp->renamed[i]);
-			break;
-		}
-	}
-	redirlist = rp->next;
-	ckfree(rp);
-	INTON;
+        INTOFF;
+        rp = redirlist;
+        for (i = 0 ; i < 10 ; i++) {
+                switch (rp->renamed[i]) {
+                case CLOSED:
+                        if (!drop)
+                                close(i);
+                        break;
+                case EMPTY:
+                case REALLY_CLOSED:
+                        break;
+                default:
+                        if (!drop)
+                                dup2(rp->renamed[i], i);
+                        close(rp->renamed[i]);
+                        break;
+                }
+        }
+        redirlist = rp->next;
+        ckfree(rp);
+        INTON;
 }
 
 /*
@@ -393,67 +393,67 @@ EXITRESET {
 int
 savefd(int from, int ofd)
 {
-	int newfd;
-	int err;
+        int newfd;
+        int err;
 
-	newfd = fcntl(from, F_DUPFD, 10);
-	err = newfd < 0 ? errno : 0;
-	if (err != EBADF) {
-		close(ofd);
-		if (err)
-			sh_error("%d: %s", from, strerror(err));
-		else
-			fcntl(newfd, F_SETFD, FD_CLOEXEC);
-	}
+        newfd = fcntl(from, F_DUPFD, 10);
+        err = newfd < 0 ? errno : 0;
+        if (err != EBADF) {
+                close(ofd);
+                if (err)
+                        sh_error("%d: %s", from, strerror(err));
+                else
+                        fcntl(newfd, F_SETFD, FD_CLOEXEC);
+        }
 
-	return newfd;
+        return newfd;
 }
 
 
 int
 redirectsafe(union node *redir, int flags)
 {
-	int err;
-	volatile int saveint;
-	struct jmploc *volatile savehandler = handler;
-	struct jmploc jmploc;
+        int err;
+        volatile int saveint;
+        struct jmploc *volatile savehandler = handler;
+        struct jmploc jmploc;
 
-	SAVEINT(saveint);
-	if (!(err = setjmp(jmploc.loc) * 2)) {
-		handler = &jmploc;
-		redirect(redir, flags);
-	}
-	handler = savehandler;
-	if (err && exception != EXERROR)
-		longjmp(handler->loc, 1);
-	RESTOREINT(saveint);
-	return err;
+        SAVEINT(saveint);
+        if (!(err = setjmp(jmploc.loc) * 2)) {
+                handler = &jmploc;
+                redirect(redir, flags);
+        }
+        handler = savehandler;
+        if (err && exception != EXERROR)
+                longjmp(handler->loc, 1);
+        RESTOREINT(saveint);
+        return err;
 }
 
 
 void unwindredir(struct redirtab *stop)
 {
-	while (redirlist != stop)
-		popredir(0);
+        while (redirlist != stop)
+                popredir(0);
 }
 
 
 struct redirtab *pushredir(union node *redir)
 {
-	struct redirtab *sv;
-	struct redirtab *q;
-	int i;
+        struct redirtab *sv;
+        struct redirtab *q;
+        int i;
 
-	q = redirlist;
-	if (!redir)
-		goto out;
+        q = redirlist;
+        if (!redir)
+                goto out;
 
-	sv = ckmalloc(sizeof (struct redirtab));
-	sv->next = q;
-	redirlist = sv;
-	for (i = 0; i < 10; i++)
-		sv->renamed[i] = EMPTY;
+        sv = ckmalloc(sizeof (struct redirtab));
+        sv->next = q;
+        redirlist = sv;
+        for (i = 0; i < 10; i++)
+                sv->renamed[i] = EMPTY;
 
 out:
-	return q;
+        return q;
 }

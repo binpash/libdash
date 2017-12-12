@@ -73,7 +73,6 @@ EditLine *el;			/* cookie for editline package */
 
 STATIC void pushfile(void);
 static int preadfd(void);
-static void setinputfd(int fd, int push);
 static int preadbuffer(void);
 
 #ifdef mkinit
@@ -408,7 +407,7 @@ out:
  * interrupts off.
  */
 
-static void
+void
 setinputfd(int fd, int push)
 {
 	if (push) {

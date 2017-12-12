@@ -78,7 +78,6 @@ static void exverror(int, const char *, va_list)
 void
 exraise(int e)
 {
-#ifdef DEBUG
 	if (handler == NULL)
 		abort();
 #endif
