@@ -2,7 +2,7 @@ DASH=$(shell (cd ../dash; pwd))
 DASHSRC=$(DASH)/src
 
 OCAMLLIB=$(shell opam config var lib)
-OCAMLINCLUDES=-I $(OCAMLLIB)/bytes -I $(OCAMLLIB)/ctypes -I /usr/local/lib/ocaml
+OCAMLINCLUDES=-I $(OCAMLLIB)/bytes -I $(OCAMLLIB)/ctypes
 OCAMLLIBS=unix.cmxa bigarray.cmxa str.cmxa ctypes.cmxa ctypes-foreign-base.cmxa ctypes-foreign-unthreaded.cmxa
 
 test : main.native $(wildcard tests/*)
