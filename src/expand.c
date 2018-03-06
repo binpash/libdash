@@ -927,7 +927,7 @@ numvar:
 	case '-':
 		p = makestrspace(NOPTS, expdest);
 		for (i = NOPTS - 1; i >= 0; i--) {
-			if (optlist[i]) {
+			if (optlist[i] && optletters[i]) {
 				USTPUTC(optletters[i], p);
 				len++;
 			}
