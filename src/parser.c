@@ -934,7 +934,8 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 				USTPUTC(c, out);
 				break;
 			case CCTL:
-				if (eofmark == NULL || synstack->dblquote)
+				if ((!eofmark) | synstack->dblquote |
+				    synstack->varnest)
 					USTPUTC(CTLESC, out);
 				USTPUTC(c, out);
 				break;
