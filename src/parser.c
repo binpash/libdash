@@ -1037,6 +1037,11 @@ toggledq:
 				}
 				break;
 			case CBQUOTE:	/* '`' */
+				if (checkkwd & CHKEOFMARK) {
+					USTPUTC('`', out);
+					break;
+				}
+
 				PARSEBACKQOLD();
 				break;
 			case CEOF:
