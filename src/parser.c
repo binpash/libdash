@@ -924,7 +924,8 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 			CHECKSTRSPACE(4, out);	/* permit 4 calls to USTPUTC */
 			switch(synstack->syntax[c]) {
 			case CNL:	/* '\n' */
-				if (synstack->syntax == BASESYNTAX)
+				if (synstack->syntax == BASESYNTAX &&
+				    !synstack->varnest)
 					goto endword;	/* exit outer loop */
 				USTPUTC(c, out);
 				nlprompt();
