@@ -318,13 +318,13 @@ start:
 		case CTLENDVAR: /* ??? */
 			goto breakloop;
 		case CTLQUOTEMARK:
-			inquotes ^= EXP_QUOTED;
 			/* "$@" syntax adherence hack */
-			if (inquotes && !memcmp(p, dolatstr + 1,
-						DOLATSTRLEN - 1)) {
-				p = evalvar(p + 1, flag | inquotes) + 1;
+			if (!inquotes && !memcmp(p, dolatstr + 1,
+						 DOLATSTRLEN - 1)) {
+				p = evalvar(p + 1, flag | EXP_QUOTED) + 1;
 				goto start;
 			}
+			inquotes ^= EXP_QUOTED;
 addquote:
 			if (flag & QUOTES_ESC) {
 				p--;
@@ -1032,7 +1032,10 @@ ifsbreakup(char *string, int maxargs, struct arglist *arglist)
 		realifs = ifsset() ? ifsval() : defifs;
 		ifsp = &ifsfirst;
 		do {
+			int afternul;
+
 			p = string + ifsp->begoff;
+			afternul = nulonly;
 			nulonly = ifsp->nulonly;
 			ifs = nulonly ? nullstr : realifs;
 			ifsspc = 0;
@@ -1097,7 +1100,7 @@ ifsbreakup(char *string, int maxargs, struct arglist *arglist)
 				}
 
 				if (isifs) {
-					if (!nulonly)
+					if (!(afternul || nulonly))
 						ifsspc = isdefifs;
 					/* Ignore IFS whitespace at start */
 					if (q == start && ifsspc) {
