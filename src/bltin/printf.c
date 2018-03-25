@@ -209,6 +209,7 @@ pc:
 				if (print_escape_str(start, param, array,
 						     getstr()))
 					goto out;
+				*fmt = 'b';
 				break;
 			case 'c': {
 				int p = getchr();
