@@ -103,6 +103,8 @@ static int print_escape_str(const char *f, int *param, int *array, char *s)
 	len = q - p;
 	total = len - 1;
 
+	q[-1] = (!!((f[1] - 's') | done) - 1) & f[2];
+	total += !!q[-1];
 	if (f[1] == 's')
 		goto easy;
 
@@ -455,21 +457,22 @@ check_conversion(const char *s, const char *ep)
 int
 echocmd(int argc, char **argv)
 {
+	const char *lastfmt = snlfmt;
 	int nonl;
 
-	nonl = *++argv ? equal(*argv, "-n") : 0;
-	argv += nonl;
+	if (*++argv && equal(*argv, "-n")) {
+		argv++;
+		lastfmt = "%s";
+	}
 
 	do {
-		int c;
+		const char *fmt = "%s ";
+		char *s = *argv;
 
-		if (likely(*argv))
-			nonl += print_escape_str("%s", NULL, NULL, *argv++);
-		if (likely((nonl + !*argv) > 1))
-			break;
+		if (!s || !*++argv)
+			fmt = lastfmt;
 
-		c = *argv ? ' ' : '\n';
-		out1c(c);
-	} while (*argv);
+		nonl = print_escape_str(fmt, NULL, NULL, s ?: nullstr);
+	} while (!nonl && *argv);
 	return 0;
 }
