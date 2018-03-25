@@ -98,20 +98,25 @@ static int print_escape_str(const char *f, int *param, int *array, char *s)
 	int total;
 
 	setstackmark(&smark);
-	done = conv_escape_str(s, &p);
-	q = stackblock();
-	len = p - q;
+	done = conv_escape_str(s, &q);
+	p = stackblock();
+	len = q - p;
+	total = len - 1;
 
-	p = makestrspace(len, p);
-	memset(p, 'X', len - 1);
-	p[len - 1] = 0;
+	if (f[1] == 's')
+		goto easy;
+
+	p = makestrspace(len, q);
+	memset(p, 'X', total);
+	p[total] = 0;
 
 	q = stackblock();
 	total = ASPF(&p, f, p);
 
 	len = strchrnul(p, 'X') - p;
-	memcpy(p + len, q, strchrnul(p + len, ' ') - (p + len));
+	memcpy(p + len, q, strspn(p + len, "X"));
 
+easy:
 	out1mem(p, total);
 
 	popstackmark(&smark);
