@@ -124,7 +124,7 @@ STATIC void expandmeta(struct strlist *, int);
 #ifdef HAVE_GLOB
 STATIC void addglob(const glob_t *);
 #else
-STATIC void expmeta(char *, char *);
+STATIC void expmeta(char *, unsigned, unsigned);
 STATIC struct strlist *expsort(struct strlist *);
 STATIC struct strlist *msort(struct strlist *, int);
 #endif
@@ -1246,6 +1246,7 @@ addglob(pglob)
 
 #else	/* HAVE_GLOB */
 STATIC char *expdir;
+STATIC unsigned expdir_max;
 
 
 STATIC void
@@ -1260,6 +1261,7 @@ expandmeta(struct strlist *str, int flag)
 		struct strlist **savelastp;
 		struct strlist *sp;
 		char *p;
+		unsigned len;
 
 		if (fflag)
 			goto nometa;
@@ -1269,12 +1271,11 @@ expandmeta(struct strlist *str, int flag)
 
 		INTOFF;
 		p = preglob(str->text, RMESCAPE_ALLOC | RMESCAPE_HEAP);
-		{
-			int i = strlen(str->text);
-			expdir = ckmalloc(i < 2048 ? 2048 : i); /* XXX */
-		}
+		len = strlen(p);
+		expdir_max = len + PATH_MAX;
+		expdir = ckmalloc(expdir_max);
 
-		expmeta(expdir, p);
+		expmeta(p, len, 0);
 		ckfree(expdir);
 		if (p != str->text)
 			ckfree(p);
@@ -1304,8 +1305,9 @@ nometa:
  */
 
 STATIC void
-expmeta(char *enddir, char *name)
+expmeta(char *name, unsigned name_len, unsigned expdir_len)
 {
+	char *enddir = expdir + expdir_len;
 	char *p;
 	const char *cp;
 	char *start;
@@ -1348,15 +1350,15 @@ expmeta(char *enddir, char *name)
 		}
 	}
 	if (metaflag == 0) {	/* we've reached the end of the file name */
-		if (enddir != expdir)
-			metaflag++;
+		if (!expdir_len)
+			return;
 		p = name;
 		do {
 			if (*p == '\\')
 				p++;
 			*enddir++ = *p;
 		} while (*p++);
-		if (metaflag == 0 || lstat64(expdir, &statb) >= 0)
+		if (lstat64(expdir, &statb) >= 0)
 			addfname(expdir);
 		return;
 	}
@@ -1369,18 +1371,13 @@ expmeta(char *enddir, char *name)
 			*enddir++ = *p++;
 		} while (p < start);
 	}
-	if (enddir == expdir) {
+	*enddir = 0;
+	cp = expdir;
+	expdir_len = enddir - cp;
+	if (!expdir_len)
 		cp = ".";
-	} else if (enddir == expdir + 1 && *expdir == '/') {
-		cp = "/";
-	} else {
-		cp = expdir;
-		enddir[-1] = '\0';
-	}
 	if ((dirp = opendir(cp)) == NULL)
 		return;
-	if (enddir != expdir)
-		enddir[-1] = '/';
 	if (*endname == 0) {
 		atend = 1;
 	} else {
@@ -1388,6 +1385,7 @@ expmeta(char *enddir, char *name)
 		*endname = '\0';
 		endname += esc + 1;
 	}
+	name_len -= endname - name;
 	matchdot = 0;
 	p = start;
 	if (*p == '\\')
@@ -1402,11 +1400,22 @@ expmeta(char *enddir, char *name)
 				scopy(dp->d_name, enddir);
 				addfname(expdir);
 			} else {
-				for (p = enddir, cp = dp->d_name;
-				     (*p++ = *cp++) != '\0';)
-					continue;
-				p[-1] = '/';
-				expmeta(p, endname);
+				unsigned offset;
+				unsigned len;
+
+				p = stpcpy(enddir, dp->d_name);
+				*p = '/';
+
+				offset = p - expdir + 1;
+				len = offset + name_len + NAME_MAX;
+				if (len > expdir_max) {
+					len += PATH_MAX;
+					expdir = ckrealloc(expdir, len);
+					expdir_max = len;
+				}
+
+				expmeta(endname, name_len, offset);
+				enddir = expdir + expdir_len;
 			}
 		}
 	}
