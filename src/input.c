@@ -479,6 +479,13 @@ popfile(void)
 }
 
 
+void unwindfiles(struct parsefile *stop)
+{
+	while (parsefile != stop)
+		popfile();
+}
+
+
 /*
  * Return to top level.
  */
@@ -486,8 +493,7 @@ popfile(void)
 void
 popallfiles(void)
 {
-	while (parsefile != &basepf)
-		popfile();
+	unwindfiles(&basepf);
 }
 
 
