@@ -848,6 +848,8 @@ bail:
 		goto out;
 	}
 
+	jp = NULL;
+
 	/* Execute the command. */
 	switch (cmdentry.cmdtype) {
 	default:
@@ -856,7 +858,6 @@ bail:
 			INTOFF;
 			jp = makejob(cmd, 1);
 			if (forkshell(jp, cmd, FORK_FG) != 0) {
-				status = waitforjob(jp);
 				INTON;
 				break;
 			}
@@ -875,21 +876,21 @@ bail:
 		if (evalbltin(cmdentry.u.cmd, argc, argv, flags)) {
 			if (exception == EXERROR && spclbltin <= 0) {
 				FORCEINTON;
-				goto readstatus;
+				break;
 			}
 raise:
 			longjmp(handler->loc, 1);
 		}
-		goto readstatus;
+		break;
 
 	case CMDFUNCTION:
 		poplocalvars(1);
 		if (evalfun(cmdentry.u.func, argc, argv, flags))
 			goto raise;
-readstatus:
-		status = exitstatus;
 		break;
 	}
+
+	status = waitforjob(jp);
 
 out:
 	if (cmd->ncmd.redirect)

@@ -53,6 +53,7 @@
 #include <termios.h>
 #undef CEOF			/* syntax.h redefines this */
 #endif
+#include "eval.h"
 #include "redir.h"
 #include "show.h"
 #include "main.h"
@@ -973,10 +974,11 @@ waitforjob(struct job *jp)
 {
 	int st;
 
-	TRACE(("waitforjob(%%%d) called\n", jobno(jp)));
-	while (jp->state == JOBRUNNING) {
+	TRACE(("waitforjob(%%%d) called\n", jp ? jobno(jp) : 0));
+	while ((jp && jp->state == JOBRUNNING) || gotsigchld)
 		dowait(DOWAIT_BLOCK, jp);
-	}
+	if (!jp)
+		return exitstatus;
 	st = getstatus(jp);
 #if JOBS
 	if (jp->jobctl) {
