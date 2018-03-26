@@ -192,7 +192,7 @@ openredirect(union node *redir)
 			} else if (!S_ISREG(sb.st_mode)) {
 				if ((f = open64(fname, O_WRONLY, 0666)) < 0)
 					goto ecreate;
-				if (fstat64(f, &sb) < 0 && S_ISREG(sb.st_mode)) {
+				if (!fstat64(f, &sb) && S_ISREG(sb.st_mode)) {
 					close(f);
 					errno = EEXIST;
 					goto ecreate;
