@@ -1205,7 +1205,8 @@ expandmeta(str, flag)
 			ckfree(p);
 		switch (i) {
 		case 0:
-			if (!(pglob.gl_flags & GLOB_MAGCHAR))
+			if ((pglob.gl_flags & (GLOB_NOMAGIC | GLOB_NOCHECK)) ==
+			    (GLOB_NOMAGIC | GLOB_NOCHECK))
 				goto nometa2;
 			addglob(&pglob);
 			globfree(&pglob);
