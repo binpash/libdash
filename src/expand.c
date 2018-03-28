@@ -849,8 +849,7 @@ memtodest(const char *p, size_t len, const char *syntax, int quotes) {
 		if (c) {
 			if ((quotes & QUOTES_ESC) &&
 			    ((syntax[c] == CCTL) ||
-			     (((quotes & EXP_FULL) || syntax != BASESYNTAX) &&
-			      syntax[c] == CBACK)))
+			     (syntax != BASESYNTAX && syntax[c] == CBACK)))
 				USTPUTC(CTLESC, q);
 		} else if (!(quotes & QUOTES_KEEPNUL))
 			continue;
@@ -1341,7 +1340,7 @@ expmeta(char *name, unsigned name_len, unsigned expdir_len)
 				}
 			}
 		} else {
-			if (*p == '\\')
+			if (*p == '\\' && p[1])
 				esc++;
 			if (p[esc] == '/') {
 				if (metaflag)
@@ -1355,7 +1354,7 @@ expmeta(char *name, unsigned name_len, unsigned expdir_len)
 			return;
 		p = name;
 		do {
-			if (*p == '\\')
+			if (*p == '\\' && p[1])
 				p++;
 			*enddir++ = *p;
 		} while (*p++);
@@ -1367,7 +1366,7 @@ expmeta(char *name, unsigned name_len, unsigned expdir_len)
 	if (name < start) {
 		p = name;
 		do {
-			if (*p == '\\')
+			if (*p == '\\' && p[1])
 				p++;
 			*enddir++ = *p++;
 		} while (p < start);
