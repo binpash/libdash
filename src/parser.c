@@ -1262,7 +1262,7 @@ varname:
 				STPUTC(c, out);
 				c = pgetc_eatbnl();
 			} while (is_digit(c));
-		} else {
+		} else if (c != '}') {
 			int cc = c;
 
 			c = pgetc_eatbnl();
@@ -1290,7 +1290,8 @@ varname:
 			}
 
 			USTPUTC(cc, out);
-		}
+		} else
+			goto badsub;
 
 		if (subtype == 0) {
 			int cc = c;
