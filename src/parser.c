@@ -1325,10 +1325,11 @@ badsub:
 			pungetc();
 		}
 
-		if (newsyn == ARISYNTAX && subtype > VSNORMAL)
+		if (newsyn == ARISYNTAX)
 			newsyn = DQSYNTAX;
 
-		if (newsyn != synstack->syntax) {
+		if ((newsyn != synstack->syntax || synstack->innerdq) &&
+		    subtype != VSNORMAL) {
 			synstack_push(&synstack,
 				      synstack->prev ?:
 				      alloca(sizeof(*synstack)),
