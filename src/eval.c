@@ -886,7 +886,6 @@ raise:
 		break;
 
 	case CMDFUNCTION:
-		poplocalvars(1);
 		if (evalfun(cmdentry.u.func, argc, argv, flags))
 			goto raise;
 		break;
@@ -971,9 +970,7 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
 	shellparam.p = argv + 1;
 	shellparam.optind = 1;
 	shellparam.optoff = -1;
-	pushlocalvars();
 	evaltree(func->n.ndefun.body, flags & EV_TESTED);
-	poplocalvars(0);
 funcdone:
 	INTOFF;
 	loopnest = saveloopnest;
