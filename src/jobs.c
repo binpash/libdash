@@ -975,10 +975,17 @@ waitforjob(struct job *jp)
 	int st;
 
 	TRACE(("waitforjob(%%%d) called\n", jp ? jobno(jp) : 0));
-	while ((jp && jp->state == JOBRUNNING) || gotsigchld)
-		dowait(DOWAIT_BLOCK, jp);
-	if (!jp)
+	if (!jp) {
+		int pid = gotsigchld;
+
+		while (pid > 0)
+			pid = dowait(DOWAIT_NORMAL, NULL);
+
 		return exitstatus;
+	}
+
+	while (jp->state == JOBRUNNING)
+		dowait(DOWAIT_BLOCK, jp);
 	st = getstatus(jp);
 #if JOBS
 	if (jp->jobctl) {

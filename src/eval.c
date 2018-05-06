@@ -859,10 +859,8 @@ bail:
 		if (!(flags & EV_EXIT) || have_traps()) {
 			INTOFF;
 			jp = makejob(cmd, 1);
-			if (forkshell(jp, cmd, FORK_FG) != 0) {
-				INTON;
+			if (forkshell(jp, cmd, FORK_FG) != 0)
 				break;
-			}
 			FORCEINTON;
 		}
 		listsetvar(varlist.list, VEXPORT|VSTACK);
@@ -875,11 +873,8 @@ bail:
 			if (execcmd && argc > 1)
 				listsetvar(varlist.list, VEXPORT);
 		}
-		if (evalbltin(cmdentry.u.cmd, argc, argv, flags)) {
-			if (exception == EXERROR && spclbltin <= 0) {
-				FORCEINTON;
-				break;
-			}
+		if (evalbltin(cmdentry.u.cmd, argc, argv, flags) &&
+		    !(exception == EXERROR && spclbltin <= 0)) {
 raise:
 			longjmp(handler->loc, 1);
 		}
@@ -892,6 +887,7 @@ raise:
 	}
 
 	status = waitforjob(jp);
+	FORCEINTON;
 
 out:
 	if (cmd->ncmd.redirect)
