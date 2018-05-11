@@ -853,6 +853,11 @@ static int pgetc_eatbnl(void)
 	return c;
 }
 
+static int pgetc_top(struct synstack *stack)
+{
+	return stack->syntax == SQSYNTAX ? pgetc() : pgetc_eatbnl();
+}
+
 static void synstack_push(struct synstack **stack, struct synstack *next,
 			  const char *syntax)
 {
@@ -915,7 +920,7 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 			attyline();
 			if (synstack->syntax == BASESYNTAX)
 				return readtoken();
-			c = syntax == SQSYNTAX ? pgetc() : pgetc_eatbnl();
+			c = pgetc_top(synstack);
 			goto loop;
 		}
 #endif
@@ -929,7 +934,7 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 					goto endword;	/* exit outer loop */
 				USTPUTC(c, out);
 				nlprompt();
-				c = syntax == SQSYNTAX ? pgetc() : pgetc_eatbnl();
+				c = pgetc_top(synstack);
 				goto loop;		/* continue outer loop */
 			case CWORD:
 				USTPUTC(c, out);
@@ -1056,7 +1061,7 @@ toggledq:
 					USTPUTC(c, out);
 				}
 			}
-			c = syntax == SQSYNTAX ? pgetc() : pgetc_eatbnl();
+			c = pgetc_top(synstack);
 		}
 	}
 endword:
