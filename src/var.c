@@ -302,28 +302,6 @@ out:
 	return vp;
 }
 
-
-
-/*
- * Process a linked list of variable assignments.
- */
-
-void
-listsetvar(struct strlist *list, int flags)
-{
-	struct strlist *lp;
-
-	lp = list;
-	if (!lp)
-		return;
-	INTOFF;
-	do {
-		setvareq(lp->text, flags);
-	} while ((lp = lp->next));
-	INTON;
-}
-
-
 /*
  * Find the value of a variable.  Returns NULL if not set.
  */
@@ -468,7 +446,7 @@ localcmd(int argc, char **argv)
 
 	argv = argptr;
 	while ((name = *argv++) != NULL) {
-		mklocal(name);
+		mklocal(name, 0);
 	}
 	return 0;
 }
@@ -481,7 +459,7 @@ localcmd(int argc, char **argv)
  * "-" as a special case.
  */
 
-void mklocal(char *name)
+void mklocal(char *name, int flags)
 {
 	struct localvar *lvp;
 	struct var **vpp;
@@ -502,16 +480,16 @@ void mklocal(char *name)
 		eq = strchr(name, '=');
 		if (vp == NULL) {
 			if (eq)
-				vp = setvareq(name, VSTRFIXED);
+				vp = setvareq(name, VSTRFIXED | flags);
 			else
-				vp = setvar(name, NULL, VSTRFIXED);
+				vp = setvar(name, NULL, VSTRFIXED | flags);
 			lvp->flags = VUNSET;
 		} else {
 			lvp->text = vp->text;
 			lvp->flags = vp->flags;
 			vp->flags |= VSTRFIXED|VTEXTFIXED;
 			if (eq)
-				setvareq(name, 0);
+				setvareq(name, flags);
 		}
 	}
 	lvp->vp = vp;

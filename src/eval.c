@@ -737,6 +737,8 @@ evalcommand(union node *cmd, int flags)
 	int execcmd;
 	int status;
 	char **nargv;
+	int vflags;
+	int vlocal;
 
 	errlinno = lineno = cmd->ncmd.linno;
 	if (funcline)
@@ -745,7 +747,6 @@ evalcommand(union node *cmd, int flags)
 	/* First expand the arguments. */
 	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
 	setstackmark(&smark);
-	localvar_stop = pushlocalvars();
 	file_stop = parsefile;
 	back_exitstatus = 0;
 
@@ -759,6 +760,8 @@ evalcommand(union node *cmd, int flags)
 	cmd_flag = 0;
 	execcmd = 0;
 	spclbltin = -1;
+	vflags = 0;
+	vlocal = 0;
 	path = NULL;
 
 	argc = 0;
@@ -770,6 +773,8 @@ evalcommand(union node *cmd, int flags)
 			find_command(arglist.list->text, &cmdentry,
 				     cmd_flag | DO_REGBLTIN, pathval());
 
+			vlocal++;
+
 			/* implement bltin and command here */
 			if (cmdentry.cmdtype != CMDBUILTIN)
 				break;
@@ -780,6 +785,7 @@ evalcommand(union node *cmd, int flags)
 					cmdentry.u.cmd->flags &
 					BUILTIN_SPECIAL
 				;
+				vlocal = spclbltin ^ BUILTIN_SPECIAL;
 			}
 			execcmd = cmdentry.u.cmd == EXECCMD;
 			if (likely(cmdentry.u.cmd != COMMANDCMD))
@@ -798,6 +804,9 @@ evalcommand(union node *cmd, int flags)
 
 		for (sp = arglist.list; sp; sp = sp->next)
 			argc++;
+
+		if (execcmd && argc > 1)
+			vflags = VEXPORT;
 	}
 
 	/* Reserve one extra spot at the front for shellexec. */
@@ -818,7 +827,8 @@ evalcommand(union node *cmd, int flags)
 	redir_stop = pushredir(cmd->ncmd.redirect);
 	status = redirectsafe(cmd->ncmd.redirect, REDIR_PUSH|REDIR_SAVEFD2);
 
-	if (status) {
+	if (unlikely(status)) {
+		vlocal = 0;
 bail:
 		exitstatus = status;
 
@@ -829,13 +839,19 @@ bail:
 		goto out;
 	}
 
+	if (likely(vlocal))
+		localvar_stop = pushlocalvars();
+
 	for (argp = cmd->ncmd.assign; argp; argp = argp->narg.next) {
 		struct strlist **spp;
 
 		spp = varlist.lastp;
 		expandarg(argp, &varlist, EXP_VARTILDE);
 
-		mklocal((*spp)->text);
+		if (vlocal)
+			mklocal((*spp)->text, VEXPORT);
+		else
+			setvareq((*spp)->text, vflags);
 	}
 
 	/* Print the command if xflag is set. */
@@ -857,8 +873,8 @@ bail:
 	/* Now locate the command. */
 	if (cmdentry.cmdtype != CMDBUILTIN ||
 	    !(cmdentry.u.cmd->flags & BUILTIN_REGULAR)) {
-		find_command(argv[0], &cmdentry, cmd_flag | DO_ERR,
-			     unlikely(path) ? path : pathval());
+		path = unlikely(path) ? path : pathval();
+		find_command(argv[0], &cmdentry, cmd_flag | DO_ERR, path);
 	}
 
 	jp = NULL;
@@ -881,17 +897,10 @@ bail:
 				break;
 			FORCEINTON;
 		}
-		listsetvar(varlist.list, VEXPORT|VSTACK);
-		path = unlikely(path) ? path : pathval();
 		shellexec(argv, path, cmdentry.u.index);
 		/* NOTREACHED */
 
 	case CMDBUILTIN:
-		if (spclbltin > 0 || argc == 0) {
-			poplocalvars(1);
-			if (execcmd && argc > 1)
-				listsetvar(varlist.list, VEXPORT);
-		}
 		if (evalbltin(cmdentry.u.cmd, argc, argv, flags) &&
 		    !(exception == EXERROR && spclbltin <= 0)) {
 raise:
@@ -913,7 +922,8 @@ out:
 		popredir(execcmd);
 	unwindredir(redir_stop);
 	unwindfiles(file_stop);
-	unwindlocalvars(localvar_stop);
+	if (likely(vlocal))
+		unwindlocalvars(localvar_stop);
 	if (lastarg)
 		/* dsl: I think this is intended to be used to support
 		 * '_' in 'vi' command mode during line editing...
