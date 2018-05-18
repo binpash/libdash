@@ -405,12 +405,11 @@ out:
 #endif
 
 STATIC int
-sprint_status(char *s, int status, int sigonly)
+sprint_status(char *os, int status, int sigonly)
 {
-	int col;
+	char *s = os;
 	int st;
 
-	col = 0;
 	st = WEXITSTATUS(status);
 	if (!WIFEXITED(status)) {
 #if JOBS
@@ -426,21 +425,21 @@ sprint_status(char *s, int status, int sigonly)
 				goto out;
 #endif
 		}
-		col = fmtstr(s, 32, strsignal(st));
+		s = stpncpy(s, strsignal(st), 32);
 #ifdef WCOREDUMP
 		if (WCOREDUMP(status)) {
-			col += fmtstr(s + col, 16, " (core dumped)");
+			s = stpcpy(s, " (core dumped)");
 		}
 #endif
 	} else if (!sigonly) {
 		if (st)
-			col = fmtstr(s, 16, "Done(%d)", st);
+			s += fmtstr(s, 16, "Done(%d)", st);
 		else
-			col = fmtstr(s, 16, "Done");
+			s = stpcpy(s, "Done");
 	}
 
 out:
-	return col;
+	return s - os;
 }
 
 static void
