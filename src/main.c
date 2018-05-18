@@ -339,13 +339,8 @@ exitcmd(int argc, char **argv)
 	if (stoppedjobs())
 		return 0;
 
-	if (argc > 1) {
-		int status = number(argv[1]);
-
-		exitstatus = status;
-		if (savestatus >= 0)
-			savestatus = status;
-	}
+	if (argc > 1)
+		savestatus = number(argv[1]);
 
 	exraise(EXEXIT);
 	/* NOTREACHED */
