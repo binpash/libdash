@@ -182,8 +182,11 @@ void
 setsignal(int signo)
 {
 	int action;
+	int lvforked;
 	char *t, tsig;
 	struct sigaction act;
+
+	lvforked = vforked;
 
 	if ((t = trap[signo]) == NULL)
 		action = S_DFL;
@@ -191,7 +194,7 @@ setsignal(int signo)
 		action = S_CATCH;
 	else
 		action = S_IGN;
-	if (rootshell && action == S_DFL) {
+	if (rootshell && action == S_DFL && !lvforked) {
 		switch (signo) {
 		case SIGINT:
 			if (iflag || minusc || sflag == 0)
@@ -256,7 +259,8 @@ setsignal(int signo)
 	default:
 		act.sa_handler = SIG_DFL;
 	}
-	*t = action;
+	if (!lvforked)
+		*t = action;
 	act.sa_flags = 0;
 	sigfillset(&act.sa_mask);
 	sigaction(signo, &act, 0);
@@ -272,7 +276,8 @@ ignoresig(int signo)
 	if (sigmode[signo - 1] != S_IGN && sigmode[signo - 1] != S_HARD_IGN) {
 		signal(signo, SIG_IGN);
 	}
-	sigmode[signo - 1] = S_HARD_IGN;
+	if (!vforked)
+		sigmode[signo - 1] = S_HARD_IGN;
 }
 
 
@@ -284,6 +289,9 @@ ignoresig(int signo)
 void
 onsig(int signo)
 {
+	if (vforked)
+		return;
+
 	if (signo == SIGCHLD) {
 		gotsigchld = 1;
 		if (!trap[SIGCHLD])
@@ -430,4 +438,12 @@ int decode_signal(const char *string, int minsig)
 	}
 
 	return -1;
+}
+
+void sigblockall(sigset_t *oldmask)
+{
+	sigset_t mask;
+
+	sigfillset(&mask);
+	sigprocmask(SIG_SETMASK, &mask, oldmask);
 }

@@ -53,6 +53,7 @@
 #include <termios.h>
 #undef CEOF			/* syntax.h redefines this */
 #endif
+#include "exec.h"
 #include "eval.h"
 #include "redir.h"
 #include "show.h"
@@ -96,6 +97,9 @@ static int ttyfd = -1;
 
 /* current job */
 static struct job *curjob;
+
+/* Set if we are in the vforked child */
+int vforked;
 
 STATIC void set_curjob(struct job *, unsigned);
 STATIC int jobno(const struct job *);
@@ -840,20 +844,29 @@ growjobtab(void)
  * Called with interrupts off.
  */
 
-STATIC inline void
-forkchild(struct job *jp, union node *n, int mode)
+static void forkchild(struct job *jp, union node *n, int mode)
 {
+	int lvforked;
 	int oldlvl;
 
 	TRACE(("Child shell %d\n", getpid()));
-	oldlvl = shlvl;
-	shlvl++;
 
-	closescript();
-	clear_traps();
+	oldlvl = shlvl;
+	lvforked = vforked;
+
+	if (!lvforked) {
+		shlvl++;
+
+		closescript();
+		clear_traps();
+
 #if JOBS
-	/* do job control only in root shell */
-	jobctl = 0;
+		/* do job control only in root shell */
+		jobctl = 0;
+#endif
+	}
+
+#if JOBS
 	if (mode != FORK_NOJOB && jp->jobctl && !oldlvl) {
 		pid_t pgrp;
 
@@ -879,17 +892,30 @@ forkchild(struct job *jp, union node *n, int mode)
 		}
 	}
 	if (!oldlvl && iflag) {
-		setsignal(SIGINT);
-		setsignal(SIGQUIT);
+		if (mode != FORK_BG) {
+			setsignal(SIGINT);
+			setsignal(SIGQUIT);
+		}
 		setsignal(SIGTERM);
 	}
+
+	if (lvforked)
+		return;
+
 	for (jp = curjob; jp; jp = jp->prev_job)
 		freejob(jp);
 }
 
-STATIC inline void
-forkparent(struct job *jp, union node *n, int mode, pid_t pid)
+static void forkparent(struct job *jp, union node *n, int mode, pid_t pid)
 {
+	if (pid < 0) {
+		TRACE(("Fork failed, errno=%d", errno));
+		if (jp)
+			freejob(jp);
+		sh_error("Cannot fork");
+		/* NOTREACHED */
+	}
+
 	TRACE(("In parent shell:  child = %d\n", pid));
 	if (!jp)
 		return;
@@ -926,17 +952,38 @@ forkshell(struct job *jp, union node *n, int mode)
 
 	TRACE(("forkshell(%%%d, %p, %d) called\n", jobno(jp), n, mode));
 	pid = fork();
-	if (pid < 0) {
-		TRACE(("Fork failed, errno=%d", errno));
-		if (jp)
-			freejob(jp);
-		sh_error("Cannot fork");
-	}
 	if (pid == 0)
 		forkchild(jp, n, mode);
 	else
 		forkparent(jp, n, mode, pid);
+
 	return pid;
+}
+
+struct job *vforkexec(union node *n, char **argv, const char *path, int idx)
+{
+	struct job *jp;
+	int pid;
+
+	jp = makejob(n, 1);
+
+	sigblockall(NULL);
+	vforked++;
+
+	pid = vfork();
+
+	if (!pid) {
+		forkchild(jp, n, FORK_FG);
+		sigclearmask();
+		shellexec(argv, path, idx);
+		/* NOTREACHED */
+	}
+
+	vforked = 0;
+	sigclearmask();
+	forkparent(jp, n, FORK_FG, pid);
+
+	return jp;
 }
 
 /*
@@ -1106,7 +1153,7 @@ static int dowait(int block, struct job *jp)
 STATIC int
 waitproc(int block, int *status)
 {
-	sigset_t mask, oldmask;
+	sigset_t oldmask;
 	int flags = block == DOWAIT_BLOCK ? 0 : WNOHANG;
 	int err;
 
@@ -1120,8 +1167,7 @@ waitproc(int block, int *status)
 		if (err || (err = -!block))
 			break;
 
-		sigfillset(&mask);
-		sigprocmask(SIG_SETMASK, &mask, &oldmask);
+		sigblockall(&oldmask);
 
 		while (!gotsigchld && !pending_sig)
 			sigsuspend(&oldmask);

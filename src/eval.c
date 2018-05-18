@@ -892,10 +892,8 @@ bail:
 		/* Fork off a child process if necessary. */
 		if (!(flags & EV_EXIT) || have_traps()) {
 			INTOFF;
-			jp = makejob(cmd, 1);
-			if (forkshell(jp, cmd, FORK_FG) != 0)
-				break;
-			FORCEINTON;
+			jp = vforkexec(cmd, argv, path, cmdentry.u.index);
+			break;
 		}
 		shellexec(argv, path, cmdentry.u.index);
 		/* NOTREACHED */

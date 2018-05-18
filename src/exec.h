@@ -58,6 +58,8 @@ struct cmdentry {
 #define DO_ALTPATH	0x08	/* using alternate path */
 #define DO_REGBLTIN	0x10	/* regular built-ins and functions only */
 
+union node;
+
 extern const char *pathopt;	/* set by padvance */
 
 void shellexec(char **, const char *, int)
