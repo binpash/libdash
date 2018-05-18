@@ -106,13 +106,15 @@ main(int argc, char **argv)
 		int e;
 		int s;
 
-		reset();
+		exitreset();
 
 		e = exception;
 
 		s = state;
 		if (e == EXEXIT || s == 0 || iflag == 0 || shlvl)
 			exitshell();
+
+		reset();
 
 		if (e == EXINT
 #if ATTY

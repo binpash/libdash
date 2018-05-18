@@ -1780,7 +1780,7 @@ varunset(const char *end, const char *var, const char *umsg, int varflags)
 
 INCLUDE "expand.h"
 
-RESET {
+EXITRESET {
 	ifsfree();
 }
 

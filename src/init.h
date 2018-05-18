@@ -35,5 +35,5 @@
  */
 
 void init(void);
+void exitreset(void);
 void reset(void);
-void initshellproc(void);
