@@ -300,7 +300,8 @@ find_dot_file(char *basename)
 
 	while ((len = padvance(&path, basename)) >= 0) {
 		fullname = stackblock();
-		if ((stat(fullname, &statb) == 0) && S_ISREG(statb.st_mode)) {
+		if ((!pathopt || *pathopt == 'f') &&
+		    !stat(fullname, &statb) && S_ISREG(statb.st_mode)) {
 			/* This will be freed by the caller. */
 			return stalloc(len);
 		}

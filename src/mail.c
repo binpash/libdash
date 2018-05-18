@@ -79,7 +79,7 @@ chkmail(void)
 	for (mtp = mailtime; mtp < mailtime + MAXMBOXES; mtp++) {
 		int len;
 
-		len = padvance(&mpath, nullstr);
+		len = padvance_magic(&mpath, nullstr, 2);
 		if (!len)
 			break;
 		p = stackblock();

@@ -92,7 +92,7 @@ STATIC int builtinloc = -1;		/* index in path of %builtin, or -1 */
 
 STATIC void tryexec(char *, char **, char **);
 STATIC void printentry(struct tblentry *);
-STATIC void clearcmdentry(int);
+STATIC void clearcmdentry(void);
 STATIC struct tblentry *cmdlookup(const char *, int);
 STATIC void delete_cmd_entry(void);
 STATIC void addcmdentry(char *, struct cmdentry *);
@@ -168,7 +168,27 @@ repeat:
 	}
 }
 
+static const char *legal_pathopt(const char *opt, const char *term, int magic)
+{
+	switch (magic) {
+	case 0:
+		opt = NULL;
+		break;
 
+	case 1:
+		opt = prefix(opt, "builtin") ?: prefix(opt, "func");
+		break;
+
+	default:
+		opt += strcspn(opt, term);
+		break;
+	}
+
+	if (opt && *opt == '%')
+		opt++;
+
+	return opt;
+}
 
 /*
  * Do a path search.  The variable path (passed by reference) should be
@@ -178,39 +198,64 @@ repeat:
  * a percent sign) appears in the path entry then the global variable
  * pathopt will be set to point to it; otherwise pathopt will be set to
  * NULL.
+ *
+ * If magic is 0 then pathopt recognition will be disabled.  If magic is
+ * 1 we shall recognise %builtin/%func.  Otherwise we shall accept any
+ * pathopt.
  */
 
 const char *pathopt;
 
-int padvance(const char **path, const char *name)
+int padvance_magic(const char **path, const char *name, int magic)
 {
+	const char *term = "%:";
+	const char *lpathopt;
 	const char *p;
 	char *q;
 	const char *start;
+	size_t qlen;
 	size_t len;
 
 	if (*path == NULL)
 		return -1;
+
+	lpathopt = NULL;
 	start = *path;
-	for (p = start ; *p && *p != ':' && *p != '%' ; p++);
-	len = p - start + strlen(name) + 2;	/* "2" is for '/' and '\0' */
-	q = growstackto(len);
-	if (p != start) {
-		memcpy(q, start, p - start);
-		q += p - start;
+
+	if (*start == '%' && (p = legal_pathopt(start + 1, term, magic))) {
+		lpathopt = start + 1;
+		start = p;
+		term = ":";
+	}
+
+	len = strcspn(start, term);
+	p = start + len;
+
+	if (*p == '%') {
+		size_t extra = strchrnul(p, ':') - p;
+
+		if (legal_pathopt(p + 1, term, magic))
+			lpathopt = p + 1;
+		else
+			len += extra;
+
+		p += extra;
+	}
+
+	pathopt = lpathopt;
+	*path = *p == ':' ? p + 1 : NULL;
+
+	/* "2" is for '/' and '\0' */
+	qlen = len + strlen(name) + 2;
+	q = growstackto(qlen);
+
+	if (likely(len)) {
+		q = mempcpy(q, start, len);
 		*q++ = '/';
 	}
 	strcpy(q, name);
-	pathopt = NULL;
-	if (*p == '%') {
-		pathopt = ++p;
-		while (*p && *p != ':')  p++;
-	}
-	if (*p == ':')
-		*path = p + 1;
-	else
-		*path = NULL;
-	return len;
+
+	return qlen;
 }
 
 
@@ -228,7 +273,7 @@ hashcmd(int argc, char **argv)
 	char *name;
 
 	while ((c = nextopt("r")) != '\0') {
-		clearcmdentry(0);
+		clearcmdentry();
 		return 0;
 	}
 	if (*argptr == NULL) {
@@ -363,15 +408,16 @@ find_command(char *name, struct cmdentry *entry, int act, const char *path)
 	idx = -1;
 loop:
 	while ((len = padvance(&path, name)) >= 0) {
+		const char *lpathopt = pathopt;
+
 		fullname = stackblock();
 		idx++;
-		if (pathopt) {
-			if (prefix(pathopt, "builtin")) {
+		if (lpathopt) {
+			if (*lpathopt == 'b') {
 				if (bcmd)
 					goto builtin_success;
 				continue;
-			} else if (!(act & DO_NOFUNC) &&
-				   prefix(pathopt, "func")) {
+			} else if (!(act & DO_NOFUNC)) {
 				/* handled below */
 			} else {
 				/* ignore unimplemented options */
@@ -397,7 +443,7 @@ loop:
 		e = EACCES;	/* if we fail, this will be the error */
 		if (!S_ISREG(statb.st_mode))
 			continue;
-		if (pathopt) {		/* this is a %func directory */
+		if (lpathopt) {		/* this is a %func directory */
 			stalloc(len);
 			readcmdfile(fullname);
 			if ((cmdp = cmdlookup(name, 0)) == NULL ||
@@ -515,39 +561,26 @@ hashcd(void)
 void
 changepath(const char *newval)
 {
-	const char *old, *new;
+	const char *new;
 	int idx;
-	int firstchange;
 	int bltin;
 
-	old = pathval();
 	new = newval;
-	firstchange = 9999;	/* assume no change */
 	idx = 0;
 	bltin = -1;
 	for (;;) {
-		if (*old != *new) {
-			firstchange = idx;
-			if ((*old == '\0' && *new == ':')
-			 || (*old == ':' && *new == '\0'))
-				firstchange++;
-			old = new;	/* ignore subsequent differences */
-		}
-		if (*new == '\0')
-			break;
-		if (*new == '%' && bltin < 0 && prefix(new + 1, "builtin"))
+		if (*new == '%' && prefix(new + 1, "builtin")) {
 			bltin = idx;
-		if (*new == ':') {
-			idx++;
+			break;
 		}
-		new++, old++;
+		new = strchr(new, ':');
+		if (!new)
+			break;
+		idx++;
+		new++;
 	}
-	if (builtinloc < 0 && bltin >= 0)
-		builtinloc = bltin;		/* zap builtins */
-	if (builtinloc >= 0 && bltin < 0)
-		firstchange = 0;
-	clearcmdentry(firstchange);
 	builtinloc = bltin;
+	clearcmdentry();
 }
 
 
@@ -557,7 +590,7 @@ changepath(const char *newval)
  */
 
 STATIC void
-clearcmdentry(int firstchange)
+clearcmdentry(void)
 {
 	struct tblentry **tblp;
 	struct tblentry **pp;
@@ -567,10 +600,8 @@ clearcmdentry(int firstchange)
 	for (tblp = cmdtable ; tblp < &cmdtable[CMDTABLESIZE] ; tblp++) {
 		pp = tblp;
 		while ((cmdp = *pp) != NULL) {
-			if ((cmdp->cmdtype == CMDNORMAL &&
-			     cmdp->param.index >= firstchange)
-			 || (cmdp->cmdtype == CMDBUILTIN &&
-			     builtinloc >= firstchange)) {
+			if (cmdp->cmdtype == CMDNORMAL ||
+			    (cmdp->cmdtype == CMDBUILTIN && builtinloc > 0)) {
 				*pp = cmdp->next;
 				ckfree(cmdp);
 			} else {

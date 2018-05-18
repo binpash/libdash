@@ -62,7 +62,7 @@ extern const char *pathopt;	/* set by padvance */
 
 void shellexec(char **, const char *, int)
     __attribute__((__noreturn__));
-int padvance(const char **, const char *);
+int padvance_magic(const char **path, const char *name, int magic);
 int hashcmd(int, char **);
 void find_command(char *, struct cmdentry *, int, const char *);
 struct builtincmd *find_builtin(const char *);
@@ -75,3 +75,8 @@ void defun(union node *);
 void unsetfunc(const char *);
 int typecmd(int, char **);
 int commandcmd(int, char **);
+
+static inline int padvance(const char **path, const char *name)
+{
+	return padvance_magic(path, name, 1);
+}
