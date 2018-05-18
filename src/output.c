@@ -286,7 +286,7 @@ fmtstr(char *outbuf, size_t length, const char *fmt, ...)
 	va_start(ap, fmt);
 	ret = xvsnprintf(outbuf, length, fmt, ap);
 	va_end(ap);
-	return ret;
+	return ret > (int)length ? length : ret;
 }
 
 
