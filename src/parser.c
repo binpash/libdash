@@ -1460,9 +1460,7 @@ done:
 	/* Ignore any pushed back tokens left from the backquote parsing. */
 	if (oldstyle)
 		tokpushback = 0;
-	while (stackblocksize() <= savelen)
-		growstackblock();
-	STARTSTACKSTR(out);
+	out = growstackto(savelen + 1);
 	if (str) {
 		memcpy(out, str, savelen);
 		STADJUST(savelen, out);

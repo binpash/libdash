@@ -195,9 +195,7 @@ padvance(const char **path, const char *name)
 	start = *path;
 	for (p = start ; *p && *p != ':' && *p != '%' ; p++);
 	len = p - start + strlen(name) + 2;	/* "2" is for '/' and '\0' */
-	while (stackblocksize() < len)
-		growstackblock();
-	q = stackblock();
+	q = growstackto(len);
 	if (p != start) {
 		memcpy(q, start, p - start);
 		q += p - start;

@@ -265,6 +265,14 @@ growstackstr(void)
 	return stackblock() + len;
 }
 
+char *growstackto(size_t len)
+{
+	while (stackblocksize() < len)
+		growstackblock();
+
+	return stackblock();
+}
+
 /*
  * Called from CHECKSTRSPACE.
  */
@@ -273,18 +281,8 @@ char *
 makestrspace(size_t newlen, char *p)
 {
 	size_t len = p - stacknxt;
-	size_t size;
 
-	for (;;) {
-		size_t nleft;
-
-		size = stackblocksize();
-		nleft = size - len;
-		if (nleft >= newlen)
-			break;
-		growstackblock();
-	}
-	return stackblock() + len;
+	return growstackto(len + newlen) + len;
 }
 
 char *
