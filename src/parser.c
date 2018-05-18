@@ -1368,6 +1368,7 @@ parsebackq: {
 	union node *n;
 	char *str;
 	size_t savelen;
+	struct heredoc *saveheredoclist;
 	int uninitialized_var(saveprompt);
 
 	str = NULL;
@@ -1432,6 +1433,9 @@ done:
 	*nlpp = (struct nodelist *)stalloc(sizeof (struct nodelist));
 	(*nlpp)->next = NULL;
 
+	saveheredoclist = heredoclist;
+	heredoclist = NULL;
+
 	if (oldstyle) {
 		saveprompt = doprompt;
 		doprompt = 0;
@@ -1444,17 +1448,18 @@ done:
 	else {
 		if (readtoken() != TRP)
 			synexpect(TRP);
+		setinputstring(nullstr);
+		parseheredoc();
 	}
 
+	heredoclist = saveheredoclist;
+
 	(*nlpp)->n = n;
-        if (oldstyle) {
-		/*
-		 * Start reading from old file again, ignoring any pushed back
-		 * tokens left from the backquote parsing
-		 */
-                popfile();
+	/* Start reading from old file again. */
+	popfile();
+	/* Ignore any pushed back tokens left from the backquote parsing. */
+	if (oldstyle)
 		tokpushback = 0;
-	}
 	while (stackblocksize() <= savelen)
 		growstackblock();
 	STARTSTACKSTR(out);
