@@ -292,20 +292,18 @@ find_dot_file(char *basename)
 	char *fullname;
 	const char *path = pathval();
 	struct stat statb;
+	int len;
 
 	/* don't try this for absolute or relative paths */
 	if (strchr(basename, '/'))
 		return basename;
 
-	while ((fullname = padvance(&path, basename)) != NULL) {
+	while ((len = padvance(&path, basename)) >= 0) {
+		fullname = stackblock();
 		if ((stat(fullname, &statb) == 0) && S_ISREG(statb.st_mode)) {
-			/*
-			 * Don't bother freeing here, since it will
-			 * be freed by the caller.
-			 */
-			return fullname;
+			/* This will be freed by the caller. */
+			return stalloc(len);
 		}
-		stunalloc(fullname);
 	}
 
 	/* not found in the PATH */

@@ -98,6 +98,7 @@ cdcmd(int argc, char **argv)
 	char c;
 	struct stat statb;
 	int flags;
+	int len;
 
 	flags = cdopt();
 	dest = *argptr;
@@ -127,9 +128,10 @@ dotdot:
 	if (!*dest)
 		dest = ".";
 	path = bltinlookup("CDPATH");
-	while (path) {
-		c = *path;
-		p = padvance(&path, dest);
+	while (p = path, (len = padvance(&path, dest)) >= 0) {
+		c = *p;
+		p = stalloc(len);
+
 		if (stat(p, &statb) >= 0 && S_ISDIR(statb.st_mode)) {
 			if (c && c != ':')
 				flags |= CD_PRINT;

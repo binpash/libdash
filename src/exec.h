@@ -62,7 +62,7 @@ extern const char *pathopt;	/* set by padvance */
 
 void shellexec(char **, const char *, int)
     __attribute__((__noreturn__));
-char *padvance(const char **, const char *);
+int padvance(const char **, const char *);
 int hashcmd(int, char **);
 void find_command(char *, struct cmdentry *, int, const char *);
 struct builtincmd *find_builtin(const char *);

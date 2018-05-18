@@ -118,13 +118,13 @@ shellexec(char **argv, const char *path, int idx)
 		e = errno;
 	} else {
 		e = ENOENT;
-		while ((cmdname = padvance(&path, argv[0])) != NULL) {
+		while (padvance(&path, argv[0]) >= 0) {
+			cmdname = stackblock();
 			if (--idx < 0 && pathopt == NULL) {
 				tryexec(cmdname, argv, envp);
 				if (errno != ENOENT && errno != ENOTDIR)
 					e = errno;
 			}
-			stunalloc(cmdname);
 		}
 	}
 
@@ -182,8 +182,7 @@ repeat:
 
 const char *pathopt;
 
-char *
-padvance(const char **path, const char *name)
+int padvance(const char **path, const char *name)
 {
 	const char *p;
 	char *q;
@@ -191,7 +190,7 @@ padvance(const char **path, const char *name)
 	size_t len;
 
 	if (*path == NULL)
-		return NULL;
+		return -1;
 	start = *path;
 	for (p = start ; *p && *p != ':' && *p != '%' ; p++);
 	len = p - start + strlen(name) + 2;	/* "2" is for '/' and '\0' */
@@ -211,7 +210,7 @@ padvance(const char **path, const char *name)
 		*path = p + 1;
 	else
 		*path = NULL;
-	return stalloc(len);
+	return len;
 }
 
 
@@ -266,9 +265,9 @@ printentry(struct tblentry *cmdp)
 	idx = cmdp->param.index;
 	path = pathval();
 	do {
-		name = padvance(&path, cmdp->cmdname);
-		stunalloc(name);
+		padvance(&path, cmdp->cmdname);
 	} while (--idx >= 0);
+	name = stackblock();
 	out1str(name);
 	out1fmt(snlfmt, cmdp->rehash ? "*" : nullstr);
 }
@@ -291,6 +290,7 @@ find_command(char *name, struct cmdentry *entry, int act, const char *path)
 	int e;
 	int updatetbl;
 	struct builtincmd *bcmd;
+	int len;
 
 	/* If name contains a slash, don't use PATH or hash table */
 	if (strchr(name, '/') != NULL) {
@@ -362,8 +362,8 @@ find_command(char *name, struct cmdentry *entry, int act, const char *path)
 	e = ENOENT;
 	idx = -1;
 loop:
-	while ((fullname = padvance(&path, name)) != NULL) {
-		stunalloc(fullname);
+	while ((len = padvance(&path, name)) >= 0) {
+		fullname = stackblock();
 		idx++;
 		if (pathopt) {
 			if (prefix(pathopt, "builtin")) {
@@ -398,7 +398,7 @@ loop:
 		if (!S_ISREG(statb.st_mode))
 			continue;
 		if (pathopt) {		/* this is a %func directory */
-			stalloc(strlen(fullname) + 1);
+			stalloc(len);
 			readcmdfile(fullname);
 			if ((cmdp = cmdlookup(name, 0)) == NULL ||
 			    cmdp->cmdtype != CMDFUNCTION)
@@ -789,9 +789,9 @@ describe_command(out, command, path, verbose)
 			p = command;
 		} else {
 			do {
-				p = padvance(&path, command);
-				stunalloc(p);
+				padvance(&path, command);
 			} while (--j >= 0);
+			p = stackblock();
 		}
 		if (verbose) {
 			outfmt(
