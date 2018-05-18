@@ -818,6 +818,17 @@ evalcommand(union node *cmd, int flags)
 	redir_stop = pushredir(cmd->ncmd.redirect);
 	status = redirectsafe(cmd->ncmd.redirect, REDIR_PUSH|REDIR_SAVEFD2);
 
+	if (status) {
+bail:
+		exitstatus = status;
+
+		/* We have a redirection error. */
+		if (spclbltin > 0)
+			exraise(EXERROR);
+
+		goto out;
+	}
+
 	for (argp = cmd->ncmd.assign; argp; argp = argp->narg.next) {
 		struct strlist **spp;
 
@@ -848,30 +859,19 @@ evalcommand(union node *cmd, int flags)
 	    !(cmdentry.u.cmd->flags & BUILTIN_REGULAR)) {
 		find_command(argv[0], &cmdentry, cmd_flag | DO_ERR,
 			     unlikely(path) ? path : pathval());
-		if (cmdentry.cmdtype == CMDUNKNOWN) {
-			status = 127;
-#ifdef FLUSHERR
-			flushout(&errout);
-#endif
-			goto bail;
-		}
-	}
-
-	if (status) {
-bail:
-		exitstatus = status;
-
-		/* We have a redirection error. */
-		if (spclbltin > 0)
-			exraise(EXERROR);
-
-		goto out;
 	}
 
 	jp = NULL;
 
 	/* Execute the command. */
 	switch (cmdentry.cmdtype) {
+	case CMDUNKNOWN:
+		status = 127;
+#ifdef FLUSHERR
+		flushout(&errout);
+#endif
+		goto bail;
+
 	default:
 		/* Fork off a child process if necessary. */
 		if (!(flags & EV_EXIT) || have_traps()) {
