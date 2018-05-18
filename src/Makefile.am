@@ -3,8 +3,7 @@ AM_YFLAGS = -d
 COMMON_CFLAGS = -Wall
 COMMON_CPPFLAGS = \
 	-include $(top_builddir)/config.h \
-	-DBSD=1 -DSHELL \
-	-DIFS_BROKEN
+	-DBSD=1 -DSHELL
 
 AM_CFLAGS = $(COMMON_CFLAGS)
 AM_CPPFLAGS = $(COMMON_CPPFLAGS)

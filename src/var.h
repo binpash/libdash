@@ -100,12 +100,8 @@ extern struct var varinit[];
 #define vhistsize (&vterm)[1]
 #endif
 
-#ifdef IFS_BROKEN
-extern const char defifsvar[];
+extern char defifsvar[];
 #define defifs (defifsvar + 4)
-#else
-extern const char defifs[];
-#endif
 extern const char defpathvar[];
 #define defpath (defpathvar + 36)
 

@@ -75,11 +75,7 @@ MKINIT struct localvar_list *localvar_stack;
 
 const char defpathvar[] =
 	"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
-#ifdef IFS_BROKEN
-const char defifsvar[] = "IFS= \t\n";
-#else
-const char defifs[] = " \t\n";
-#endif
+char defifsvar[] = "IFS= \t\n";
 MKINIT char defoptindvar[] = "OPTIND=1";
 
 int lineno;
@@ -90,11 +86,7 @@ struct var varinit[] = {
 #if ATTY
 	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"ATTY\0",	0 },
 #endif
-#ifdef IFS_BROKEN
 	{ 0,	VSTRFIXED|VTEXTFIXED,		defifsvar,	0 },
-#else
-	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"IFS\0",	0 },
-#endif
 	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"MAIL\0",	changemail },
 	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"MAILPATH\0",	changemail },
 	{ 0,	VSTRFIXED|VTEXTFIXED,		defpathvar,	changepath },
@@ -143,6 +135,7 @@ INIT {
 		}
 	}
 
+	setvareq(defifsvar, VTEXTFIXED);
 	setvareq(defoptindvar, VTEXTFIXED);
 
 	fmtstr(ppid + 5, sizeof(ppid) - 5, "%ld", (long) getppid());
