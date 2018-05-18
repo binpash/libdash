@@ -287,9 +287,11 @@ hashcmd(int argc, char **argv)
 	}
 	c = 0;
 	while ((name = *argptr) != NULL) {
-		if ((cmdp = cmdlookup(name, 0)) != NULL
-		 && (cmdp->cmdtype == CMDNORMAL
-		     || (cmdp->cmdtype == CMDBUILTIN && builtinloc >= 0)))
+		if ((cmdp = cmdlookup(name, 0)) &&
+		    (cmdp->cmdtype == CMDNORMAL ||
+		     (cmdp->cmdtype == CMDBUILTIN &&
+		      !(cmdp->param.cmd->flags & BUILTIN_REGULAR) &&
+		      builtinloc > 0)))
 			delete_cmd_entry();
 		find_command(name, &entry, DO_ERR, pathval());
 		if (entry.cmdtype == CMDUNKNOWN)
@@ -377,7 +379,8 @@ find_command(char *name, struct cmdentry *entry, int act, const char *path)
 			bit = DO_NOFUNC;
 			break;
 		case CMDBUILTIN:
-			bit = DO_ALTBLTIN;
+			bit = cmdp->param.cmd->flags & BUILTIN_REGULAR ?
+			      0 : DO_ALTBLTIN;
 			break;
 		}
 		if (act & bit) {
@@ -601,7 +604,9 @@ clearcmdentry(void)
 		pp = tblp;
 		while ((cmdp = *pp) != NULL) {
 			if (cmdp->cmdtype == CMDNORMAL ||
-			    (cmdp->cmdtype == CMDBUILTIN && builtinloc > 0)) {
+			    (cmdp->cmdtype == CMDBUILTIN &&
+			     !(cmdp->param.cmd->flags & BUILTIN_REGULAR) &&
+			     builtinloc > 0)) {
 				*pp = cmdp->next;
 				ckfree(cmdp);
 			} else {
