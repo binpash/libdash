@@ -56,7 +56,7 @@ struct cmdentry {
 #define DO_ABS		0x02	/* checks absolute paths */
 #define DO_NOFUNC	0x04	/* don't return shell functions, for command */
 #define DO_ALTPATH	0x08	/* using alternate path */
-#define DO_ALTBLTIN	0x20	/* %builtin in alt. path */
+#define DO_REGBLTIN	0x10	/* regular built-ins and functions only */
 
 extern const char *pathopt;	/* set by padvance */
 

@@ -125,8 +125,7 @@ STATIC void synerror(const char *) __attribute__((__noreturn__));
 STATIC void setprompt(int);
 
 
-static inline int
-isassignment(const char *p)
+int isassignment(const char *p)
 {
 	const char *q = endofname(p);
 	if (p == q)

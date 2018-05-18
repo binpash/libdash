@@ -100,8 +100,9 @@ STATIC int bltincmd(int, char **);
 
 
 STATIC const struct builtincmd bltin = {
-	name: nullstr,
-	builtin: bltincmd
+	.name = nullstr,
+	.builtin = bltincmd,
+	.flags = BUILTIN_REGULAR,
 };
 
 
@@ -648,22 +649,42 @@ out:
 		result->fd, result->buf, result->nleft, result->jp));
 }
 
-static char **
-parse_command_args(char **argv, const char **path)
+static struct strlist *fill_arglist(struct arglist *arglist,
+				    union node **argpp)
 {
+	struct strlist **lastp = arglist->lastp;
+	union node *argp;
+
+	while ((argp = *argpp)) {
+		expandarg(argp, arglist, EXP_FULL | EXP_TILDE);
+		*argpp = argp->narg.next;
+		if (*lastp)
+			break;
+	}
+
+	return *lastp;
+}
+
+static int parse_command_args(struct arglist *arglist, union node **argpp,
+			      const char **path)
+{
+	struct strlist *sp = arglist->list;
 	char *cp, c;
 
 	for (;;) {
-		cp = *++argv;
-		if (!cp)
+		sp = unlikely(sp->next) ? sp->next :
+					  fill_arglist(arglist, argpp);
+		if (!sp)
 			return 0;
+		cp = sp->text;
 		if (*cp++ != '-')
 			break;
 		if (!(c = *cp++))
 			break;
 		if (c == '-' && !*cp) {
-			if (!*++argv)
+			if (likely(!sp->next) && !fill_arglist(arglist, argpp))
 				return 0;
+			sp = sp->next;
 			break;
 		}
 		do {
@@ -677,10 +698,10 @@ parse_command_args(char **argv, const char **path)
 			}
 		} while ((c = *cp++));
 	}
-	return argv;
+
+	arglist->list = sp;
+	return DO_NOFUNC;
 }
-
-
 
 /*
  * Execute a simple command.
@@ -702,6 +723,7 @@ evalcommand(union node *cmd, int flags)
 	struct arglist varlist;
 	char **argv;
 	int argc;
+	struct strlist *osp;
 	struct strlist *sp;
 #ifdef notyet
 	int pip[2];
@@ -711,6 +733,7 @@ evalcommand(union node *cmd, int flags)
 	char *lastarg;
 	const char *path;
 	int spclbltin;
+	int cmd_flag;
 	int execcmd;
 	int status;
 	char **nargv;
@@ -733,13 +756,47 @@ evalcommand(union node *cmd, int flags)
 	arglist.lastp = &arglist.list;
 	*arglist.lastp = NULL;
 
-	argc = 0;
-	for (argp = cmd->ncmd.args; argp; argp = argp->narg.next) {
-		struct strlist **spp;
+	cmd_flag = 0;
+	execcmd = 0;
+	spclbltin = -1;
+	path = NULL;
 
-		spp = arglist.lastp;
-		expandarg(argp, &arglist, EXP_FULL | EXP_TILDE);
-		for (sp = *spp; sp; sp = sp->next)
+	argc = 0;
+	argp = cmd->ncmd.args;
+	if ((osp = fill_arglist(&arglist, &argp))) {
+		int pseudovarflag = 0;
+
+		for (;;) {
+			find_command(arglist.list->text, &cmdentry,
+				     cmd_flag | DO_REGBLTIN, pathval());
+
+			/* implement bltin and command here */
+			if (cmdentry.cmdtype != CMDBUILTIN)
+				break;
+
+			pseudovarflag = cmdentry.u.cmd->flags & BUILTIN_ASSIGN;
+			if (likely(spclbltin < 0)) {
+				spclbltin =
+					cmdentry.u.cmd->flags &
+					BUILTIN_SPECIAL
+				;
+			}
+			execcmd = cmdentry.u.cmd == EXECCMD;
+			if (likely(cmdentry.u.cmd != COMMANDCMD))
+				break;
+
+			cmd_flag = parse_command_args(&arglist, &argp, &path);
+			if (!cmd_flag)
+				break;
+		}
+
+		for (; argp; argp = argp->narg.next)
+			expandarg(argp, &arglist,
+				  pseudovarflag &&
+				  isassignment(argp->narg.text) ?
+				  EXP_VARTILDE : EXP_FULL | EXP_TILDE);
+
+		for (sp = arglist.list; sp; sp = sp->next)
 			argc++;
 	}
 
@@ -761,23 +818,13 @@ evalcommand(union node *cmd, int flags)
 	redir_stop = pushredir(cmd->ncmd.redirect);
 	status = redirectsafe(cmd->ncmd.redirect, REDIR_PUSH|REDIR_SAVEFD2);
 
-	path = vpath.text;
 	for (argp = cmd->ncmd.assign; argp; argp = argp->narg.next) {
 		struct strlist **spp;
-		char *p;
 
 		spp = varlist.lastp;
 		expandarg(argp, &varlist, EXP_VARTILDE);
 
 		mklocal((*spp)->text);
-
-		/*
-		 * Modify the command lookup path, if a PATH= assignment
-		 * is present
-		 */
-		p = (*spp)->text;
-		if (varequal(p, path))
-			path = p;
 	}
 
 	/* Print the command if xflag is set. */
@@ -789,53 +836,24 @@ evalcommand(union node *cmd, int flags)
 		outstr(expandstr(ps4val()), out);
 		sep = 0;
 		sep = eprintlist(out, varlist.list, sep);
-		eprintlist(out, arglist.list, sep);
+		eprintlist(out, osp, sep);
 		outcslow('\n', out);
 #ifdef FLUSHERR
 		flushout(out);
 #endif
 	}
 
-	execcmd = 0;
-	spclbltin = -1;
-
 	/* Now locate the command. */
-	if (argc) {
-		const char *oldpath;
-		int cmd_flag = DO_ERR;
-
-		path += 5;
-		oldpath = path;
-		for (;;) {
-			find_command(argv[0], &cmdentry, cmd_flag, path);
-			if (cmdentry.cmdtype == CMDUNKNOWN) {
-				status = 127;
+	if (cmdentry.cmdtype != CMDBUILTIN ||
+	    !(cmdentry.u.cmd->flags & BUILTIN_REGULAR)) {
+		find_command(argv[0], &cmdentry, cmd_flag | DO_ERR,
+			     unlikely(path) ? path : pathval());
+		if (cmdentry.cmdtype == CMDUNKNOWN) {
+			status = 127;
 #ifdef FLUSHERR
-				flushout(&errout);
+			flushout(&errout);
 #endif
-				goto bail;
-			}
-
-			/* implement bltin and command here */
-			if (cmdentry.cmdtype != CMDBUILTIN)
-				break;
-			if (spclbltin < 0)
-				spclbltin = 
-					cmdentry.u.cmd->flags &
-					BUILTIN_SPECIAL
-				;
-			if (cmdentry.u.cmd == EXECCMD)
-				execcmd++;
-			if (cmdentry.u.cmd != COMMANDCMD)
-				break;
-
-			path = oldpath;
-			nargv = parse_command_args(argv, &path);
-			if (!nargv)
-				break;
-			argc -= nargv - argv;
-			argv = nargv;
-			cmd_flag |= DO_NOFUNC;
+			goto bail;
 		}
 	}
 
@@ -864,6 +882,7 @@ bail:
 			FORCEINTON;
 		}
 		listsetvar(varlist.list, VEXPORT|VSTACK);
+		path = unlikely(path) ? path : pathval();
 		shellexec(argv, path, cmdentry.u.index);
 		/* NOTREACHED */
 

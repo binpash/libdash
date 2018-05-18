@@ -357,11 +357,8 @@ find_command(char *name, struct cmdentry *entry, int act, const char *path)
 	}
 
 	updatetbl = (path == pathval());
-	if (!updatetbl) {
+	if (!updatetbl)
 		act |= DO_ALTPATH;
-		if (strstr(path, "%builtin") != NULL)
-			act |= DO_ALTBLTIN;
-	}
 
 	/* If name is in the table, check answer will be ok */
 	if ((cmdp = cmdlookup(name, 0)) != NULL) {
@@ -373,17 +370,20 @@ find_command(char *name, struct cmdentry *entry, int act, const char *path)
 			abort();
 #endif
 		case CMDNORMAL:
-			bit = DO_ALTPATH;
+			bit = DO_ALTPATH | DO_REGBLTIN;
 			break;
 		case CMDFUNCTION:
 			bit = DO_NOFUNC;
 			break;
 		case CMDBUILTIN:
 			bit = cmdp->param.cmd->flags & BUILTIN_REGULAR ?
-			      0 : DO_ALTBLTIN;
+			      0 : DO_REGBLTIN;
 			break;
 		}
 		if (act & bit) {
+			if (act & bit & DO_REGBLTIN)
+				goto fail;
+
 			updatetbl = 0;
 			cmdp = NULL;
 		} else if (cmdp->rehash == 0)
@@ -393,10 +393,12 @@ find_command(char *name, struct cmdentry *entry, int act, const char *path)
 
 	/* If %builtin not in path, check for builtin next */
 	bcmd = find_builtin(name);
-	if (bcmd && (bcmd->flags & BUILTIN_REGULAR || (
-		act & DO_ALTPATH ? !(act & DO_ALTBLTIN) : builtinloc <= 0
-	)))
+	if (bcmd && ((bcmd->flags & BUILTIN_REGULAR) | (act & DO_ALTPATH) |
+		     (builtinloc <= 0)))
 		goto builtin_success;
+
+	if (act & DO_REGBLTIN)
+		goto fail;
 
 	/* We have to search path. */
 	prev = -1;		/* where to start */
@@ -489,6 +491,7 @@ loop:
 		delete_cmd_entry();
 	if (act & DO_ERR)
 		sh_warnx("%s: %s", name, errmsg(e, E_EXEC));
+fail:
 	entry->cmdtype = CMDUNKNOWN;
 	return;
 

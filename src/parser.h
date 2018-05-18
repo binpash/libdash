@@ -82,6 +82,7 @@ extern int whichprompt;		/* 1 == PS1, 2 == PS2 */
 extern int checkkwd;
 
 
+int isassignment(const char *p);
 union node *parsecmd(int);
 void fixredir(union node *, const char *, int);
 const char *getprompt(void *);
