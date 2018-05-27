@@ -58,6 +58,7 @@ struct arglist {
 #define EXP_VARTILDE2	0x40	/* expand tildes after colons only */
 #define EXP_WORD	0x80	/* expand word in parameter expansion */
 #define EXP_QUOTED	0x100	/* expand word in double quotes */
+#define EXP_KEEPNUL	0x200	/* do not skip NUL characters */
 
 
 union node;
