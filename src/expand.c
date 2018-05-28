@@ -805,6 +805,8 @@ record:
 		goto record;
 	}
 
+	varlen = 0;
+
 end:
 	if (subtype != VSNORMAL) {	/* skip to end of alternative */
 		int nesting = 1;
