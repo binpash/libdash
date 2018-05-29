@@ -110,10 +110,10 @@ static struct ifsregion *ifslastp;
 /* holds expanded arg list */
 static struct arglist exparg;
 
-STATIC void argstr(char *, int);
-STATIC char *exptilde(char *, char *, int);
+static char *argstr(char *p, int flag);
+static char *exptilde(char *startp, int flag);
+static char *expari(char *start, int flag);
 STATIC void expbackq(union node *, int);
-STATIC const char *subevalvar(char *, char *, int, int, int, int, int);
 STATIC char *evalvar(char *, int);
 static size_t strtodest(const char *p, int flags);
 static void memtodest(const char *p, size_t len, int flags);
@@ -192,13 +192,11 @@ expandarg(union node *arg, struct arglist *arglist, int flag)
 	argbackq = arg->narg.backquote;
 	STARTSTACKSTR(expdest);
 	argstr(arg->narg.text, flag);
-	p = _STPUTC('\0', expdest);
-	expdest = p - 1;
 	if (arglist == NULL) {
 		/* here document expanded */
 		goto out;
 	}
-	p = grabstackstr(p);
+	p = grabstackstr(expdest);
 	exparg.lastp = &exparg.list;
 	/*
 	 * TODO - EXP_REDIR
@@ -232,8 +230,7 @@ out:
  * $@ like $* since no splitting will be performed.
  */
 
-STATIC void
-argstr(char *p, int flag)
+static char *argstr(char *p, int flag)
 {
 	static const char spclchars[] = {
 		'=',
@@ -243,6 +240,7 @@ argstr(char *p, int flag)
 		CTLESC,
 		CTLVAR,
 		CTLBACKQ,
+		CTLARI,
 		CTLENDARI,
 		0
 	};
@@ -253,35 +251,41 @@ argstr(char *p, int flag)
 	size_t length;
 	int startloc;
 
-	if (!(flag & EXP_VARTILDE)) {
-		reject += 2;
-	} else if (flag & EXP_VARTILDE2) {
-		reject++;
-	}
+	reject += !!(flag & EXP_VARTILDE2);
+	reject += flag & EXP_VARTILDE ? 0 : 2;
 	inquotes = 0;
 	length = 0;
 	if (flag & EXP_TILDE) {
-		char *q;
-
 		flag &= ~EXP_TILDE;
 tilde:
-		q = p;
-		if (*q == '~')
-			p = exptilde(p, q, flag);
+		if (*p == '~')
+			p = exptilde(p, flag);
 	}
 start:
 	startloc = expdest - (char *)stackblock();
 	for (;;) {
+		int end;
+
 		length += strcspn(p + length, reject);
+		end = 0;
 		c = (signed char)p[length];
-		if (c && (!(c & 0x80) || c == CTLENDARI)) {
-			/* c == '=' || c == ':' || c == CTLENDARI */
+		if (!(c & 0x80) || c == CTLENDARI || c == CTLENDVAR) {
+			/*
+			 * c == '=' || c == ':' || c == '\0' ||
+			 * c == CTLENDARI || c == CTLENDVAR
+			 */
 			length++;
+			/* c == '\0' || c == CTLENDARI || c == CTLENDVAR */
+			end = !!((c - 1) & 0x80);
 		}
-		if (length > 0) {
+		if (length > 0 && !(flag & EXP_DISCARD)) {
 			int newloc;
-			expdest = stnputs(p, length, expdest);
-			newloc = expdest - (char *)stackblock();
+			char *q;
+
+			q = stnputs(p, length, expdest);
+			q[-1] &= end - 1;
+			expdest = q - (flag & EXP_WORD ? end : 0);
+			newloc = expdest - (char *)stackblock() - end;
 			if (breakall && !inquotes && newloc > startloc) {
 				recordregion(startloc, newloc, 0);
 			}
@@ -290,14 +294,11 @@ start:
 		p += length + 1;
 		length = 0;
 
+		if (end)
+			break;
+
 		switch (c) {
-		case '\0':
-			goto breakloop;
 		case '=':
-			if (flag & EXP_VARTILDE2) {
-				p--;
-				continue;
-			}
 			flag |= EXP_VARTILDE2;
 			reject++;
 			/* fall through */
@@ -310,11 +311,6 @@ start:
 				goto tilde;
 			}
 			continue;
-		}
-
-		switch (c) {
-		case CTLENDVAR: /* ??? */
-			goto breakloop;
 		case CTLQUOTEMARK:
 			/* "$@" syntax adherence hack */
 			if (!inquotes && !memcmp(p, dolatstr + 1,
@@ -339,25 +335,23 @@ addquote:
 			goto start;
 		case CTLBACKQ:
 			expbackq(argbackq->n, flag | inquotes);
-			argbackq = argbackq->next;
 			goto start;
-		case CTLENDARI:
-			p--;
-			expari(flag | inquotes);
+		case CTLARI:
+			p = expari(p, flag | inquotes);
 			goto start;
 		}
 	}
-breakloop:
-	;
+	return p - 1;
 }
 
-STATIC char *
-exptilde(char *startp, char *p, int flag)
+static char *exptilde(char *startp, int flag)
 {
 	signed char c;
 	char *name;
 	const char *home;
+	char *p;
 
+	p = startp;
 	name = p + 1;
 
 	while ((c = *++p) != '\0') {
@@ -376,19 +370,21 @@ exptilde(char *startp, char *p, int flag)
 		}
 	}
 done:
+	if (flag & EXP_DISCARD)
+		goto out;
 	*p = '\0';
 	if (*name == '\0') {
 		home = lookupvar(homestr);
 	} else {
 		home = getpwhome(name);
 	}
+	*p = c;
 	if (!home)
 		goto lose;
-	*p = c;
 	strtodest(home, flag | EXP_QUOTED);
+out:
 	return (p);
 lose:
-	*p = c;
 	return (startp);
 }
 
@@ -437,63 +433,43 @@ removerecordregions(int endoff)
  * Expand arithmetic expression.  Backup to start of expression,
  * evaluate, place result in (backed up) result, adjust string position.
  */
-void
-expari(int flag)
+static char *expari(char *start, int flag)
 {
 	struct stackmark sm;
-	char *p, *start;
 	int begoff;
+	int endoff;
 	int len;
 	intmax_t result;
+	char *p;
 
-	/*	ifsfree(); */
+	p = stackblock();
+	begoff = expdest - p;
+	p = argstr(start, flag & EXP_DISCARD);
 
-	/*
-	 * This routine is slightly over-complicated for
-	 * efficiency.  Next we scan backwards looking for the
-	 * start of arithmetic.
-	 */
+	if (flag & EXP_DISCARD)
+		goto out;
+
 	start = stackblock();
-	p = expdest;
-	pushstackmark(&sm, p - start);
-	*--p = '\0';
-	p--;
-	do {
-		int esc;
-
-		while (*p != (char)CTLARI) {
-			p--;
-#ifdef DEBUG
-			if (p < start) {
-				sh_error("missing CTLARI (shouldn't happen)");
-			}
-#endif
-		}
-
-		esc = esclen(start, p);
-		if (!(esc % 2)) {
-			break;
-		}
-
-		p -= esc + 1;
-	} while (1);
-
-	begoff = p - start;
+	endoff = expdest - start;
+	start += begoff;
+	STADJUST(start - expdest, expdest);
 
 	removerecordregions(begoff);
 
-	expdest = p;
-
 	if (likely(flag & QUOTES_ESC))
-		rmescapes(p + 1);
+		rmescapes(start);
 
-	result = arith(p + 1);
+	pushstackmark(&sm, endoff);
+	result = arith(start);
 	popstackmark(&sm);
 
 	len = cvtnum(result);
 
 	if (likely(!(flag & EXP_QUOTED)))
 		recordregion(begoff, begoff + len, 0);
+
+out:
+	return p;
 }
 
 
@@ -511,6 +487,9 @@ expbackq(union node *cmd, int flag)
 	char *dest;
 	int startloc;
 	struct stackmark smark;
+
+	if (flag & EXP_DISCARD)
+		goto out;
 
 	INTOFF;
 	startloc = expdest - (char *)stackblock();
@@ -556,6 +535,9 @@ read:
 		(dest - (char *)stackblock()) - startloc,
 		(dest - (char *)stackblock()) - startloc,
 		stackblock() + startloc));
+
+out:
+	argbackq = argbackq->next;
 }
 
 
@@ -626,33 +608,35 @@ scanright(
 	return 0;
 }
 
-STATIC const char *
-subevalvar(char *p, char *str, int strloc, int subtype, int startloc, int varflags, int flag)
+static char *subevalvar(char *start, char *str, int strloc, int startloc,
+			int varflags, int flag)
 {
+	int subtype = varflags & VSTYPE;
 	int quotes = flag & QUOTES_ESC;
 	char *startp;
 	char *loc;
-	struct nodelist *saveargbackq = argbackq;
-	int amount;
+	long amount;
 	char *rmesc, *rmescend;
 	int zero;
 	char *(*scan)(char *, char *, char *, char *, int , int);
+	char *p;
 
-	argstr(p, EXP_TILDE | (subtype != VSASSIGN && subtype != VSQUESTION ?
-			       EXP_CASE : 0));
-	STPUTC('\0', expdest);
-	argbackq = saveargbackq;
+	p = argstr(start, (flag & EXP_DISCARD) | EXP_TILDE |
+			  (str ?  0 : EXP_CASE));
+	if (flag & EXP_DISCARD)
+		return p;
+
 	startp = stackblock() + startloc;
 
 	switch (subtype) {
 	case VSASSIGN:
 		setvar(str, startp, 0);
-		amount = startp - expdest;
-		STADJUST(amount, expdest);
-		return startp;
+
+		loc = startp;
+		goto out;
 
 	case VSQUESTION:
-		varunset(p, str, startp, varflags);
+		varunset(start, str, startp, varflags);
 		/* NOTREACHED */
 	}
 
@@ -687,10 +671,17 @@ subevalvar(char *p, char *str, int strloc, int subtype, int startloc, int varfla
 			loc = startp + (str - loc) - 1;
 		}
 		*loc = '\0';
-		amount = loc - expdest;
-		STADJUST(amount, expdest);
-	}
-	return loc;
+	} else
+		loc = str - 1;
+
+out:
+	amount = loc - expdest;
+	STADJUST(amount, expdest);
+
+	/* Remove any recorded regions beyond start of variable */
+	removerecordregions(startloc);
+
+	return p;
 }
 
 
@@ -705,16 +696,12 @@ evalvar(char *p, int flag)
 	int varflags;
 	char *var;
 	int patloc;
-	int c;
 	int startloc;
 	ssize_t varlen;
 	int quoted;
 
 	varflags = *p++;
 	subtype = varflags & VSTYPE;
-
-	if (!subtype)
-		sh_error("Bad substitution");
 
 	quoted = flag & EXP_QUOTED;
 	var = p;
@@ -726,32 +713,30 @@ again:
 	if (varflags & VSNUL)
 		varlen--;
 
-	if (subtype == VSPLUS) {
+	switch (subtype) {
+	case VSPLUS:
 		varlen = -1 - varlen;
-		goto vsplus;
-	}
+		/* fall through */
 
-	if (subtype == VSMINUS) {
-vsplus:
-		if (varlen < 0) {
-			argstr(p, flag | EXP_TILDE | EXP_WORD);
-			goto end;
-		}
+	case 0:
+	case VSMINUS:
+		p = argstr(p, flag | EXP_TILDE | EXP_WORD);
+		if (varlen < 0)
+			return p;
 		goto record;
-	}
 
-	if (subtype == VSASSIGN || subtype == VSQUESTION) {
+	case VSASSIGN:
+	case VSQUESTION:
 		if (varlen >= 0)
 			goto record;
 
-		subevalvar(p, var, 0, subtype, startloc, varflags,
-			   flag & ~QUOTES_ESC);
+		p = subevalvar(p, var, 0, startloc, varflags,
+			       flag & ~QUOTES_ESC);
+
+		if (flag & EXP_DISCARD)
+			return p;
+
 		varflags &= ~VSNUL;
-		/* 
-		 * Remove any recorded regions beyond 
-		 * start of variable 
-		 */
-		removerecordregions(startloc);
 		goto again;
 	}
 
@@ -759,20 +744,14 @@ vsplus:
 		varunset(p, var, 0, 0);
 
 	if (subtype == VSLENGTH) {
+		if (flag & EXP_DISCARD)
+			return p;
 		cvtnum(varlen > 0 ? varlen : 0);
 		goto record;
 	}
 
-	if (subtype == VSNORMAL) {
-record:
-		if (quoted) {
-			quoted = *var == '@' && shellparam.nparam;
-			if (!quoted)
-				goto end;
-		}
-		recordregion(startloc, expdest - (char *)stackblock(), quoted);
-		goto end;
-	}
+	if (subtype == VSNORMAL)
+		goto record;
 
 #ifdef DEBUG
 	switch (subtype) {
@@ -786,45 +765,28 @@ record:
 	}
 #endif
 
-	if (varlen >= 0) {
+	flag |= varlen < 0 ? EXP_DISCARD : 0;
+	if (!(flag & EXP_DISCARD)) {
 		/*
 		 * Terminate the string and start recording the pattern
 		 * right after it
 		 */
 		STPUTC('\0', expdest);
-		patloc = expdest - (char *)stackblock();
-		if (subevalvar(p, NULL, patloc, subtype,
-			       startloc, varflags, flag) == 0) {
-			int amount = expdest - (
-				(char *)stackblock() + patloc - 1
-			);
-			STADJUST(-amount, expdest);
-		}
-		/* Remove any recorded regions beyond start of variable */
-		removerecordregions(startloc);
-		goto record;
 	}
 
-	varlen = 0;
+	patloc = expdest - (char *)stackblock();
+	p = subevalvar(p, NULL, patloc, startloc, varflags, flag);
 
-end:
-	if (subtype != VSNORMAL) {	/* skip to end of alternative */
-		int nesting = 1;
-		for (;;) {
-			if ((c = (signed char)*p++) == CTLESC)
-				p++;
-			else if (c == CTLBACKQ) {
-				if (varlen >= 0)
-					argbackq = argbackq->next;
-			} else if (c == CTLVAR) {
-				if ((*p++ & VSTYPE) != VSNORMAL)
-					nesting++;
-			} else if (c == CTLENDVAR) {
-				if (--nesting == 0)
-					break;
-			}
-		}
+record:
+	if (flag & EXP_DISCARD)
+		return p;
+
+	if (quoted) {
+		quoted = *var == '@' && shellparam.nparam;
+		if (!quoted)
+			return p;
 	}
+	recordregion(startloc, expdest - (char *)stackblock(), quoted);
 	return p;
 }
 
@@ -882,9 +844,17 @@ varvalue(char *name, int varflags, int flags, int quoted)
 	char sepc;
 	char **ap;
 	int subtype = varflags & VSTYPE;
-	int discard = subtype == VSPLUS || subtype == VSLENGTH;
+	int discard = (subtype == VSPLUS || subtype == VSLENGTH) |
+		      (flags & EXP_DISCARD);
 	ssize_t len = 0;
 	char c;
+
+	if (!subtype) {
+		if (discard)
+			return -1;
+
+		sh_error("Bad substitution");
+	}
 
 	flags |= EXP_KEEPNUL;
 	flags &= discard ? ~QUOTES_ESC : ~0;
@@ -979,6 +949,7 @@ value:
 
 	if (discard)
 		STADJUST(-len, expdest);
+
 	return len;
 }
 
@@ -1730,7 +1701,6 @@ casematch(union node *pattern, char *val)
 	argbackq = pattern->narg.backquote;
 	STARTSTACKSTR(expdest);
 	argstr(pattern->narg.text, EXP_TILDE | EXP_CASE);
-	STACKSTRNUL(expdest);
 	ifsfree();
 	result = patmatch(stackblock(), val);
 	popstackmark(&smark);

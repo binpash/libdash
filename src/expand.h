@@ -59,11 +59,11 @@ struct arglist {
 #define EXP_WORD	0x80	/* expand word in parameter expansion */
 #define EXP_QUOTED	0x100	/* expand word in double quotes */
 #define EXP_KEEPNUL	0x200	/* do not skip NUL characters */
+#define EXP_DISCARD	0x400	/* discard result of expansion */
 
 
 union node;
 void expandarg(union node *, struct arglist *, int);
-void expari(int);
 #define rmescapes(p) _rmescapes((p), 0)
 char *_rmescapes(char *, int);
 int casematch(union node *, char *);
