@@ -562,18 +562,24 @@ poplocalvars(int keep)
 /*
  * Create a new localvar environment.
  */
-struct localvar_list *pushlocalvars(void)
+struct localvar_list *pushlocalvars(int push)
 {
 	struct localvar_list *ll;
+	struct localvar_list *top;
+
+	top = localvar_stack;
+	if (!push)
+		goto out;
 
 	INTOFF;
 	ll = ckmalloc(sizeof(*ll));
 	ll->lv = NULL;
-	ll->next = localvar_stack;
+	ll->next = top;
 	localvar_stack = ll;
 	INTON;
 
-	return ll->next;
+out:
+	return top;
 }
 
 

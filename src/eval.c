@@ -809,6 +809,8 @@ evalcommand(union node *cmd, int flags)
 			vflags = VEXPORT;
 	}
 
+	localvar_stop = pushlocalvars(vlocal);
+
 	/* Reserve one extra spot at the front for shellexec. */
 	nargv = stalloc(sizeof (char *) * (argc + 2));
 	argv = ++nargv;
@@ -828,7 +830,6 @@ evalcommand(union node *cmd, int flags)
 	status = redirectsafe(cmd->ncmd.redirect, REDIR_PUSH|REDIR_SAVEFD2);
 
 	if (unlikely(status)) {
-		vlocal = 0;
 bail:
 		exitstatus = status;
 
@@ -838,9 +839,6 @@ bail:
 
 		goto out;
 	}
-
-	if (likely(vlocal))
-		localvar_stop = pushlocalvars();
 
 	for (argp = cmd->ncmd.assign; argp; argp = argp->narg.next) {
 		struct strlist **spp;
@@ -920,8 +918,7 @@ out:
 		popredir(execcmd);
 	unwindredir(redir_stop);
 	unwindfiles(file_stop);
-	if (likely(vlocal))
-		unwindlocalvars(localvar_stop);
+	unwindlocalvars(localvar_stop);
 	if (lastarg)
 		/* dsl: I think this is intended to be used to support
 		 * '_' in 'vi' command mode during line editing...
