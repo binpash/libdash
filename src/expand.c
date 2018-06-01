@@ -116,7 +116,7 @@ static char *expari(char *start, int flag);
 STATIC void expbackq(union node *, int);
 STATIC char *evalvar(char *, int);
 static size_t strtodest(const char *p, int flags);
-static void memtodest(const char *p, size_t len, int flags);
+static size_t memtodest(const char *p, size_t len, int flags);
 STATIC ssize_t varvalue(char *, int, int, int);
 STATIC void expandmeta(struct strlist *, int);
 #ifdef HAVE_GLOB
@@ -133,7 +133,7 @@ STATIC int pmatch(const char *, const char *);
 #else
 #define pmatch(a, b) !fnmatch((a), (b), 0)
 #endif
-STATIC int cvtnum(intmax_t);
+static size_t cvtnum(intmax_t num, int flags);
 STATIC size_t esclen(const char *, const char *);
 STATIC char *scanleft(char *, char *, char *, char *, int, int);
 STATIC char *scanright(char *, char *, char *, char *, int, int);
@@ -463,7 +463,7 @@ static char *expari(char *start, int flag)
 	result = arith(start);
 	popstackmark(&sm);
 
-	len = cvtnum(result);
+	len = cvtnum(result, flag);
 
 	if (likely(!(flag & EXP_QUOTED)))
 		recordregion(begoff, begoff + len, 0);
@@ -746,7 +746,7 @@ again:
 	if (subtype == VSLENGTH) {
 		if (flag & EXP_DISCARD)
 			return p;
-		cvtnum(varlen > 0 ? varlen : 0);
+		cvtnum(varlen > 0 ? varlen : 0, flag);
 		goto record;
 	}
 
@@ -795,15 +795,17 @@ record:
  * Put a string on the stack.
  */
 
-static void memtodest(const char *p, size_t len, int flags)
+static size_t memtodest(const char *p, size_t len, int flags)
 {
 	const char *syntax = flags & EXP_QUOTED ? DQSYNTAX : BASESYNTAX;
 	char *q;
+	char *s;
 
 	if (unlikely(!len))
-		return;
+		return 0;
 
 	q = makestrspace(len * 2, expdest);
+	s = q;
 
 	do {
 		int c = (signed char)*p++;
@@ -818,6 +820,7 @@ static void memtodest(const char *p, size_t len, int flags)
 	} while (--len);
 
 	expdest = q;
+	return q - s;
 }
 
 
@@ -875,7 +878,7 @@ varvalue(char *name, int varflags, int flags, int quoted)
 		if (num == 0)
 			return -1;
 numvar:
-		len = cvtnum(num);
+		len = cvtnum(num, flags);
 		break;
 	case '-':
 		p = makestrspace(NOPTS, expdest);
@@ -1711,15 +1714,13 @@ casematch(union node *pattern, char *val)
  * Our own itoa().
  */
 
-STATIC int
-cvtnum(intmax_t num)
+static size_t cvtnum(intmax_t num, int flags)
 {
 	int len = max_int_length(sizeof(num));
+	char buf[len];
 
-	expdest = makestrspace(len, expdest);
-	len = fmtstr(expdest, len, "%" PRIdMAX, num);
-	STADJUST(len, expdest);
-	return len;
+	len = fmtstr(buf, len, "%" PRIdMAX, num);
+	return memtodest(buf, len, flags);
 }
 
 STATIC void
