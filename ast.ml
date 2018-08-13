@@ -44,7 +44,7 @@ type t =
    | TrimL
    | TrimLMax
    | Length
- and case = { cpattern : arg; cbody : t }
+ and case = { cpattern : arg list; cbody : t }
 
 let var_type = function
  | 0x0 -> (* VSNORMAL ${var} *) Normal
@@ -142,7 +142,7 @@ let rec of_node (n : node union ptr) : t =
            to_arg (getf n ncase_expr @-> node_narg),
            List.map
              (fun (pattern,body) ->
-               { cpattern = to_arg (pattern @-> node_narg);
+               { cpattern = to_args pattern;
                  cbody = of_node body})
              (caselist (getf n ncase_cases)))
   (* NDEFUN *)
@@ -400,7 +400,8 @@ and string_of_arg = function
 and string_of_assign (v,a) = v ^ "=" ^ string_of_arg a
                                                    
 and string_of_case c =
-  string_of_arg c.cpattern ^ ") " ^ to_string c.cbody ^ ";;"
+  let pats = List.map string_of_arg c.cpattern in
+  intercalate "|" pats ^ ") " ^ to_string c.cbody ^ ";;"
 
 and string_of_redir = function
   | File (To,fd,a)      -> show_unless 1 fd ^ ">" ^ string_of_arg a
