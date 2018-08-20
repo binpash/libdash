@@ -55,6 +55,10 @@ let setinputtostdin () : unit =
 let setinputfile (s : string) : unit =
   let _ = foreign "setinputfile" (string @-> int @-> returning int) s 0 in
   ()
+
+let setvar (x : string) (v : string) : unit =
+  let _ = foreign "setvar" (string @-> string @-> int @-> returning (ptr void)) x v 0 in
+  ()
           
 (* first, we define the node type... *)
           
