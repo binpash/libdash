@@ -55,8 +55,8 @@ let setinputstring : string -> unit =
 let setinputtostdin () : unit =
   foreign "setinputfd" (int @-> int @-> returning void) 0 0 (* don't both pushing the file *)
 
-let setinputfile (s : string) : unit =
-  let _ = foreign "setinputfile" (string @-> int @-> returning int) s 0 in
+let setinputfile ?push:(push=false) (s : string) : unit =
+  let _ = foreign "setinputfile" (string @-> int @-> returning int) s (if push then 1 else 0) in
   ()
 
 let setvar (x : string) (v : string) : unit =
