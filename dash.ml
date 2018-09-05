@@ -45,6 +45,9 @@ let init : unit -> unit = foreign "init" (void @-> returning void)
 let initialize () =
   init ();
   init_stack ()
+
+let popfile : unit -> unit =
+  foreign "popfile" (void @-> returning void)
                                   
 let setinputstring : string -> unit =
   foreign "setinputstring" (string @-> returning void)
