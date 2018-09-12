@@ -698,6 +698,7 @@ evalvar(char *p, int flag)
 	int patloc;
 	int startloc;
 	ssize_t varlen;
+	int discard;
 	int quoted;
 
 	varflags = *p++;
@@ -713,41 +714,41 @@ again:
 	if (varflags & VSNUL)
 		varlen--;
 
+	discard = varlen < 0 ? EXP_DISCARD : 0;
+
 	switch (subtype) {
 	case VSPLUS:
-		varlen = -1 - varlen;
+		discard ^= EXP_DISCARD;
 		/* fall through */
 
 	case 0:
 	case VSMINUS:
-		p = argstr(p, flag | EXP_TILDE | EXP_WORD);
-		if (varlen < 0)
-			return p;
+		p = argstr(p, flag | EXP_TILDE | EXP_WORD |
+			      (discard ^ EXP_DISCARD));
 		goto record;
 
 	case VSASSIGN:
 	case VSQUESTION:
-		if (varlen >= 0)
+		p = subevalvar(p, var, 0, startloc, varflags,
+			       (flag & ~QUOTES_ESC) |
+			       (discard ^ EXP_DISCARD));
+
+		if ((flag | ~discard) & EXP_DISCARD)
 			goto record;
 
-		p = subevalvar(p, var, 0, startloc, varflags,
-			       flag & ~QUOTES_ESC);
-
-		if (flag & EXP_DISCARD)
-			return p;
-
 		varflags &= ~VSNUL;
+		subtype = VSNORMAL;
 		goto again;
 	}
 
-	if (varlen < 0 && uflag)
+	if ((discard & ~flag) && uflag)
 		varunset(p, var, 0, 0);
 
 	if (subtype == VSLENGTH) {
 		if (flag & EXP_DISCARD)
 			return p;
 		cvtnum(varlen > 0 ? varlen : 0, flag);
-		goto record;
+		goto really_record;
 	}
 
 	if (subtype == VSNORMAL)
@@ -765,7 +766,7 @@ again:
 	}
 #endif
 
-	flag |= varlen < 0 ? EXP_DISCARD : 0;
+	flag |= discard;
 	if (!(flag & EXP_DISCARD)) {
 		/*
 		 * Terminate the string and start recording the pattern
@@ -778,9 +779,10 @@ again:
 	p = subevalvar(p, NULL, patloc, startloc, varflags, flag);
 
 record:
-	if (flag & EXP_DISCARD)
+	if ((flag | discard) & EXP_DISCARD)
 		return p;
 
+really_record:
 	if (quoted) {
 		quoted = *var == '@' && shellparam.nparam;
 		if (!quoted)
