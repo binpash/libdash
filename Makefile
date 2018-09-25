@@ -28,3 +28,8 @@ dash.cmxa : dash.cmx ast.cmx compile.cmx $(DASH)/libdash.a
 clean :
 	rm -f *.o test *~ *.cmi *.cmx main.native dash.a dash.cmxa
 	rm -rf _build
+
+# ocamldep output
+ast.cmx : dash.cmx
+compile.cmx : ast.cmx
+main.cmx : dash.cmx compile.cmx ast.cmx

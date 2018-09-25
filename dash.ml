@@ -63,6 +63,12 @@ let setvar (x : string) (v : string) : unit =
   let _ = foreign "setvar" (string @-> string @-> int @-> returning (ptr void)) x v 0 in
   ()
           
+let setalias (name : string) (mapping : string) : unit =
+  foreign "setalias" (string @-> string @-> returning void) name mapping
+
+let unalias (name : string) : unit =
+  foreign "unalias" (string @-> returning void) name
+
 (* first, we define the node type... *)
           
 type node       
