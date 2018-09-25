@@ -231,14 +231,15 @@ let () = seal nnot
 let node_nnot = field node "nnot" nnot
 let () = seal node
               
-let parsecmd : int -> node union ptr =
-  foreign "parsecmd" (int @-> returning (ptr node))
+let parsecmd_safe : int -> node union ptr =
+  foreign "parsecmd_safe" (int @-> returning (ptr node))
           
 let parse s =
   setinputstring s; (* TODO set stack mark? *)
-  parsecmd 0
+  parsecmd_safe 0
 
 let neof : node union ptr = foreign_value "tokpushback" node
+let nerr : node union ptr = foreign_value "lasttoken" node
 
 let addrof p = raw_address_of_ptr (to_voidp p)
 
@@ -246,19 +247,26 @@ let eqptr p1 p2 = addrof p1 = addrof p2
                                   
 let nullptr (p : 'a ptr) = addrof p = Nativeint.zero
 
+type parse_result = Done | Error | Null | Parsed of (node union ptr)
+
+exception Parse_error
+
 let parse_next ?interactive:(i=false) () =
-  let n = parsecmd (if i then 1 else 0) in
+  let n = parsecmd_safe (if i then 1 else 0) in
   if eqptr n neof
-  then `Done
+  then Done
+  else if eqptr n nerr
+  then Error
   else if nullptr n
-  then `Null (* comment or blank line ... *)
-  else `Parsed n
+  then Null (* comment or blank line or error ... *)
+  else Parsed n
 
 let rec parse_all ?interactive:(i=false) () : (node union ptr) list =
   match parse_next ~interactive:i () with
-  | `Done -> []
-  | `Null -> parse_all ~interactive:i ()
-  | `Parsed n -> n::parse_all ~interactive:i ()
+  | Done -> []
+  | Error -> raise Parse_error
+  | Null -> parse_all ~interactive:i ()
+  | Parsed n -> n::parse_all ~interactive:i ()
             
 let (@->) (s : ('b, 'c) structured ptr) (f : ('a, ('b, 'c) structured) field) =
   getf (!@ s) f
