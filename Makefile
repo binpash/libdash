@@ -5,6 +5,8 @@ OCAMLLIB=$(shell opam config var lib)
 OCAMLINCLUDES=-I $(OCAMLLIB)/bytes -I $(OCAMLLIB)/ctypes
 OCAMLLIBS=unix.cmxa bigarray.cmxa str.cmxa ctypes.cmxa ctypes-foreign-base.cmxa ctypes-foreign-unthreaded.cmxa
 
+all : main.native dash.cmxa
+
 test : main.native $(wildcard tests/*)
 	@for f in tests/*; do \
 		./round_trip.sh ./main.native $$f 2>test.err; \

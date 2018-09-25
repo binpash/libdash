@@ -246,19 +246,19 @@ let eqptr p1 p2 = addrof p1 = addrof p2
                                   
 let nullptr (p : 'a ptr) = addrof p = Nativeint.zero
 
-let parse_next () =
-  let n = parsecmd 0 in
+let parse_next ?interactive:(i=false) () =
+  let n = parsecmd (if i then 1 else 0) in
   if eqptr n neof
   then `Done
   else if nullptr n
   then `Null (* comment or blank line ... *)
   else `Parsed n
 
-let rec parse_all () : (node union ptr) list =
-  match parse_next () with
+let rec parse_all ?interactive:(i=false) () : (node union ptr) list =
+  match parse_next ~interactive:i () with
   | `Done -> []
-  | `Null -> parse_all ()
-  | `Parsed n -> n::parse_all ()
+  | `Null -> parse_all ~interactive:i ()
+  | `Parsed n -> n::parse_all ~interactive:i ()
             
 let (@->) (s : ('b, 'c) structured ptr) (f : ('a, ('b, 'c) structured) field) =
   getf (!@ s) f
