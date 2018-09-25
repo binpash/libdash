@@ -19,7 +19,7 @@ main.native : dash.cmx ast.cmx compile.cmx main.cmx
 	ocamlopt.opt -cclib -force_load $(DASH)/libdash.a $(OCAMLINCLUDES) $(OCAMLLIBS) $^ -o $@
 #	ocamlbuild -log build.log -no-hygiene -pkg ctypes.foreign -lflags "-cclib -force_load $(DASH)/libdash.a" $@
 
-dash.cmxa : dash.cmx ast.cmx compile.cmx
+dash.cmxa : dash.cmx ast.cmx compile.cmx $(DASH)/libdash.a
 	ocamlopt.opt -cclib -force_load $(DASH)/libdash.a $(OCAMLINCLUDES) $^ -a -o $@
 
 %.cmx : %.ml
