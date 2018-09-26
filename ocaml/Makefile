@@ -13,8 +13,8 @@ test : test.native $(wildcard tests/*)
 
 
 test.native : dash.cmx ast.cmx main.cmx 
+	$(MAKE) dash.cmxa
 	ocamlopt.opt -cclib -force_load libdash.a $(OCAMLINCLUDES) $(OCAMLLIBS) $^ -o $@
-
 
 dash.cmxa : dash.cmx ast.cmx
 	$(MAKE) libdash.a
@@ -30,7 +30,7 @@ libdash.a : $(DASH)/src/libdash.a
 	ocamlopt.opt $(OCAMLINCLUDES) -c $< -o $@
 
 clean :
-	rm -f *.o test *~ *.cmi *.cmx test.native dash.a dash.cmxa
+	rm -f *.o test *~ *.cmi *.cmx test.native libdash.a dash.cmxa
 	rm -rf _build
 
 # ocamldep output
