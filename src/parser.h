@@ -78,12 +78,15 @@
 extern int lasttoken;
 extern int tokpushback;
 #define NEOF ((union node *)&tokpushback)
+/* MMG 2018-09-25 similar story for an error return value */
+#define NERR ((union node *)&lasttoken)
 extern int whichprompt;		/* 1 == PS1, 2 == PS2 */
 extern int checkkwd;
 
 
 int isassignment(const char *p);
 union node *parsecmd(int);
+union node *parsecmd_safe(int);
 void fixredir(union node *, const char *, int);
 const char *getprompt(void *);
 const char *const *findkwd(const char *);

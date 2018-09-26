@@ -50,6 +50,7 @@
 #include "var.h"
 #include "error.h"
 #include "memalloc.h"
+#include "init.h"       /* MMG 2018-09-25 for reset() */
 #include "mystring.h"
 #include "alias.h"
 #include "show.h"
@@ -154,9 +155,32 @@ parsecmd(int interact)
 	if (doprompt)
 		setprompt(doprompt);
 	needprompt = 0;
+
 	return list(1);
 }
 
+/* MMG 2018-09-25 manually install a handler here */
+union node *
+parsecmd_safe(int interact)
+{
+	struct jmploc jmploc;
+
+	tokpushback = 0;
+	checkkwd = 0;
+	heredoclist = 0;
+	doprompt = interact;
+	if (doprompt)
+		setprompt(doprompt);
+	needprompt = 0;
+
+        if (unlikely(setjmp(jmploc.loc))) {
+          reset();
+          return NERR;
+        }
+        handler = &jmploc;
+
+	return list(1);
+}
 
 STATIC union node *
 list(int nlflag)
