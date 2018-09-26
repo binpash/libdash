@@ -45,6 +45,7 @@ struct alias {
 };
 
 struct alias *lookupalias(const char *, int);
+void setalias(const char *, const char *);
 int aliascmd(int, char **);
 int unaliascmd(int, char **);
 void rmaliases(void);
