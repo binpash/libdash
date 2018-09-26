@@ -13,15 +13,13 @@ let parse_args () =
     ["-v",Arg.Set verbose,"verbose mode"]
     (function | "-" -> input_src := None | f -> input_src := Some f)
     "Final argument should be either a filename or - (for STDIN); only the last such argument is used"
-;;
+
+let main () = 
   initialize ();
   parse_args ();
   set_input_src ();
   let ns = parse_all () in
   let cs = List.map Ast.of_node ns in
-  let try_compile c =
-    try ignore (Compile.compile c)
-    with _ -> prerr_endline "couldn't compile"; () in
-  List.iter try_compile cs;
-  List.map
-    (fun c -> print_endline (Ast.to_string c)) cs
+  List.map (fun c -> print_endline (Ast.to_string c)) cs;;
+
+main ()
