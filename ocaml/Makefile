@@ -4,15 +4,15 @@ OCAMLLIB=$(shell opam config var lib)
 OCAMLINCLUDES=-I $(OCAMLLIB)/bytes -I $(OCAMLLIB)/ctypes
 OCAMLLIBS=unix.cmxa bigarray.cmxa str.cmxa ctypes.cmxa ctypes-foreign-base.cmxa ctypes-foreign-unthreaded.cmxa
 
-all : main.native dash.cmxa
+all : test.native dash.cmxa
 
-test : main.native $(wildcard tests/*)
+test : test.native $(wildcard tests/*)
 	@for f in tests/*; do \
-		./round_trip.sh ./main.native $$f 2>test.err; \
+		./round_trip.sh ./test.native $$f 2>test.err; \
 	done
 
 
-main.native : dash.cmx ast.cmx main.cmx 
+test.native : dash.cmx ast.cmx main.cmx 
 	ocamlopt.opt -cclib -force_load $(DASH)/src/libdash.a $(OCAMLINCLUDES) $(OCAMLLIBS) $^ -o $@
 
 
@@ -26,7 +26,7 @@ dash.cmxa : dash.cmx ast.cmx $(DASH)/src/libdash.a
 	ocamlopt.opt $(OCAMLINCLUDES) -c $< -o $@
 
 clean :
-	rm -f *.o test *~ *.cmi *.cmx main.native dash.a dash.cmxa
+	rm -f *.o test *~ *.cmi *.cmx test.native dash.a dash.cmxa
 	rm -rf _build
 
 # ocamldep output
