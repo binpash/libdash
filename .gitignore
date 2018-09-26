@@ -39,3 +39,6 @@ Makefile
 .Spotlight*
 .Trash*
 *[Tt]humbs.db
+ar-lib
+config.*
+src/libdash.a

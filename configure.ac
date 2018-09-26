@@ -8,6 +8,9 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_GNU_SOURCE
 AC_PROG_YACC
+dnl MMG 2018-09-26 support building the library
+AC_PROG_RANLIB
+AM_PROG_AR
 
 AC_MSG_CHECKING([for build system compiler])
 if test "$cross_compiling" = yes; then

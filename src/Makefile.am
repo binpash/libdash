@@ -16,6 +16,10 @@ COMPILE_FOR_BUILD = \
 
 bin_PROGRAMS = dash
 
+dash_CFLAGS = -DMAIN
+
+noinst_LIBRARIES = libdash.a
+
 dash_CFILES = \
 	alias.c arith_yacc.c arith_yylex.c cd.c error.c eval.c exec.c expand.c \
 	histedit.c input.c jobs.c mail.c main.c memalloc.c miscbltin.c \
@@ -29,6 +33,8 @@ dash_SOURCES = \
 	myhistedit.h mystring.h options.h output.h parser.h redir.h shell.h \
 	show.h system.h trap.h var.h
 dash_LDADD = builtins.o init.o nodes.o signames.o syntax.o
+
+libdash_a_SOURCES = $(dash_SOURCES)
 
 HELPERS = mkinit mksyntax mknodes mksignames
 
