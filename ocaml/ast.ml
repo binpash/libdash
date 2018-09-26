@@ -315,8 +315,6 @@ let show_unless expected actual =
   then ""
   else string_of_int actual
 
-let braces s = "{ " ^ s ^ " ; }"
-
 let background s = "{ " ^ s ^ " & }"
                             
 let rec to_string = function

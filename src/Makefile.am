@@ -36,6 +36,8 @@ dash_LDADD = builtins.o init.o nodes.o signames.o syntax.o
 
 libdash_a_SOURCES = $(dash_SOURCES)
 
+libdash_a_LIBADD = builtins.o init.o nodes.o signames.o syntax.o
+
 HELPERS = mkinit mksyntax mknodes mksignames
 
 BUILT_SOURCES = builtins.h nodes.h syntax.h token.h token_vars.h

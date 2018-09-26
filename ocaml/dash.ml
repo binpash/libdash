@@ -40,10 +40,10 @@ let with_handler (k : int -> 'a) : 'a =
       k r
     end
           
-let init : unit -> unit = foreign "init" (void @-> returning void)
+let dash_init : unit -> unit = foreign "init" (void @-> returning void)
 
 let initialize () =
-  init ();
+  dash_init ();
   init_stack ()
 
 let popfile : unit -> unit =
