@@ -324,7 +324,7 @@ lookupvar(const char *name)
 
 intmax_t lookupvarint(const char *name)
 {
-	return atomax(lookupvar(name) ?: nullstr, 0);
+	return atomax(lookupvar(name) ?: "0", 0);
 }
 
 
