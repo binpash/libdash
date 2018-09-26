@@ -1,0 +1,10 @@
+*.a
+*.cmxa
+test
+*.native
+*~
+*.o
+*.cmx
+*.cmi
+_build
+test.err
