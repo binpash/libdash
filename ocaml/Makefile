@@ -13,11 +13,15 @@ test : test.native $(wildcard tests/*)
 
 
 test.native : dash.cmx ast.cmx main.cmx 
-	ocamlopt.opt -cclib -force_load $(DASH)/src/libdash.a $(OCAMLINCLUDES) $(OCAMLLIBS) $^ -o $@
+	ocamlopt.opt -cclib -force_load libdash.a $(OCAMLINCLUDES) $(OCAMLLIBS) $^ -o $@
 
 
-dash.cmxa : dash.cmx ast.cmx $(DASH)/src/libdash.a
-	ocamlopt.opt -cclib -force_load $(DASH)/src/libdash.a $(OCAMLINCLUDES) $^ -a -o $@
+dash.cmxa : dash.cmx ast.cmx
+	$(MAKE) libdash.a
+	ocamlopt.opt -cclib -force_load libdash.a $(OCAMLINCLUDES) $^ -a -o $@
+
+libdash.a : $(DASH)/src/libdash.a
+	cp $< $@
 
 %.cmx : %.ml
 	ocamlopt.opt $(OCAMLINCLUDES) -c $< -o $@
