@@ -41,7 +41,6 @@ Makefile
 .Trash*
 *[Tt]humbs.db
 
-
 *.a
 *.cmxa
 
@@ -53,3 +52,7 @@ test
 *.cmi
 _build
 test.err
+
+ar-lib
+config.*
+src/libdash.a

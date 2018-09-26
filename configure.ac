@@ -8,7 +8,14 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
 
 dnl Checks for programs.
 AC_PROG_CC
+
 AC_USE_SYSTEM_EXTENSIONS
+
+dnl AC_GNU_SOURCE
+dnl AC_PROG_YACC
+dnl MMG 2018-09-26 support building the library
+AC_PROG_RANLIB
+AM_PROG_AR
 
 AC_MSG_CHECKING([for build system compiler])
 if test "$cross_compiling" = yes; then
