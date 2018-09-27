@@ -38,6 +38,10 @@ libdash_a_SOURCES = $(dash_SOURCES)
 
 libdash_a_LIBADD = builtins.o init.o nodes.o signames.o syntax.o
 
+#lib_LTLIBRARIES = libdash.la
+#libdash_la_SOURCES = $(dash_SOURCES)
+#libdash_la_CFLAGS = $(AM_CFLAGS)
+
 HELPERS = mkinit mksyntax mknodes mksignames
 
 BUILT_SOURCES = builtins.h nodes.h syntax.h token.h token_vars.h

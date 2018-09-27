@@ -1,7 +1,6 @@
 AC_INIT([dash],[0.5.13.3])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/main.c])
-
 AC_CONFIG_HEADERS(config.h)
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
@@ -14,8 +13,10 @@ AC_USE_SYSTEM_EXTENSIONS
 dnl AC_GNU_SOURCE
 dnl AC_PROG_YACC
 dnl MMG 2018-09-26 support building the library
-AC_PROG_RANLIB
 AM_PROG_AR
+AC_PROG_RANLIB
+dnl AC_PROG_LIBTOOL
+
 
 AC_MSG_CHECKING([for build system compiler])
 if test "$cross_compiling" = yes; then
