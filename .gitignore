@@ -42,3 +42,7 @@ Makefile
 ar-lib
 config.*
 src/libdash.a
+*.lo
+m4
+libtool
+ltmain.sh

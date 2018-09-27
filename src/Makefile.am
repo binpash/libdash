@@ -18,7 +18,17 @@ bin_PROGRAMS = dash
 
 dash_CFLAGS = -DMAIN
 
-noinst_LIBRARIES = libdash.a
+lib_LIBRARIES = libdash.a
+lib_LTLIBRARIES = libdash.la
+
+libdash_la_SOURCES = \
+	alias.c arith_yacc.c arith_yylex.c cd.c error.c eval.c exec.c expand.c \
+	histedit.c input.c jobs.c mail.c main.c memalloc.c miscbltin.c \
+	mystring.c options.c parser.c redir.c show.c trap.c output.c \
+	bltin/printf.c system.c bltin/test.c bltin/times.c var.c \
+	builtins.c init.c nodes.c signames.c syntax.c
+libdash_la_CFLAGS = $(AM_CFLAGS)
+libdash_la_LDFLAGS = -module -shared
 
 dash_CFILES = \
 	alias.c arith_yacc.c arith_yylex.c cd.c error.c eval.c exec.c expand.c \
@@ -34,13 +44,8 @@ dash_SOURCES = \
 	show.h system.h trap.h var.h
 dash_LDADD = builtins.o init.o nodes.o signames.o syntax.o
 
-libdash_a_SOURCES = $(dash_SOURCES)
-
-libdash_a_LIBADD = builtins.o init.o nodes.o signames.o syntax.o
-
-#lib_LTLIBRARIES = libdash.la
-#libdash_la_SOURCES = $(dash_SOURCES)
-#libdash_la_CFLAGS = $(AM_CFLAGS)
+libdash_a_SOURCES = $(dash_CFILES)
+libdash_a_LIBADD = $(dash_LDADD)
 
 HELPERS = mkinit mksyntax mknodes mksignames
 

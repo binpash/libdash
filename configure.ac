@@ -2,6 +2,7 @@ AC_INIT(dash, 0.5.10.2)
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_MACRO_DIRS([m4])
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -9,8 +10,6 @@ AC_GNU_SOURCE
 AC_PROG_YACC
 dnl MMG 2018-09-26 support building the library
 AM_PROG_AR
-AC_PROG_RANLIB
-dnl AC_PROG_LIBTOOL
 
 
 AC_MSG_CHECKING([for build system compiler])
@@ -185,5 +184,10 @@ AC_ARG_ENABLE(lineno, AS_HELP_STRING(--disable-lineno, \
 if test "$enable_lineno" != "no"; then
 	AC_DEFINE([WITH_LINENO], 1, [Define if you build with -DWITH_LINENO])
 fi
+
+dnl MMG 2018-09-27 support building the shared library
+AC_PROG_LIBTOOL
+LT_INIT
+
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

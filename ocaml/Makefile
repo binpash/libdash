@@ -1,6 +1,8 @@
 DASH=..
 
-FORCE_LOAD=$(if $(shell gcc -v 2>&1 | grep gcc),--force-link,-force_load)
+DYNLINK=-ccopt '-Wl,-L../src/.libs/ -ldash'
+STALINK=-cclib -force_load libdash.a
+LINK=$(if $(shell gcc -v 2>&1 | grep gcc),$(DYNLINK),$(STALINK))
 
 OCAMLLIB=$(shell opam config var lib)
 OCAMLINCLUDES=-I $(OCAMLLIB)/bytes -I $(OCAMLLIB)/ctypes
@@ -16,11 +18,11 @@ test : test.native $(wildcard tests/*)
 
 test.native : dash.cmx ast.cmx main.cmx 
 	$(MAKE) dash.cmxa
-	ocamlopt.opt -cclib $(FORCE_LOAD) libdash.a $(OCAMLINCLUDES) $(OCAMLLIBS) $^ -o $@
+	ocamlopt.opt $(LINK) $(OCAMLINCLUDES) $(OCAMLLIBS) $^ -o $@
 
 dash.cmxa : dash.cmx ast.cmx
 	$(MAKE) libdash.a
-	ocamlopt.opt -cclib $(FORCE_LOAD) libdash.a $(OCAMLINCLUDES) $^ -a -o $@
+	ocamlopt.opt $(LINK) $(OCAMLINCLUDES) $^ -a -o $@
 
 libdash.a : $(DASH)/src/libdash.a
 	cp $< $@

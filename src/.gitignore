@@ -11,3 +11,5 @@ nodes.[ch]
 signames.c
 syntax.[ch]
 token.h
+.libs
+libdash.la
