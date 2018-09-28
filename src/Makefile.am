@@ -28,7 +28,7 @@ libdash_la_SOURCES = \
 	bltin/printf.c system.c bltin/test.c bltin/times.c var.c \
 	builtins.c init.c nodes.c signames.c syntax.c
 libdash_la_CFLAGS = $(AM_CFLAGS)
-libdash_la_LDFLAGS = -module -shared
+libdash_la_LDFLAGS = -shared -dynamic
 
 dash_CFILES = \
 	alias.c arith_yacc.c arith_yylex.c cd.c error.c eval.c exec.c expand.c \
