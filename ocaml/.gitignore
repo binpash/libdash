@@ -6,4 +6,5 @@ test
 *.o
 *.cmx
 *.cmi
-
+*.cmo
+*.cma

@@ -3,6 +3,7 @@
 all : dash.cmxa
 
 install : all
+	if ocamlfind query dash; then ocamlfind remove dash; fi
 	ocamlfind install dash META dash.cmxa dash.a dash.mli dash.cmi dash.cmx ast.mli ast.cmi ast.cmx
 
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml

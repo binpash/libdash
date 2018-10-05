@@ -491,7 +491,10 @@ and show_arg (s : char list) (bqlist : nodelist structure ptr) stack =
      let c' = match c with
       | '\'' -> "\\'"
       | '\"' -> "\\\""
-      | _ -> Char.escaped c
+      | '\\' -> "\\"
+      | '$' -> "$"
+      | '`' -> "`"
+      | _ -> "\\" ^ String.make 1 c
      in
      c' ^ str,s'',bqlist',stack'
   (* CTLVAR *)
