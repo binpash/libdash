@@ -307,10 +307,10 @@ setstatus:
 		break;
 	}
 out:
+	dotrap();
+
 	if (checkexit & status)
 		goto exexit;
-
-	dotrap();
 
 	if (flags & EV_EXIT) {
 exexit:
