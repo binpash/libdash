@@ -44,27 +44,27 @@ EXTRA_DIST = \
 	mknodes.c nodetypes nodes.c.pat mksyntax.c mksignames.c
 
 token.h token_vars.h: mktokens
-	$(SHELL) $^
+	$(AM_V_GEN)$(SHELL) $^
 
 builtins.def: builtins.def.in $(top_builddir)/config.h
-	$(COMPILE) -E -x c -o $@ $<
+	$(AM_V_CC)$(COMPILE) -E -x c -o $@ $<
 
 builtins.c builtins.h: mkbuiltins builtins.def
-	$(SHELL) $^
+	$(AM_V_GEN)$(SHELL) $^
 
 init.c: mkinit $(dash_CFILES)
-	./$^
+	$(AM_V_GEN)./$^
 
 nodes.c nodes.h: mknodes nodetypes nodes.c.pat
-	./$^
+	$(AM_V_GEN)./$^
 
 syntax.c syntax.h: mksyntax
-	./$^
+	$(AM_V_GEN)./$^
 
 signames.c: mksignames
-	./$^
+	$(AM_V_GEN)./$^
 
 mksyntax: token.h
 
 $(HELPERS): %: %.c
-	$(COMPILE_FOR_BUILD) -o $@ $<
+	$(AM_V_CC)$(COMPILE_FOR_BUILD) -o $@ $<

@@ -4,6 +4,8 @@ AC_CONFIG_SRCDIR([src/main.c])
 
 AC_CONFIG_HEADERS(config.h)
 
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
