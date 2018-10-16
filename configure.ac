@@ -1,4 +1,4 @@
-AC_INIT(dash, 0.5.10.2)
+AC_INIT([dash],[0.5.10.2])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/main.c])
 
@@ -6,7 +6,7 @@ AC_CONFIG_HEADERS(config.h)
 
 dnl Checks for programs.
 AC_PROG_CC
-AC_GNU_SOURCE
+AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_YACC
 
 AC_MSG_CHECKING([for build system compiler])
