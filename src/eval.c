@@ -279,7 +279,7 @@ checkexit:
 		isor = n->type - NAND;
 		status = evaltree(n->nbinary.ch1,
 				  (flags | ((isor >> 1) - 1)) & EV_TESTED);
-		if (!status == isor || evalskip)
+		if ((!status) == isor || evalskip)
 			break;
 		n = n->nbinary.ch2;
 evaln:
