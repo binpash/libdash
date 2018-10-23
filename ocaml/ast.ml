@@ -90,6 +90,9 @@ open Dash
 let skip = Command (-1,[],[],[])
        
 let rec of_node (n : node union ptr) : t =
+  if nullptr n
+  then skip
+  else
   match (n @-> node_type) with
   (* NCMD *)
   | 0  ->
@@ -118,12 +121,9 @@ let rec of_node (n : node union ptr) : t =
   (* NIF *)
   | 8  ->
      let n = n @-> node_nif in
-     let else_part = getf n nif_elsepart in
      If (of_node (getf n nif_test),
          of_node (getf n nif_ifpart),
-         if nullptr else_part
-         then skip
-         else of_node else_part)
+         of_node (getf n nif_elsepart))
   (* NWHILE *)
   | 9  -> let (t,b) = of_binary n in While (t,b)
   (* NUNTIL *)
