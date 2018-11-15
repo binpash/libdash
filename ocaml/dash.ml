@@ -13,7 +13,11 @@ let () = seal stackmark
 
 let init_stack () =
   let stack = make stackmark in (* ??? do we want to save this *)
-  foreign "setstackmark" (ptr stackmark @-> returning void) (addr stack)
+  foreign "setstackmark" (ptr stackmark @-> returning void) (addr stack);
+  stack
+
+let pop_stack stack =
+  foreign "popstackmark" (ptr stackmark @-> returning void) (addr stack)
 
 (* on OS X x86_64 *)
 let jmp_buf_t : 'a Ctypes_static.carray typ = array 18 int
@@ -43,8 +47,7 @@ let with_handler (k : int -> 'a) : 'a =
 let dash_init : unit -> unit = foreign "init" (void @-> returning void)
 
 let initialize () =
-  dash_init ();
-  init_stack ()
+  dash_init ()
 
 let popfile : unit -> unit =
   foreign "popfile" (void @-> returning void)
@@ -255,8 +258,6 @@ let nullptr (p : 'a ptr) = addrof p = Nativeint.zero
 
 type parse_result = Done | Error | Null | Parsed of (node union ptr)
 
-exception Parse_error
-
 let parse_next ?interactive:(i=false) () =
   let n = parsecmd_safe (if i then 1 else 0) in
   if eqptr n neof
@@ -266,13 +267,6 @@ let parse_next ?interactive:(i=false) () =
   else if nullptr n
   then Null (* comment or blank line or error ... *)
   else Parsed n
-
-let rec parse_all ?interactive:(i=false) () : (node union ptr) list =
-  match parse_next ~interactive:i () with
-  | Done -> []
-  | Error -> raise Parse_error
-  | Null -> parse_all ~interactive:i ()
-  | Parsed n -> n::parse_all ~interactive:i ()
             
 let (@->) (s : ('b, 'c) structured ptr) (f : ('a, ('b, 'c) structured) field) =
   getf (!@ s) f
