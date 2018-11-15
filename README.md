@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/mgree/libdash.svg?branch=master)](https://travis-ci.com/mgree/libdash)
+
 *libdash* is a fork of the Linux Kernel's `dash` shell that builds a linkable library with extra exposed interfaces. The primary use of libdash is to parse shell scripts, but it could be used for more.
 
 # What are the dependencies?
