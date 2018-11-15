@@ -8,29 +8,33 @@ The C code for dash should build on a wide variety of systems. The library may n
 
 The OCaml code relies on `ctypes-0.11.5` and `ctypes-foreign`; everything else should be in `base`.
 
-# How to build it
+# How to build and test it
 
-In the root directory run:
+You should be able to simply run `docker build -t libdash .` to get a runnable environment. Everything will be in `/home/opam/libdash`.
+
+## How to build it locally
+
+Broadly: crib from the `Dockerfile`. More concretely, in the root directory run:
 
 ```
-./autogen.sh && ./configure && make
+./autogen.sh && ./configure && make && sudo make install
 ```
 
-This should construct an executable `src/dash` and a static library `src/libdash.a`.
+This should construct an executable `src/dash` and a static library `src/libdash.a`. They will need to be installed globally for things to work well.
 
 Then run:
 
 ```
-cd ocaml; make
+cd ocaml; make && make install
 ```
 
-This will build the OCaml library `ocaml/dash.mxa` along with a tester, `ocaml/test.native`. You can then run (still in the `ocaml` directory):
+This will build the OCaml library and install it in your OPAM repository. There are tests in another directory; they will only build when libdash is actually installed.
 
 ```
-make test
+cd test; make test
 ```
 
-Which will use `ocaml/round_trip.sh` to ensure that every tester file in `ocaml/tests` round-trips correctly through parsing and pretty printing.
+The tests use `ocaml/round_trip.sh` to ensure that every tester file in `ocaml/tests` round-trips correctly through parsing and pretty printing.
 
 # How to use the parser
 
