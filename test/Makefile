@@ -8,7 +8,7 @@ test : test.native $(wildcard tests/*)
 	done
 
 test.native : test.ml
-	ocamlfind ocamlopt -package dash -linkpkg test.ml -o test.native
+	ocamlfind ocamlopt -package dash,ctypes,ctypes.foreign -linkpkg test.ml -o test.native
 
 clean :
 	rm -f *.o *.cmi *.cmx test.native test.err

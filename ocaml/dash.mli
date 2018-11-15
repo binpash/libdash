@@ -5,6 +5,16 @@
 
 val initialize : unit -> unit
 
+(* stackmark discipline:
+
+   (init_stack parse_next [process AST] pop_stack[deallocates dash AST])*
+
+   see libdash/test/test.ml for an example usage in parse_all
+*)
+type stackmark
+val init_stack : unit -> stackmark Ctypes.structure
+val pop_stack : stackmark Ctypes.structure -> unit
+
 val popfile : unit -> unit
 val setinputstring : string -> unit
 val setinputtostdin : unit -> unit
@@ -211,10 +221,7 @@ type parse_result =
   | Error
   | Null
   | Parsed of node Ctypes.union Ctypes.ptr
-exception Parse_error
 val parse_next : ?interactive:bool -> unit -> parse_result
-val parse_all :
-  ?interactive:bool -> unit -> node Ctypes.union Ctypes.ptr list
 
 (* native pretty printer *)
 val show : node Ctypes.union Ctypes.ptr -> string
