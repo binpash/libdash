@@ -12,48 +12,31 @@ let size = field stackmark "stacknleft" PosixTypes.size_t
 let () = seal stackmark
 
 let init_stack () =
-  let stack = make stackmark in (* ??? do we want to save this *)
+  let stack = make stackmark in
   foreign "setstackmark" (ptr stackmark @-> returning void) (addr stack);
   stack
 
 let pop_stack stack =
   foreign "popstackmark" (ptr stackmark @-> returning void) (addr stack)
 
-(* on OS X x86_64 *)
-let jmp_buf_t : 'a Ctypes_static.carray typ = array 18 int
+let alloc_stack_string =
+  foreign "sstrdup" (string @-> returning (ptr char))
 
-type jmploc
-let jmploc : jmploc structure typ = structure "jmploc"
-let jmp_buf = field jmploc "jmp_buf" jmp_buf_t
-let () = seal jmploc
-
-let setjmp : int ptr -> int = foreign "setjmp" (ptr int @-> returning int)
-
-let with_handler (k : int -> 'a) : 'a =  
-  let jmptgt = make jmploc in
-  let r = setjmp (CArray.start (getf jmptgt jmp_buf)) in
-  if r = 0
-  then (* normal return *)
-    let handler = foreign_value "handler" (ptr jmploc) in
-    handler <-@ addr jmptgt;
-    k 0
-  else (* coming from a longjmp *)
-    (* TODO we're never actually landing here, for some reason... *)
-    begin 
-      fprintf stderr "dash raised exception %d\n" r;
-      k r
-    end
-          
+let free_stack_string s =
+  foreign "stunalloc" (ptr char @-> returning void) s
+  
 let dash_init : unit -> unit = foreign "init" (void @-> returning void)
 
+let root_stackmark = ref None
 let initialize () =
-  dash_init ()
+  dash_init ();
+  root_stackmark := Some (init_stack ())
 
 let popfile : unit -> unit =
   foreign "popfile" (void @-> returning void)
                                   
-let setinputstring : string -> unit =
-  foreign "setinputstring" (string @-> returning void)
+let setinputstring : char ptr -> unit =
+  foreign "setinputstring" (ptr char @-> returning void)
 
 let setinputtostdin () : unit =
   foreign "setinputfd" (int @-> int @-> returning void) 0 0 (* don't both pushing the file *)
@@ -263,7 +246,15 @@ let parse_next ?interactive:(i=false) () =
   if eqptr n neof
   then Done
   else if eqptr n nerr
-  then Error
+  then
+    begin
+      begin
+        match !root_stackmark with
+        | None -> failwith "!!! missing root stackmark"
+        | Some smark -> pop_stack smark
+      end;
+      Error
+    end
   else if nullptr n
   then Null (* comment or blank line or error ... *)
   else Parsed n
