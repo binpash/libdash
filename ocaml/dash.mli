@@ -15,8 +15,11 @@ type stackmark
 val init_stack : unit -> stackmark Ctypes.structure
 val pop_stack : stackmark Ctypes.structure -> unit
 
+val alloc_stack_string : string -> (char Ctypes.ptr)
+val free_stack_string : (char Ctypes.ptr) -> unit
+  
 val popfile : unit -> unit
-val setinputstring : string -> unit
+val setinputstring : (char Ctypes.ptr) -> unit
 val setinputtostdin : unit -> unit
 val setinputfile : ?push:bool -> string -> unit
 
