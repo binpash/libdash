@@ -953,7 +953,7 @@ evalbltin(const struct builtincmd *cmd, int argc, char **argv, int flags)
 		status = (*cmd->builtin)(argc, argv);
 	flushall();
 	if (outerr(out1))
-		warnx("%s: I/O error", commandname);
+		sh_warnx("%s: I/O error", commandname);
 	status |= outerr(out1);
 	exitstatus = status;
 cmddone:
