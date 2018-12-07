@@ -79,9 +79,9 @@ STATIC void read_profile(const char *);
 STATIC char *find_dot_file(char *);
 static int cmdloop(int);
 
-#ifdef MAIN
+#ifdef MAIN // libdash
 int main(int, char **);
-#endif
+#endif //MAIN // libdash
 
 /*
  * Main routine.  We initialize things, parse the arguments, execute
@@ -91,7 +91,7 @@ int main(int, char **);
  * is used to figure out how far we had gotten.
  */
 
-#ifdef MAIN
+#ifdef MAIN //libdash
 int
 main(int argc, char **argv)
 {
@@ -198,7 +198,7 @@ exit:
 	/* NOTREACHED */
 }
 
-#endif
+#endif // MAIN // libdash
 
 /*
  * Read and execute commands.  "Top" is nonzero for the top level command
