@@ -95,7 +95,7 @@ void pungetc(void);
 void pushstring(char *, void *);
 void popstring(void);
 int setinputfile(const char *, int);
-void setinputfd(int fd, int push);
+void setinputfd(int fd, int push); // libdash
 void setinputstring(char *);
 void popfile(void);
 void unwindfiles(struct parsefile *);
