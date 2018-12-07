@@ -184,7 +184,7 @@ unaliascmd(int argc, char **argv)
 }
 
 /*
-STATIC
+STATIC struct alias *
 */ // libdash
 struct alias *
 freealias(struct alias *ap) {
