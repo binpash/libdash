@@ -49,6 +49,7 @@ struct alias *atab[ATABSIZE];
 STATIC struct alias *freealias(struct alias *);
 STATIC struct alias **__lookupalias(const char *);
 
+// libdash
 void
 setalias(const char *name, const char *val)
 {
@@ -177,6 +178,7 @@ unaliascmd(int argc, char **argv)
 	return (i);
 }
 
+// libdash
 struct alias *
 freealias(struct alias *ap) {
 	struct alias *next;
