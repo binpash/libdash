@@ -46,6 +46,7 @@ union node;
 void redirect(union node *, int);
 void popredir(int);
 void clearredir(void);
+int freshfd_ge10(int); // libdash
 int savefd(int, int);
 int redirectsafe(union node *, int);
 void unwindredir(struct redirtab *stop);

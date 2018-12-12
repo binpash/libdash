@@ -27,6 +27,8 @@ val setvar : string -> string -> unit
 val setalias : string -> string -> unit
 val unalias : string -> unit
 
+val freshfd_ge10 : int -> int option
+  
 (* Ctypes mappings of the node types *)
 type node
 val node : node Ctypes.union Ctypes.typ
