@@ -3,6 +3,8 @@ open Ctypes
 open Ctypes_types
 open Foreign
 
+(* First, some dash trivia. *)
+   
 type stackmark
               
 let stackmark : stackmark structure typ = structure "stackmark"
@@ -55,6 +57,15 @@ let setalias (name : string) (mapping : string) : unit =
 let unalias (name : string) : unit =
   foreign "unalias" (string @-> returning void) name
 
+(* Next, a utility function that isn't in Unix or ExtUnix. *)
+
+let freshfd_ge10 (fd : int) : int option =
+  let newfd = foreign "freshfd_ge10" (int @-> returning int) fd in
+  if newfd < 0
+  then None
+  else Some newfd
+  
+(* Actual AST stuff begins here. *)
 (* first, we define the node type... *)
           
 type node       

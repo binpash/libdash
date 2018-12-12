@@ -453,7 +453,15 @@ FORKRESET {
 
 #endif
 
-
+/* 
+ * Just a convenience because fcntl isn't well exposed in OCaml.
+ */
+// libdash
+int
+freshfd_ge10(int fd)
+{
+  return fcntl(fd, F_DUPFD, 10);
+}
 
 /*
  * Move a file descriptor to > 10.  Invokes sh_error on error unless
