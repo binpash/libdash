@@ -27,7 +27,8 @@ val setvar : string -> string -> unit
 val setalias : string -> string -> unit
 val unalias : string -> unit
 
-val freshfd_ge10 : int -> int option
+(* returns -1 when fd was closed; -2 on other errors *)
+val freshfd_ge10 : int -> int 
   
 (* Ctypes mappings of the node types *)
 type node

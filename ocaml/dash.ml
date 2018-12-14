@@ -59,11 +59,8 @@ let unalias (name : string) : unit =
 
 (* Next, a utility function that isn't in Unix or ExtUnix. *)
 
-let freshfd_ge10 (fd : int) : int option =
-  let newfd = foreign "freshfd_ge10" (int @-> returning int) fd in
-  if newfd < 0
-  then None
-  else Some newfd
+let freshfd_ge10 (fd : int) : int =
+  foreign "freshfd_ge10" (int @-> returning int) fd
   
 (* Actual AST stuff begins here. *)
 (* first, we define the node type... *)
