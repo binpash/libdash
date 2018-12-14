@@ -111,7 +111,7 @@ main(int argc, char **argv)
 		e = exception;
 
 		s = state;
-		if (e == EXEXIT || s == 0 || iflag == 0 || shlvl)
+		if (e == EXEND || e == EXEXIT || s == 0 || iflag == 0 || shlvl)
 			exitshell();
 
 		reset();

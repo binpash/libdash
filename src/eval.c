@@ -114,12 +114,13 @@ STATIC const struct builtincmd bltin = {
 INCLUDE "eval.h"
 
 EXITRESET {
-	evalskip = 0;
-	loopnest = 0;
 	if (savestatus >= 0) {
-		exitstatus = savestatus;
+		if (exception == EXEXIT || evalskip == SKIPFUNCDEF)
+			exitstatus = savestatus;
 		savestatus = -1;
 	}
+	evalskip = 0;
+	loopnest = 0;
 }
 #endif
 
@@ -318,7 +319,7 @@ out:
 
 	if (flags & EV_EXIT) {
 exexit:
-		exraise(EXEXIT);
+		exraise(EXEND);
 	}
 
 	popstackmark(&smark);
