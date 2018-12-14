@@ -460,7 +460,15 @@ FORKRESET {
 int
 freshfd_ge10(int fd)
 {
-  return fcntl(fd, F_DUPFD, 10);
+  int newfd;
+
+  newfd = fcntl(fd, F_DUPFD, 10);
+
+  if (newfd < 0) {
+    return errno == EBADF ? -1 : -2;
+  } else {
+    return newfd;
+  }
 }
 
 /*
