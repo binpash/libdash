@@ -1132,7 +1132,8 @@ eprintlist(struct output *out, struct strlist *sp, int sep)
 	while (sp) {
 		const char *p;
 
-		p = " %s" + (1 - sep);
+		p = " %s";
+		p += (1 - sep);
 		sep |= 1;
 		outfmt(out, p, sp->text);
 		sp = sp->next;
