@@ -28,9 +28,12 @@ let free_stack_string s =
   foreign "stunalloc" (ptr char @-> returning void) s
   
 let dash_init : unit -> unit = foreign "init" (void @-> returning void)
+let initialize_dash_errno : unit -> unit = 
+  foreign "initialize_dash_errno" (void @-> returning void)
 
 let root_stackmark = ref None
 let initialize () =
+  initialize_dash_errno ();
   dash_init ();
   root_stackmark := Some (init_stack ())
 
