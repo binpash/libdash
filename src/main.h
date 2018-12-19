@@ -48,6 +48,7 @@ extern int *dash_errno;
 #undef errno
 #define errno (*dash_errno)
 #endif
+void initialize_dash_errno(); // libdash
 
 void readcmdfile(char *);
 int dotcmd(int, char **);

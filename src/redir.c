@@ -391,14 +391,18 @@ int
 freshfd_ge10(int fd)
 {
   int newfd;
+  int err;
 
-  newfd = fcntl(fd, F_DUPFD, 10);
-
-  if (newfd < 0) {
-    return errno == EBADF ? -1 : -2;
-  } else {
-    return newfd;
+  newfd = fcntl(fd, F_DUPFD_CLOEXEC, 10);
+  
+  err = newfd < 0 ? errno : 0;
+  if (err == EBADF) {
+    newfd = -1;
+  } else if (err) {
+    newfd = -2;
   }
+
+  return newfd;
 }
 
 /*

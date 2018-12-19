@@ -76,6 +76,15 @@ STATIC void read_profile(const char *);
 STATIC char *find_dot_file(char *);
 static int cmdloop(int);
 
+//libdash
+void
+initialize_dash_errno() 
+{
+#ifdef __GLIBC__
+	dash_errno = __errno_location();
+#endif
+}
+
 #ifdef MAIN // libdash
 int main(int, char **);
 #endif //MAIN // libdash
