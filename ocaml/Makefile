@@ -1,13 +1,13 @@
 .PHONY : all install clean
 
-all : dash.cmxa
+all : dash.cmxa dash.cma
 
 install : all
 	if ocamlfind query dash; then ocamlfind remove dash; fi
-	ocamlfind install dash META dash.cmxa dash.a dash.mli dash.cmi dash.cmx ast.mli ast.cmi ast.cmx
+	ocamlfind install dash META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx
 
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml
-	ocamlfind ocamlmklib -package ctypes,ctypes.foreign -linkpkg -cclib -ldash $^ -o dash
+	ocamlfind ocamlmklib -package ctypes,ctypes.foreign -cclib -ldash $^ -o dash
 
 clean :
 	rm -f *.o *.cmi *.cmx dash.a dash.cmxa

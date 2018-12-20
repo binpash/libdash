@@ -13,3 +13,4 @@ syntax.[ch]
 token.h
 .libs
 libdash.la
+dlldash.la
