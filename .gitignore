@@ -60,3 +60,4 @@ src/libdash.a
 m4
 libtool
 ltmain.sh
+ocamlprof.dump
