@@ -1,5 +1,6 @@
 # compiled code anywhere
 **/*.native
+**/*.byte
 **/*.o
 **/*.lo
 **/*.cmx

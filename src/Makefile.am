@@ -19,7 +19,7 @@ bin_PROGRAMS = dash
 dash_CFLAGS = -DMAIN
 
 lib_LIBRARIES = libdash.a
-lib_LTLIBRARIES = libdash.la
+lib_LTLIBRARIES = libdash.la dlldash.la
 
 libdash_la_SOURCES = \
 	alias.c arith_yacc.c arith_yylex.c cd.c error.c eval.c exec.c expand.c \
@@ -29,6 +29,15 @@ libdash_la_SOURCES = \
 	builtins.c init.c nodes.c signames.c syntax.c
 libdash_la_CFLAGS = $(AM_CFLAGS)
 libdash_la_LDFLAGS = -shared -dynamic
+
+dlldash_la_SOURCES = \
+	alias.c arith_yacc.c arith_yylex.c cd.c error.c eval.c exec.c expand.c \
+	histedit.c input.c jobs.c mail.c main.c memalloc.c miscbltin.c \
+	mystring.c options.c parser.c redir.c show.c trap.c output.c \
+	bltin/printf.c system.c bltin/test.c bltin/times.c var.c \
+	builtins.c init.c nodes.c signames.c syntax.c
+dlldash_la_CFLAGS = $(AM_CFLAGS)
+dlldash_la_LDFLAGS = -shared -dynamic -module
 
 dash_CFILES = \
 	alias.c arith_yacc.c arith_yylex.c cd.c error.c eval.c exec.c expand.c \

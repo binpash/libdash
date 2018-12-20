@@ -7,3 +7,5 @@ test
 *.cmx
 *.cmi
 test.err
+test.byte
+test.cmo
