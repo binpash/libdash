@@ -268,8 +268,12 @@ and parse_arg (s : char list) (bqlist : nodelist structure ptr) stack =
      arg_char (Q a) s bqlist stack'
   (* tildes *)
   | '~'::s,stack ->
-     let uname,s' = parse_tilde [] s in
-     arg_char (T uname) s' bqlist stack
+     if List.exists (fun m -> m = `CTLQuo || m = `CTLAri) stack
+     then (* we're in arithmetic or double quotes, so tilde is ignored *)
+       arg_char (C '~') s bqlist stack
+     else
+       let uname,s' = parse_tilde [] s in
+       arg_char (T uname) s' bqlist stack
   (* ordinary character *)
   | c::s,_ ->
      arg_char (C c) s bqlist stack
@@ -287,6 +291,7 @@ and parse_tilde acc =
   | ':'::_ as s -> ret, s
   | '/'::_ as s -> ret, s
   (* ordinary char *)
+  (* TODO 2019-01-03 only characters from the portable character set *)
   | c::s' -> parse_tilde (acc @ [c]) s'  
               
 and arg_char c s bqlist stack =
