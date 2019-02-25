@@ -285,7 +285,7 @@ start:
 			q = stnputs(p, length, expdest);
 			q[-1] &= end - 1;
 			expdest = q - (flag & EXP_WORD ? end : 0);
-			newloc = expdest - (char *)stackblock() - end;
+			newloc = q - (char *)stackblock() - end;
 			if (breakall && !inquotes && newloc > startloc) {
 				recordregion(startloc, newloc, 0);
 			}
