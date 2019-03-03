@@ -71,6 +71,7 @@ int *dash_errno;
 short profile_buf[16384];
 extern int etext();
 #endif
+static struct jmploc main_handler;
 
 STATIC void read_profile(const char *);
 STATIC char *find_dot_file(char *);
@@ -90,7 +91,6 @@ main(int argc, char **argv)
 {
 	char *shinit;
 	volatile int state;
-	struct jmploc jmploc;
 	struct stackmark smark;
 	int login;
 
@@ -102,7 +102,7 @@ main(int argc, char **argv)
 	monitor(4, etext, profile_buf, sizeof profile_buf, 50);
 #endif
 	state = 0;
-	if (unlikely(setjmp(jmploc.loc))) {
+	if (unlikely(setjmp(main_handler.loc))) {
 		int e;
 		int s;
 
@@ -137,7 +137,7 @@ main(int argc, char **argv)
 		else
 			goto state4;
 	}
-	handler = &jmploc;
+	handler = &main_handler;
 #ifdef DEBUG
 	opentrace();
 	trputs("Shell args:  ");  trargs(argv);
@@ -352,4 +352,9 @@ exitcmd(int argc, char **argv)
 
 	exraise(EXEXIT);
 	/* NOTREACHED */
+}
+
+void reset_handler(void)
+{
+	handler = &main_handler;
 }
