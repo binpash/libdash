@@ -1451,9 +1451,9 @@ done:
 		if (readtoken() != TRP)
 			synexpect(TRP);
 		setinputstring(nullstr);
-		parseheredoc();
 	}
 
+	parseheredoc();
 	heredoclist = saveheredoclist;
 
 	(*nlpp)->n = n;
