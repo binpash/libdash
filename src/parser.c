@@ -170,7 +170,7 @@ parsecmd(int interact)
 }
 
 // libdash
-/* 2018-09-25 manually install a handler here */
+/* 2018-09-25 manually install a handler here so we can return an appropriate error code */
 union node *
 parsecmd_safe(int interact)
 {
@@ -185,7 +185,6 @@ parsecmd_safe(int interact)
 	needprompt = 0;
 
         if (unlikely(setjmp(jmploc.loc))) {
-          reset();
           return NERR;
         }
         handler = &jmploc;
