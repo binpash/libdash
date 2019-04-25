@@ -508,6 +508,9 @@ next_case:
 		break;
 	case TWORD:
 	case TREDIR:
+// libdash
+/* 2019-04-25 to allow for proper handling of empty aliases */
+        case TNL:
 		tokpushback++;
 		return simplecmd();
 	}
@@ -750,6 +753,9 @@ top:
 	kwd |= checkkwd;
 	checkkwd = 0;
 
+// libdash
+/* 2019-04-25 to handle empty aliases */
+ignorenl:
 	if (t != TWORD || quoteflag) {
 		goto out;
 	}
@@ -770,10 +776,15 @@ top:
 	if (kwd & CHKALIAS) {
 		struct alias *ap;
 		if ((ap = lookupalias(wordtext, 1)) != NULL) {
+// libdash
+/* 2019-04-25 to handle empty aliases */
 			if (*ap->val) {
 				pushstring(ap->val, ap);
-			}
-			goto top;
+				goto top;
+			} else {
+				t = xxreadtoken();
+				goto ignorenl;
+   		        }
 		}
 	}
 out:
