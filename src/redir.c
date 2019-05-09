@@ -57,7 +57,6 @@
 #include "error.h"
 
 
-#define REALLY_CLOSED -3	/* fd that was closed and still is */
 #define EMPTY -2		/* marks an unused slot in redirtab */
 #define CLOSED -1		/* fd opened for redir needs to be closed */
 
@@ -77,6 +76,9 @@ struct redirtab {
 
 MKINIT struct redirtab *redirlist;
 
+/* Bit map of currently closed file descriptors. */
+static unsigned closed_redirs;
+
 STATIC int openredirect(union node *);
 #ifdef notyet
 STATIC void dupredirect(union node *, int, char[10]);
@@ -84,6 +86,20 @@ STATIC void dupredirect(union node *, int, char[10]);
 STATIC void dupredirect(union node *, int);
 #endif
 STATIC int openhere(union node *);
+
+
+static unsigned update_closed_redirs(int fd, int nfd)
+{
+	unsigned val = closed_redirs;
+	unsigned bit = 1 << fd;
+
+	if (nfd >= 0)
+		closed_redirs &= ~bit;
+	else
+		closed_redirs |= bit;
+
+	return val & bit;
+}
 
 
 /*
@@ -110,41 +126,41 @@ redirect(union node *redir, int flags)
                 memory[i] = 0;
         memory[1] = flags & REDIR_BACKQ;
 #endif
-        if (!redir)
-                return;
-        sv = NULL;
-        INTOFF;
-        if (likely(flags & REDIR_PUSH))
-                sv = redirlist;
-        n = redir;
-        do {
-                newfd = openredirect(n);
-                if (newfd < -1)
-                        continue;
+	if (!redir)
+		return;
+	sv = NULL;
+	INTOFF;
+	if (likely(flags & REDIR_PUSH))
+		sv = redirlist;
+	n = redir;
+	do {
+		newfd = openredirect(n);
+		if (newfd < -1)
+			continue;
 
-                fd = n->nfile.fd;
+		fd = n->nfile.fd;
 
-                if (sv) {
-                        p = &sv->renamed[fd];
-                        i = *p;
+		if (sv) {
+			int closed;
 
-                        if (likely(i == EMPTY)) {
-                                i = CLOSED;
-                                if (fd != newfd) {
-                                        i = savefd(fd, fd);
-                                        fd = -1;
-                                }
-                        }
+			p = &sv->renamed[fd];
+			i = *p;
 
-                        if (i == newfd)
-                                /* Can only happen if i == newfd == CLOSED */
-                                i = REALLY_CLOSED;
+			closed = update_closed_redirs(fd, newfd);
 
-                        *p = i;
-                }
+			if (likely(i == EMPTY)) {
+				i = CLOSED;
+				if (fd != newfd && !closed) {
+					i = savefd(fd, fd);
+					fd = -1;
+				}
+			}
 
-                if (fd == newfd)
-                        continue;
+			*p = i;
+		}
+
+		if (fd == newfd)
+			continue;
 
 #ifdef notyet
                 dupredirect(n, newfd, memory);
@@ -340,30 +356,34 @@ out:
 void
 popredir(int drop)
 {
-        struct redirtab *rp;
-        int i;
+	struct redirtab *rp;
+	int i;
 
-        INTOFF;
-        rp = redirlist;
-        for (i = 0 ; i < 10 ; i++) {
-                switch (rp->renamed[i]) {
-                case CLOSED:
-                        if (!drop)
-                                close(i);
-                        break;
-                case EMPTY:
-                case REALLY_CLOSED:
-                        break;
-                default:
-                        if (!drop)
-                                dup2(rp->renamed[i], i);
-                        close(rp->renamed[i]);
-                        break;
-                }
-        }
-        redirlist = rp->next;
-        ckfree(rp);
-        INTON;
+	INTOFF;
+	rp = redirlist;
+	for (i = 0 ; i < 10 ; i++) {
+		int closed;
+
+		if (rp->renamed[i] == EMPTY)
+			continue;
+
+		closed = drop ? 1 : update_closed_redirs(i, rp->renamed[i]);
+
+		switch (rp->renamed[i]) {
+		case CLOSED:
+			if (!closed)
+				close(i);
+			break;
+		default:
+			if (!drop)
+				dup2(rp->renamed[i], i);
+			close(rp->renamed[i]);
+			break;
+		}
+	}
+	redirlist = rp->next;
+	ckfree(rp);
+	INTON;
 }
 
 /*

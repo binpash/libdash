@@ -114,12 +114,13 @@ STATIC const struct builtincmd bltin = {
 INCLUDE "eval.h"
 
 EXITRESET {
-	evalskip = 0;
-	loopnest = 0;
 	if (savestatus >= 0) {
-		exitstatus = savestatus;
+		if (exception == EXEXIT || evalskip == SKIPFUNCDEF)
+			exitstatus = savestatus;
 		savestatus = -1;
 	}
+	evalskip = 0;
+	loopnest = 0;
 }
 #endif
 
@@ -200,8 +201,12 @@ evaltree(union node *n, int flags)
 {
 	int checkexit = 0;
 	int (*evalfn)(union node *, int);
+	struct stackmark smark;
 	unsigned isor;
 	int status = 0;
+
+	setstackmark(&smark);
+
 	if (n == NULL) {
 		TRACE(("evaltree(NULL) called\n"));
 		goto out;
@@ -279,7 +284,7 @@ checkexit:
 		isor = n->type - NAND;
 		status = evaltree(n->nbinary.ch1,
 				  (flags | ((isor >> 1) - 1)) & EV_TESTED);
-		if (!status == isor || evalskip)
+		if ((!status) == isor || evalskip)
 			break;
 		n = n->nbinary.ch2;
 evaln:
@@ -307,15 +312,17 @@ setstatus:
 		break;
 	}
 out:
+	dotrap();
+
 	if (checkexit & status)
 		goto exexit;
 
-	dotrap();
-
 	if (flags & EV_EXIT) {
 exexit:
-		exraise(EXEXIT);
+		exraise(EXEND);
 	}
+
+	popstackmark(&smark);
 
 	return exitstatus;
 }
@@ -396,14 +403,12 @@ evalfor(union node *n, int flags)
 	struct arglist arglist;
 	union node *argp;
 	struct strlist *sp;
-	struct stackmark smark;
 	int status;
 
 	errlinno = lineno = n->nfor.linno;
 	if (funcline)
 		lineno -= funcline - 1;
 
-	setstackmark(&smark);
 	arglist.lastp = &arglist.list;
 	for (argp = n->nfor.args ; argp ; argp = argp->narg.next) {
 		expandarg(argp, &arglist, EXP_FULL | EXP_TILDE);
@@ -420,7 +425,6 @@ evalfor(union node *n, int flags)
 			break;
 	}
 	loopnest--;
-	popstackmark(&smark);
 
 	return status;
 }
@@ -433,14 +437,12 @@ evalcase(union node *n, int flags)
 	union node *cp;
 	union node *patp;
 	struct arglist arglist;
-	struct stackmark smark;
 	int status = 0;
 
 	errlinno = lineno = n->ncase.linno;
 	if (funcline)
 		lineno -= funcline - 1;
 
-	setstackmark(&smark);
 	arglist.lastp = &arglist.list;
 	expandarg(n->ncase.expr, &arglist, EXP_TILDE);
 	for (cp = n->ncase.cases ; cp && evalskip == 0 ; cp = cp->nclist.next) {
@@ -459,8 +461,6 @@ evalcase(union node *n, int flags)
 		}
 	}
 out:
-	popstackmark(&smark);
-
 	return status;
 }
 
@@ -529,7 +529,7 @@ expredir(union node *n)
 		case NFROMFD:
 		case NTOFD:
 			if (redir->ndup.vname) {
-				expandarg(redir->ndup.vname, &fn, EXP_FULL | EXP_TILDE);
+				expandarg(redir->ndup.vname, &fn, EXP_TILDE | EXP_REDIR);
 				fixredir(redir, fn.list->text, 1);
 			}
 			break;
@@ -717,7 +717,6 @@ evalcommand(union node *cmd, int flags)
 	struct localvar_list *localvar_stop;
 	struct parsefile *file_stop;
 	struct redirtab *redir_stop;
-	struct stackmark smark;
 	union node *argp;
 	struct arglist arglist;
 	struct arglist varlist;
@@ -746,7 +745,6 @@ evalcommand(union node *cmd, int flags)
 
 	/* First expand the arguments. */
 	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
-	setstackmark(&smark);
 	file_stop = parsefile;
 	back_exitstatus = 0;
 
@@ -925,7 +923,6 @@ out:
 		 * However I implemented that within libedit itself.
 		 */
 		setvar("_", lastarg, 0);
-	popstackmark(&smark);
 
 	return status;
 }
@@ -953,7 +950,7 @@ evalbltin(const struct builtincmd *cmd, int argc, char **argv, int flags)
 		status = (*cmd->builtin)(argc, argv);
 	flushall();
 	if (outerr(out1))
-		warnx("%s: I/O error", commandname);
+		sh_warnx("%s: I/O error", commandname);
 	status |= outerr(out1);
 	exitstatus = status;
 cmddone:
@@ -1135,7 +1132,8 @@ eprintlist(struct output *out, struct strlist *sp, int sep)
 	while (sp) {
 		const char *p;
 
-		p = " %s" + (1 - sep);
+		p = " %s";
+		p += (1 - sep);
 		sep |= 1;
 		outfmt(out, p, sp->text);
 		sp = sp->next;

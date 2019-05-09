@@ -745,6 +745,7 @@ again:
 		varunset(p, var, 0, 0);
 
 	if (subtype == VSLENGTH) {
+		p++;
 		if (flag & EXP_DISCARD)
 			return p;
 		cvtnum(varlen > 0 ? varlen : 0, flag);

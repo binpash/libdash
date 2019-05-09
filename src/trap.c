@@ -41,6 +41,7 @@
 #include "main.h"
 #include "nodes.h"	/* for other headers */
 #include "eval.h"
+#include "init.h"
 #include "jobs.h"
 #include "show.h"
 #include "options.h"
@@ -397,8 +398,10 @@ exitshell(void)
 		trap[0] = NULL;
 		evalskip = 0;
 		evalstring(p, 0);
+		evalskip = SKIPFUNCDEF;
 	}
 out:
+	exitreset();
 	/*
 	 * Disable job control so that whoever had the foreground before we
 	 * started can get it back.
@@ -406,7 +409,7 @@ out:
 	if (likely(!setjmp(loc.loc)))
 		setjobctl(0);
 	flushall();
-	_exit(savestatus);
+	_exit(exitstatus);
 	/* NOTREACHED */
 }
 
