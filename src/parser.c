@@ -1268,7 +1268,7 @@ varname:
 			do {
 				STPUTC(c, out);
 				c = pgetc_eatbnl();
-			} while (is_digit(c));
+			} while (!subtype && is_digit(c));
 		} else if (c != '}') {
 			int cc = c;
 
