@@ -8,6 +8,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 # system support for libdash; libgmp for zarith for lem
 RUN sudo apt-get install -y autoconf autotools-dev libtool pkg-config libffi-dev
 
+# because extunix needs camlp4, which isn't ready yet :( 2019-06-24
+RUN opam switch 4.07
+
 # make sure we have ocamlfind and ocamlbuild
 RUN opam install ocamlfind ocamlbuild
 
