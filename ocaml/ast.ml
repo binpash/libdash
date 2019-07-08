@@ -171,7 +171,10 @@ and redirs (n : node union ptr) =
       let vname = getf n ndup_vname in
       let tgt =
         if nullptr vname
-        then List.map (fun c -> C c) (explode (string_of_int (getf n ndup_dupfd)))
+        then let dupfd = getf n ndup_dupfd in
+             if dupfd = -1
+             then [C '-']
+             else List.map (fun c -> C c) (explode (string_of_int dupfd))
         else to_arg (vname @-> node_narg)
       in
       Dup (ty,getf n ndup_fd,tgt) in
