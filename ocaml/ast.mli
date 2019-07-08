@@ -18,7 +18,7 @@ type t =
 and assign = string * arg
 and redirection =
     File of redir_type * int * arg
-  | Dup of dup_type * int * int
+  | Dup of dup_type * int * arg
   | Heredoc of heredoc_type * int * arg
 and redir_type = To | Clobber | From | FromTo | Append
 and dup_type = ToFD | FromFD
