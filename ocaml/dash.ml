@@ -457,7 +457,14 @@ and shredir (n : node union ptr) : string =
 and show_redir n : string =
   match n with
   | `File (src,sym,f) -> show_redir_src (getf f nfile_fd) src ^ sym ^ sharg ((getf f nfile_fname) @-> node_narg)
-  | `Dup (src,sym,d) -> show_redir_src (getf d ndup_fd) src ^ sym ^ string_of_int (getf d ndup_dupfd)
+  | `Dup (src,sym,d) -> 
+      let vname = getf d ndup_vname in
+      let tgt =
+        if nullptr vname
+        then string_of_int (getf d ndup_dupfd)
+        else sharg (vname @-> node_narg)
+      in
+     show_redir_src (getf d ndup_fd) src ^ sym ^ tgt
   | `Here (src,sym,exp,h) ->
      let heredoc = sharg ((getf h nhere_doc) @-> node_narg) in
      let marker = fresh_marker (lines heredoc) "EOF" in

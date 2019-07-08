@@ -18,7 +18,7 @@ type t =
  and assign = string * arg
  and redirection =
    | File of redir_type * int * arg
-   | Dup of dup_type * int * int
+   | Dup of dup_type * int * arg
    | Heredoc of heredoc_type * int * arg
  and redir_type = To | Clobber | From | FromTo | Append
  and dup_type = ToFD | FromFD
@@ -168,7 +168,13 @@ and redirs (n : node union ptr) =
       File (ty,getf n nfile_fd,to_arg (getf n nfile_fname @-> node_narg)) in
     let mk_dup ty =
       let n = n @-> node_ndup in
-      Dup (ty,getf n ndup_fd,getf n ndup_dupfd) in
+      let vname = getf n ndup_vname in
+      let tgt=
+        if nullptr vname
+        then List.map (fun c -> C c) (explode (string_of_int (getf n ndup_dupfd)))
+        else to_arg (vname @-> node_narg)
+      in
+      Dup (ty,getf n ndup_fd,tgt) in
     let mk_here ty =
       let n = n @-> node_nhere in
       Heredoc (ty,getf n nhere_fd,to_arg (getf n nhere_doc @-> node_narg)) in
@@ -412,8 +418,8 @@ and string_of_redir = function
   | File (From,fd,a)    -> show_unless 0 fd ^ "<" ^ string_of_arg a
   | File (FromTo,fd,a)  -> show_unless 0 fd ^ "<>" ^ string_of_arg a
   | File (Append,fd,a)  -> show_unless 1 fd ^ ">>" ^ string_of_arg a
-  | Dup (ToFD,fd,tgt)   -> show_unless 1 fd ^ ">&" ^ string_of_int tgt
-  | Dup (FromFD,fd,tgt) -> show_unless 0 fd ^ "<&" ^ string_of_int tgt
+  | Dup (ToFD,fd,tgt)   -> show_unless 1 fd ^ ">&" ^ string_of_arg tgt
+  | Dup (FromFD,fd,tgt) -> show_unless 0 fd ^ "<&" ^ string_of_arg tgt
   | Heredoc (t,fd,a) ->
      let heredoc = string_of_arg a in
      let marker = fresh_marker (lines heredoc) "EOF" in
