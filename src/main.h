@@ -52,4 +52,3 @@ extern int *dash_errno;
 void readcmdfile(char *);
 int dotcmd(int, char **);
 int exitcmd(int, char **);
-void reset_handler(void);

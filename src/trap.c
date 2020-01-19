@@ -66,7 +66,7 @@
 
 
 /* trap handler commands */
-static char *trap[NSIG];
+MKINIT char *trap[NSIG];
 /* number of non-null traps */
 int trapcnt;
 /* current value of signal */
@@ -83,10 +83,28 @@ extern char *signal_names[];
 static int decode_signum(const char *);
 
 #ifdef mkinit
+INCLUDE "memalloc.h"
 INCLUDE "trap.h"
+
 INIT {
 	sigmode[SIGCHLD - 1] = S_DFL;
 	setsignal(SIGCHLD);
+}
+
+FORKRESET {
+	char **tp;
+
+	INTOFF;
+	for (tp = trap ; tp < &trap[NSIG] ; tp++) {
+		if (*tp && **tp) {	/* trap not NULL or SIG_IGN */
+			ckfree(*tp);
+			*tp = NULL;
+			if (tp != &trap[0])
+				setsignal(tp - trap);
+		}
+	}
+	trapcnt = 0;
+	INTON;
 }
 #endif
 
@@ -146,30 +164,6 @@ trapcmd(int argc, char **argv)
 		ap++;
 	}
 	return 0;
-}
-
-
-
-/*
- * Clear traps on a fork.
- */
-
-void
-clear_traps(void)
-{
-	char **tp;
-
-	INTOFF;
-	for (tp = trap ; tp < &trap[NSIG] ; tp++) {
-		if (*tp && **tp) {	/* trap not NULL or SIG_IGN */
-			ckfree(*tp);
-			*tp = NULL;
-			if (tp != &trap[0])
-				setsignal(tp - trap);
-		}
-	}
-	trapcnt = 0;
-	INTON;
 }
 
 

@@ -78,6 +78,7 @@ static int preadbuffer(void);
 
 #ifdef mkinit
 INCLUDE <stdio.h>
+INCLUDE <unistd.h>
 INCLUDE "input.h"
 INCLUDE "error.h"
 
@@ -90,6 +91,14 @@ RESET {
 	/* clear input buffer */
 	basepf.lleft = basepf.nleft = 0;
 	popallfiles();
+}
+
+FORKRESET {
+	popallfiles();
+	if (parsefile->fd > 0) {
+		close(parsefile->fd);
+		parsefile->fd = 0;
+	}
 }
 #endif
 
@@ -494,21 +503,4 @@ void
 popallfiles(void)
 {
 	unwindfiles(&basepf);
-}
-
-
-
-/*
- * Close the file(s) that the shell is reading commands from.  Called
- * after a fork is done.
- */
-
-void
-closescript(void)
-{
-	popallfiles();
-	if (parsefile->fd > 0) {
-		close(parsefile->fd);
-		parsefile->fd = 0;
-	}
 }

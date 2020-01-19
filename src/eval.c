@@ -41,6 +41,7 @@
  * Evaluate a command.
  */
 
+#include "init.h"
 #include "main.h"
 #include "shell.h"
 #include "nodes.h"
@@ -483,17 +484,18 @@ evalsubshell(union node *n, int flags)
 		lineno -= funcline - 1;
 
 	expredir(n->nredir.redirect);
-	if (!backgnd && flags & EV_EXIT && !have_traps())
-		goto nofork;
 	INTOFF;
+	if (!backgnd && flags & EV_EXIT && !have_traps()) {
+		forkreset();
+		goto nofork;
+	}
 	jp = makejob(n, 1);
 	if (forkshell(jp, n, backgnd) == 0) {
-		INTON;
 		flags |= EV_EXIT;
 		if (backgnd)
 			flags &=~ EV_TESTED;
 nofork:
-		reset_handler();
+		INTON;
 		redirect(n->nredir.redirect, 0);
 		evaltreenr(n->nredir.n, flags);
 		/* never returns */
@@ -576,7 +578,6 @@ evalpipe(union node *n, int flags)
 			}
 		}
 		if (forkshell(jp, lp->n, n->npipe.backgnd) == 0) {
-			reset_handler();
 			INTON;
 			if (pip[1] >= 0) {
 				close(pip[0]);
@@ -633,7 +634,6 @@ evalbackcmd(union node *n, struct backcmd *result)
 		sh_error("Pipe call failed");
 	jp = makejob(n, 1);
 	if (forkshell(jp, n, FORK_NOJOB) == 0) {
-		reset_handler();
 		FORCEINTON;
 		close(pip[0]);
 		if (pip[1] != 1) {

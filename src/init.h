@@ -36,4 +36,5 @@
 
 void init(void);
 void exitreset(void);
+void forkreset(void);
 void reset(void);

@@ -55,6 +55,7 @@
 #endif
 #include "exec.h"
 #include "eval.h"
+#include "init.h"
 #include "redir.h"
 #include "show.h"
 #include "main.h"
@@ -857,8 +858,7 @@ static void forkchild(struct job *jp, union node *n, int mode)
 	if (!lvforked) {
 		shlvl++;
 
-		closescript();
-		clear_traps();
+		forkreset();
 
 #if JOBS
 		/* do job control only in root shell */

@@ -71,7 +71,7 @@ int *dash_errno;
 short profile_buf[16384];
 extern int etext();
 #endif
-static struct jmploc main_handler;
+MKINIT struct jmploc main_handler;
 
 STATIC void read_profile(const char *);
 STATIC char *find_dot_file(char *);
@@ -354,7 +354,10 @@ exitcmd(int argc, char **argv)
 	/* NOTREACHED */
 }
 
-void reset_handler(void)
-{
+#ifdef mkinit
+INCLUDE "error.h"
+
+FORKRESET {
 	handler = &main_handler;
 }
+#endif

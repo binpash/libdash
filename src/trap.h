@@ -42,7 +42,6 @@ extern volatile sig_atomic_t pending_sig;
 extern int gotsigchld;
 
 int trapcmd(int, char **);
-void clear_traps(void);
 void setsignal(int);
 void ignoresig(int);
 void onsig(int);
