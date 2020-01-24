@@ -31,11 +31,9 @@ let dash_init : unit -> unit = foreign "init" (void @-> returning void)
 let initialize_dash_errno : unit -> unit = 
   foreign "initialize_dash_errno" (void @-> returning void)
 
-let root_stackmark = ref None
 let initialize () =
   initialize_dash_errno ();
-  dash_init ();
-  root_stackmark := Some (init_stack ())
+  dash_init ()
 
 let popfile : unit -> unit =
   foreign "popfile" (void @-> returning void)
@@ -257,15 +255,7 @@ let parse_next ?interactive:(i=false) () =
   if eqptr n neof
   then Done
   else if eqptr n nerr
-  then
-    begin
-      begin
-        match !root_stackmark with
-        | None -> failwith "!!! missing root stackmark"
-        | Some smark -> pop_stack smark
-      end;
-      Error
-    end
+  then Error
   else if nullptr n
   then Null (* comment or blank line or error ... *)
   else Parsed n
