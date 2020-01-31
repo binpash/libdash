@@ -88,7 +88,11 @@ open Foreign
 open Dash
 
 let skip = Command (-1,[],[],[])
-       
+
+let special_chars : char list = explode "|&;<>()$`\\\"'"
+
+let needs_escaping c = List.mem c special_chars
+
 let rec of_node (n : node union ptr) : t =
   if nullptr n
   then skip
@@ -393,7 +397,7 @@ and string_of_arg_char = function
   | E '!' -> "\\!"
   | E '&' -> "\\&"
   | E '|' -> "\\|" 
-  | E ';' -> "\\;" 
+  | E ';' -> "\\;"
   | C c -> String.make 1 c
   | E c -> Char.escaped c
   | T None -> "~"
