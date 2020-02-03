@@ -15,9 +15,8 @@ RUN opam switch 4.07
 RUN opam install ocamlfind ocamlbuild
 
 # set up FFI for libdash; num library for lem; extunix for shell syscalls
-RUN opam pin add ctypes 0.11.5
-RUN opam install ctypes-foreign
-RUN opam install extunix
+RUN opam pin add -n ctypes 0.11.5
+RUN opam install ctypes-foreign ctypes
 
 WORKDIR /home/opam
 
@@ -26,14 +25,16 @@ WORKDIR /home/opam
 ADD --chown=opam:opam . libdash
 
 # build libdash, expose shared object
-RUN cd libdash; ./autogen.sh && ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu
-RUN cd libdash; make
-RUN cd libdash; sudo make install
+#RUN cd libdash; ./autogen.sh && ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu
+#RUN cd libdash; make
+#RUN cd libdash; sudo make install
 # build ocaml bindings
-RUN cd libdash/ocaml; opam config exec -- make && opam config exec -- make install
+#RUN cd libdash/ocaml; opam config exec -- make && opam config exec -- make install
 
 # system test
-RUN cd libdash/test; opam config exec -- make && opam config exec make test
+#RUN cd libdash/test; opam config exec -- make && opam config exec make test
+
+RUN (cd libdash; opam install .)
 
 ENTRYPOINT [ "opam", "config", "exec", "--" ]
 CMD [ "bash" ]
