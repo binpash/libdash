@@ -20,9 +20,9 @@ build: [
   ["./configure" "--prefix=%{prefix}%" "--libdir=%{stublibs}%"]
   [make]
   [make "install"]
+  [make "-C" "ocaml"]
 ]
 install: [
-  [make "-C" "ocaml"]
   [make "-C" "ocaml" "install"]
 ]
 remove: [
