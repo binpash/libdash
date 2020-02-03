@@ -1,5 +1,5 @@
 # start with a reasonable image. Debian 9 stretch is what's on the POSIX testing VM
-FROM ocaml/opam2:debian-9
+FROM ocaml/opam2:debian-stable
 
 # silence apt
 # TODO this still isn't silencing it :(
@@ -8,7 +8,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 # system support for libdash; libgmp for zarith for lem
 RUN sudo apt-get install -y autoconf autotools-dev libtool pkg-config libffi-dev
 
-# because extunix needs camlp4, which isn't ready yet :( 2019-06-24
+RUN opam update
+
 RUN opam switch 4.07
 
 # make sure we have ocamlfind and ocamlbuild
@@ -34,7 +35,7 @@ ADD --chown=opam:opam . libdash
 # system test
 #RUN cd libdash/test; opam config exec -- make && opam config exec make test
 
-RUN (cd libdash; opam install .)
+RUN (cd libdash; opam exec -- opam install .)
 
-ENTRYPOINT [ "opam", "config", "exec", "--" ]
+ENTRYPOINT [ "opam", "exec", "--" ]
 CMD [ "bash" ]
