@@ -17,6 +17,7 @@ Dockerfile.test
 Dockerfile.web
 .git
 .gitmodules
+.dockerignore
 **/.gitignore
 **/*~
 **/.#*
@@ -34,6 +35,7 @@ Dockerfile.web
 ################################################################################
 # libdash ignores
 
+libtool
 # geneated by libtool
 ltmain.sh
 

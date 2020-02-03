@@ -35,7 +35,7 @@ ADD --chown=opam:opam . libdash
 # system test
 #RUN cd libdash/test; opam config exec -- make && opam config exec make test
 
-RUN (cd libdash; opam exec -- opam install .)
+RUN (cd libdash; eval $(opam env); opam install .)
 
 ENTRYPOINT [ "opam", "exec", "--" ]
 CMD [ "bash" ]
