@@ -2,9 +2,12 @@
 
 all : dash.cmxa dash.cma
 
-install : all
+install : all META
 	if ocamlfind query libdash; then ocamlfind remove libdash; fi
 	ocamlfind install libdash META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx
+
+META : mk_meta.sh
+	./mk_meta.sh
 
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml
 	ocamlfind ocamlmklib -g -package ctypes,ctypes.foreign $^ -o dash
