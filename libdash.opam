@@ -17,7 +17,7 @@ depends: [
 ]
 build: [
   ["./autogen.sh"]
-  ["./configure" "--prefix=%{prefix}%" "--libdir=%{_:lib}%"]
+  ["./configure" "--prefix=%{prefix}%" "--libdir=%{stublibs}%"]
   [make]
   [make "install"]
   [make "-C" "ocaml"]
