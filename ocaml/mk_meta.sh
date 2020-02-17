@@ -6,5 +6,6 @@ requires = "ctypes,ctypes.foreign"
 version = "0.1"
 archive(native) = "dash.cmxa"
 archive(byte) = "dash.cma"
-inkopts="-ccopt -L$(ocamlfind query libdash) -cclib -Wl,-rpath=$(ocamlfind query libdash) -cclib -ldash"
+linkopts(byte) ="-ccopt -L$(opam var lib)/libdash -cclib -ldash -dllpath $(opam var lib)/libdash"
 EOF
+
