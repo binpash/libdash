@@ -3,7 +3,7 @@
 all : dash.cmxa dash.cma
 
 install : all META
-	if ocamlfind query libdash; then ocamlfind remove libdash; fi
+#	if ocamlfind query libdash; then ocamlfind remove libdash; fi
 	ocamlfind install libdash META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx
 
 META : mk_meta.sh

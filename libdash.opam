@@ -19,10 +19,10 @@ build: [
   ["./autogen.sh"]
   ["./configure" "--prefix=%{prefix}%" "--libdir=%{_:lib}%"]
   [make]
-  [make "install"]
   [make "-C" "ocaml"]
 ]
 install: [
+  [make "install"]
   [make "-C" "ocaml" "install"]
   [make "-C" "test" "test"] {with-test}
 ]
