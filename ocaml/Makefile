@@ -10,7 +10,7 @@ META : mk_meta.sh
 	./mk_meta.sh
 
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml
-	ocamlfind ocamlmklib -g -package ctypes,ctypes.foreign -dllpath `opam var lib`/libdash $^ -o dash
+	ocamlfind ocamlmklib -g -package str,ctypes,ctypes.foreign -dllpath `opam var lib`/libdash $^ -o dash
 
 clean :
 	rm -f *.o *.cmo *.cmi *.cmx dash.a dash.cma dash.cmxa
