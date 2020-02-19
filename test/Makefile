@@ -14,10 +14,10 @@ test : test.native test.byte $(wildcard tests/*)
 
 
 test.native : test.ml
-	ocamlfind ocamlopt -g -package libdash -linkpkg $^ -o test.native
+	ocamlfind ocamlopt -g -package str,libdash -linkpkg $^ -o test.native
 
 test.byte : test.ml 
-	ocamlfind ocamlcp -p a -package libdash -linkpkg $^ -o test.byte
+	ocamlfind ocamlcp -p a -package str,libdash -linkpkg $^ -o test.byte
 
 clean :
 	rm -f *.o *.cmo *.cmi *.cmx test.native test.byte test.err
