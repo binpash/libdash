@@ -504,8 +504,8 @@ void mklocal(char *name, int flags)
  * Interrupts must be off.
  */
 
-void
-poplocalvars(int keep)
+static void
+poplocalvars(void)
 {
 	struct localvar_list *ll;
 	struct localvar *lvp, *next;
@@ -522,23 +522,7 @@ poplocalvars(int keep)
 		next = lvp->next;
 		vp = lvp->vp;
 		TRACE(("poplocalvar %s\n", vp ? vp->text : "-"));
-		if (keep) {
-			int bits = VSTRFIXED;
-
-			if (lvp->flags != VUNSET) {
-				if (vp->text == lvp->text)
-					bits |= VTEXTFIXED;
-				else if (!(lvp->flags & (VTEXTFIXED|VSTACK)))
-					ckfree(lvp->text);
-			}
-
-			vp->flags &= ~bits;
-			vp->flags |= (lvp->flags & bits);
-
-			if ((vp->flags &
-			     (VEXPORT|VREADONLY|VSTRFIXED|VUNSET)) == VUNSET)
-				unsetvar(vp->text);
-		} else if (vp == NULL) {	/* $- saved */
+		if (vp == NULL) {	/* $- saved */
 			memcpy(optlist, lvp->text, sizeof(optlist));
 			ckfree(lvp->text);
 			optschanged();
@@ -586,7 +570,7 @@ out:
 void unwindlocalvars(struct localvar_list *stop)
 {
 	while (localvar_stack != stop)
-		poplocalvars(0);
+		poplocalvars();
 }
 
 
