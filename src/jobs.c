@@ -78,7 +78,7 @@
 #define CUR_STOPPED 0
 
 /* mode flags for dowait */
-#define DOWAIT_NORMAL 0
+#define DOWAIT_NONBLOCK 0
 #define DOWAIT_BLOCK 1
 #define DOWAIT_WAITCMD 2
 
@@ -558,7 +558,7 @@ showjobs(struct output *out, int mode)
 	TRACE(("showjobs(%x) called\n", mode));
 
 	/* If not even one one job changed, there is nothing to do */
-	dowait(DOWAIT_NORMAL, NULL);
+	dowait(DOWAIT_NONBLOCK, NULL);
 
 	for (jp = curjob; jp; jp = jp->prev_job) {
 		if (!(mode & SHOW_CHANGED) || jp->changed)
@@ -1013,7 +1013,7 @@ waitforjob(struct job *jp)
 	int st;
 
 	TRACE(("waitforjob(%%%d) called\n", jp ? jobno(jp) : 0));
-	dowait(jp ? DOWAIT_BLOCK : DOWAIT_NORMAL, jp);
+	dowait(jp ? DOWAIT_BLOCK : DOWAIT_NONBLOCK, jp);
 	if (!jp)
 		return exitstatus;
 
@@ -1123,7 +1123,7 @@ out:
 
 static int dowait(int block, struct job *jp)
 {
-	int pid = block == DOWAIT_NORMAL ? gotsigchld : 1;
+	int pid = block == DOWAIT_NONBLOCK ? gotsigchld : 1;
 
 	while (jp ? jp->state == JOBRUNNING : pid > 0) {
 		if (!jp)
