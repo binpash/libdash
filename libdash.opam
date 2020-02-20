@@ -27,9 +27,7 @@ build: [
   [make]
   [make "install"] # into _build
   [make "-C" "ocaml" "all"]
-  ["./mk_dot_install.sh"] # PICK UP HERE: don't leave it to OPAM to install these :(
+  ["./mk_dot_install.sh"]
+  [make "-C" "ocaml" "test"] {with-test}
 ]
-#run-test: [
-#  [make "-C" "test" "test"]
-#]
 dev-repo: "git+https:///github.com/mgree/libdash"

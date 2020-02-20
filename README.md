@@ -14,27 +14,13 @@ You should be able to simply run `docker build -t libdash .` to get a runnable e
 
 ## How to build it locally
 
-Broadly: crib from the `Dockerfile`. More concretely, in the root directory run:
-
-```
-./autogen.sh && ./configure && make && sudo make install
-```
-
-This should construct an executable `src/dash` and a static library `src/libdash.a`. They will need to be installed globally for things to work well.
-
-Then run:
-
-```
-cd ocaml; make && make install
-```
-
-This will build the OCaml library and install it in your OPAM repository. There are tests in another directory; they will only build when libdash is actually installed.
+Install the OPAM file: `opam pin add .` or `opam install .`. This will build the OCaml library and install it in your OPAM repository. There are tests in another directory; they will only build when libdash is actually installed.
 
 ```
 cd test; make test
 ```
 
-The tests use `ocaml/round_trip.sh` to ensure that every tester file in `ocaml/tests` round-trips correctly through parsing and pretty printing.
+The tests use `test/round_trip.sh` to ensure that every tester file in `test/tests` round-trips correctly through parsing and pretty printing. The OPAM package can be installed with the `-t` flag to run the tests internally; see `ocaml/Makefile`'s testing targets.
 
 # How to use the parser
 
