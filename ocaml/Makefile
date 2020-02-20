@@ -16,10 +16,12 @@ dash.cmxa : dash.mli dash.ml ast.mli ast.ml
 
 test : test.native test.byte $(wildcard ../test/tests/*)
 	@echo "TESTING test.native"
+	@echo test.native can run | ./test.native
 	@for f in ../test/tests/*; do \
 		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.native $$f 2>test.err; \
 	done
 	@echo "TESTING test.byte"
+	@echo test.byte can run | ./test.native
 	@for f in ../test/tests/*; do \
 		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.byte $$f 2>test.err; \
 	done
