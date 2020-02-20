@@ -5,7 +5,6 @@ BUILD=$(abspath ../_build/lib)
 all : dash.cmxa dash.cma META
 
 install : all
-#	if ocamlfind query libdash; then ocamlfind remove libdash; fi
 	ocamlfind install libdash META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx
 
 META : mk_meta.sh
@@ -16,12 +15,10 @@ dash.cmxa : dash.mli dash.ml ast.mli ast.ml
 
 test : test.native test.byte $(wildcard ../test/tests/*)
 	@echo "TESTING test.native"
-	@echo test.native can run | ./test.native
 	@for f in ../test/tests/*; do \
 		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.native $$f 2>test.err; \
 	done
 	@echo "TESTING test.byte"
-	@echo test.byte can run | ./test.byte
 	@for f in ../test/tests/*; do \
 		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.byte $$f 2>test.err; \
 	done
