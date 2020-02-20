@@ -21,16 +21,16 @@ test : test.native test.byte $(wildcard ../test/tests/*)
 		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.native $$f 2>test.err; \
 	done
 	@echo "TESTING test.byte"
-	@echo test.byte can run | ./test.native
+	@echo test.byte can run | ./test.byte
 	@for f in ../test/tests/*; do \
 		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.byte $$f 2>test.err; \
 	done
 
 test.native : test.ml dash.cmxa
-	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlopt -g -package str,ctypes,ctypes.foreign -linkpkg -ccopt -L$(BUILD) -ccopt -Wl,-rpath -ccopt -Wl,$(BUILD) dash.cmxa test.ml -o $@
+	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlopt -g -package str,ctypes,ctypes.foreign -linkpkg -ccopt -L$(BUILD) -ccopt -Wl,-rpath -ccopt -Wl,$(BUILD) -cclib -ldash dash.cmxa test.ml -o $@
 
 test.byte : test.ml dash.cmxa
-	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlc -g -package str,ctypes,ctypes.foreign -linkpkg -I $(BUILD) -ccopt -L$(BUILD) -dllpath $(BUILD) dash.cma test.ml -o $@
+	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlc -g -package str,ctypes,ctypes.foreign -linkpkg -I $(BUILD) -ccopt -L$(BUILD) -dllpath $(BUILD) -cclib -ldash dash.cma test.ml -o $@
 
 test.ml : ../test/test.ml
 	cp $< $@
