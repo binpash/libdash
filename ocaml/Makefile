@@ -1,8 +1,8 @@
 .PHONY : all install clean
 
-all : dash.cmxa dash.cma
+all : dash.cmxa dash.cma META
 
-install : all META
+install : all
 #	if ocamlfind query libdash; then ocamlfind remove libdash; fi
 	ocamlfind install libdash META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx
 
