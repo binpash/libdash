@@ -13,3 +13,5 @@ trylink dlldash.so.0.0.0 dlldash.so.0
 
 trylink libdash.so.0.0.0 libdash.so 
 trylink libdash.so.0.0.0 libdash.so.0
+
+ls -l
