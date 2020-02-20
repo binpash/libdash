@@ -1,3 +1,5 @@
+BUILD=$(abspath ../_build/lib)
+
 .PHONY : all install clean
 
 all : dash.cmxa dash.cma META
@@ -15,20 +17,18 @@ dash.cmxa : dash.mli dash.ml ast.mli ast.ml
 test : test.native test.byte $(wildcard ../test/tests/*)
 	@echo "TESTING test.native"
 	@for f in ../test/tests/*; do \
-		../test/round_trip.sh ./test.native $$f 2>test.err; \
+		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.native $$f 2>test.err; \
 	done
 	@echo "TESTING test.byte"
 	@for f in ../test/tests/*; do \
-		../test/round_trip.sh ./test.byte $$f 2>test.err; \
+		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.byte $$f 2>test.err; \
 	done
 
-BUILD=$(abspath ../_build/lib)
-
 test.native : test.ml dash.cmxa
-	ocamlfind ocamlopt -g -package str,ctypes,ctypes.foreign -linkpkg -ccopt -L$(BUILD) -ccopt -Wl,-rpath -ccopt -Wl,$(BUILD) dash.cmxa test.ml -o $@
+	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlopt -g -package str,ctypes,ctypes.foreign -linkpkg -ccopt -L$(BUILD) -ccopt -Wl,-rpath -ccopt -Wl,$(BUILD) dash.cmxa test.ml -o $@
 
 test.byte : test.ml dash.cmxa
-	ocamlfind ocamlc -g -package str,ctypes,ctypes.foreign -linkpkg -I $(BUILD) -ccopt -L$(BUILD) -dllpath $(BUILD) dash.cma test.ml -o $@
+	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlc -g -package str,ctypes,ctypes.foreign -linkpkg -I $(BUILD) -ccopt -L$(BUILD) -dllpath $(BUILD) dash.cma test.ml -o $@
 
 test.ml : ../test/test.ml
 	cp $< $@
