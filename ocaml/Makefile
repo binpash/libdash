@@ -25,7 +25,7 @@ test : test.native test.byte $(wildcard ../test/tests/*)
 BUILD=$(abspath ../_build/lib)
 
 test.native : test.ml dash.cmxa
-	ocamlfind ocamlopt -g -package str,ctypes,ctypes.foreign -linkpkg -ccopt -L$(BUILD) -ccopt -Wl,-rpath=$(BUILD) dash.cmxa test.ml -o $@
+	ocamlfind ocamlopt -g -package str,ctypes,ctypes.foreign -linkpkg -ccopt -L$(BUILD) -ccopt -Wl,-rpath -ccopt -Wl,$(BUILD) dash.cmxa test.ml -o $@
 
 test.byte : test.ml dash.cmxa
 	ocamlfind ocamlc -g -package str,ctypes,ctypes.foreign -linkpkg -I $(BUILD) -ccopt -L$(BUILD) -dllpath $(BUILD) dash.cma test.ml -o $@
