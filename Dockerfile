@@ -32,7 +32,7 @@ ADD --chown=opam:opam . libdash
 # build ocaml bindings
 #RUN cd libdash/ocaml; opam config exec -- make && opam config exec -- make install
 
-RUN (cd libdash; eval $(opam env); opam install .)
+RUN (cd libdash; eval $(opam env); opam install -v -t .)
 
 # system test
 RUN cd libdash/test; opam config exec -- make && opam config exec make test

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 cat >META <<EOF
 description = "bindings to the dash shell as a library"
 requires = "ctypes,ctypes.foreign"
