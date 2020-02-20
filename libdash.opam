@@ -31,3 +31,7 @@ build: [
   [make "-C" "ocaml" "test"] {with-test}
 ]
 dev-repo: "git+https:///github.com/mgree/libdash"
+url {
+  src: "https://github.com/mgree/libdash/archive/0.2.2.tar.gz"
+  checksum: "md5=ef65c591a6ed23108795f093172fbc8a"
+}
