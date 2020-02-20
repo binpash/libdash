@@ -17,7 +17,7 @@ test.native : test.ml
 	ocamlfind ocamlopt -g -package str,libdash -linkpkg $^ -o test.native
 
 test.byte : test.ml 
-	ocamlfind ocamlcp -p a -package str,libdash -linkpkg $^ -o test.byte
+	ocamlfind ocamlc -g -package str,libdash -linkpkg $^ -o test.byte
 
 clean :
 	rm -f *.o *.cmo *.cmi *.cmx test.native test.byte test.err
