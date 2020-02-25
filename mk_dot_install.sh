@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-set -ex
+set -e
 
 libdash_files=$(ls _build/lib)
 bindings_files="META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx"
@@ -8,12 +8,15 @@ bindings_files="META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.c
 files=
 for f in ${libdash_files}
 do
-    files="${files} _build/lib/${f}"
+    files="${files} \"_build/lib/${f}\""
 done
 
 for f in ${bindings_files}
 do
-    files="${files} ocaml/${f}"
+    files="${files} \"ocaml/${f}\""
 done
 
-ocamlfind install libdash -nodll $files
+cat >libdash.install <<EOF
+lib: [${files} ]
+EOF
+
