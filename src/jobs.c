@@ -1123,15 +1123,28 @@ out:
 
 static int dowait(int block, struct job *jp)
 {
-	int pid = block == DOWAIT_NONBLOCK ? gotsigchld : 1;
+	int gotchld = *(volatile int *)&gotsigchld;
+	int rpid;
+	int pid;
 
-	while (jp ? jp->state == JOBRUNNING : pid > 0) {
-		if (!jp)
-			gotsigchld = 0;
+	if (jp && jp->state != JOBRUNNING)
+		block = DOWAIT_NONBLOCK;
+
+	if (block == DOWAIT_NONBLOCK && !gotchld)
+		return 1;
+
+	rpid = 1;
+
+	do {
+		gotsigchld = 0;
 		pid = waitone(block, jp);
-	}
+		rpid &= !!pid;
 
-	return pid;
+		if (!pid || (jp && jp->state != JOBRUNNING))
+			block = DOWAIT_NONBLOCK;
+	} while (pid >= 0);
+
+	return rpid;
 }
 
 /*
@@ -1163,7 +1176,10 @@ waitproc(int block, int *status)
 #endif
 
 	do {
-		err = wait3(status, flags, NULL);
+		do
+			err = wait3(status, flags, NULL);
+		while (err < 0 && errno == EINTR);
+
 		if (err || (err = -!block))
 			break;
 
@@ -1173,8 +1189,6 @@ waitproc(int block, int *status)
 			sigsuspend(&oldmask);
 
 		sigclearmask();
-
-		err = 0;
 	} while (gotsigchld);
 
 	return err;
