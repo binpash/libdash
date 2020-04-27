@@ -115,7 +115,6 @@ STATIC union node *simplecmd(void);
 STATIC union node *makename(void);
 STATIC void parsefname(void);
 STATIC void parseheredoc(void);
-STATIC int peektoken(void);
 STATIC int readtoken(void);
 STATIC int xxreadtoken(void);
 STATIC int pgetc_eatbnl();
@@ -161,21 +160,23 @@ parsecmd(int interact)
 STATIC union node *
 list(int nlflag)
 {
+	int chknl = nlflag & 1 ? 0 : CHKNL;
 	union node *n1, *n2, *n3;
 	int tok;
 
 	n1 = NULL;
 	for (;;) {
-		switch (readtoken()) {
+		checkkwd = chknl | CHKKWD | CHKALIAS;
+		tok = readtoken();
+		switch (tok) {
 		case TNL:
-			if (!(nlflag & 1))
-				break;
 			parseheredoc();
 			return n1;
 
 		case TEOF:
-			if (!n1 && (nlflag & 1))
+			if (!n1 && !chknl)
 				n1 = NEOF;
+out_eof:
 			parseheredoc();
 			tokpushback++;
 			lasttoken = TEOF;
@@ -183,8 +184,7 @@ list(int nlflag)
 		}
 
 		tokpushback++;
-		checkkwd = CHKNL | CHKKWD | CHKALIAS;
-		if (nlflag == 2 && tokendlist[peektoken()])
+		if (nlflag == 2 && tokendlist[tok])
 			return n1;
 		nlflag |= 2;
 
@@ -214,15 +214,16 @@ list(int nlflag)
 			n1 = n3;
 		}
 		switch (tok) {
-		case TNL:
 		case TEOF:
+			goto out_eof;
+		case TNL:
 			tokpushback++;
 			/* fall through */
 		case TBACKGND:
 		case TSEMI:
 			break;
 		default:
-			if ((nlflag & 1))
+			if (!chknl)
 				synexpect(-1);
 			tokpushback++;
 			return n1;
@@ -683,16 +684,6 @@ parseheredoc(void)
 		here->here->nhere.doc = n;
 		here = here->next;
 	}
-}
-
-STATIC int
-peektoken(void)
-{
-	int t;
-
-	t = readtoken();
-	tokpushback++;
-	return (t);
 }
 
 STATIC int
