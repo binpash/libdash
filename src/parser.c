@@ -704,9 +704,13 @@ top:
 	if (kwd & CHKNL) {
 		while (t == TNL) {
 			parseheredoc();
+			checkkwd = 0;
 			t = xxreadtoken();
 		}
 	}
+
+	kwd |= checkkwd;
+	checkkwd = 0;
 
 	if (t != TWORD || quoteflag) {
 		goto out;
@@ -725,7 +729,7 @@ top:
 		}
 	}
 
-	if (checkkwd & CHKALIAS) {
+	if (kwd & CHKALIAS) {
 		struct alias *ap;
 		if ((ap = lookupalias(wordtext, 1)) != NULL) {
 			if (*ap->val) {
@@ -735,7 +739,6 @@ top:
 		}
 	}
 out:
-	checkkwd = 0;
 #ifdef DEBUG
 	if (!alreadyseen)
 	    TRACE(("token %s %s\n", tokname[t], t == TWORD ? wordtext : ""));
