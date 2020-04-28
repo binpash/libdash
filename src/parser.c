@@ -1562,20 +1562,28 @@ setprompt(int which)
 const char *
 expandstr(const char *ps)
 {
+	struct parsefile *volatile file_stop;
+	struct jmploc *volatile savehandler;
+	const char *volatile result;
+	volatile int saveprompt;
+	struct jmploc jmploc;
 	union node n;
-	int saveprompt;
+	int err;
+
+	file_stop = parsefile;
 
 	/* XXX Fix (char *) cast. */
 	setinputstring((char *)ps);
 
 	saveprompt = doprompt;
 	doprompt = 0;
+	result = ps;
+	savehandler = handler;
+	if (unlikely(err = setjmp(jmploc.loc)))
+		goto out;
+	handler = &jmploc;
 
 	readtoken1(pgetc_eatbnl(), DQSYNTAX, FAKEEOFMARK, 0);
-
-	doprompt = saveprompt;
-
-	popfile();
 
 	n.narg.type = NARG;
 	n.narg.next = NULL;
@@ -1583,7 +1591,17 @@ expandstr(const char *ps)
 	n.narg.backquote = backquotelist;
 
 	expandarg(&n, NULL, EXP_QUOTED);
-	return stackblock();
+	result = stackblock();
+
+out:
+	handler = savehandler;
+	if (err && exception != EXERROR)
+		longjmp(handler->loc, 1);
+
+	doprompt = saveprompt;
+	unwindfiles(file_stop);
+
+	return result;
 }
 
 /*
