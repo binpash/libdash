@@ -118,7 +118,7 @@ STATIC char *evalvar(char *, int);
 static size_t strtodest(const char *p, int flags);
 static size_t memtodest(const char *p, size_t len, int flags);
 STATIC ssize_t varvalue(char *, int, int, int);
-STATIC void expandmeta(struct strlist *, int);
+STATIC void expandmeta(struct strlist *);
 #ifdef HAVE_GLOB
 STATIC void addglob(const glob_t *);
 #else
@@ -205,7 +205,7 @@ expandarg(union node *arg, struct arglist *arglist, int flag)
 		ifsbreakup(p, -1, &exparg);
 		*exparg.lastp = NULL;
 		exparg.lastp = &exparg.list;
-		expandmeta(exparg.list, flag);
+		expandmeta(exparg.list);
 	} else {
 		sp = (struct strlist *)stalloc(sizeof (struct strlist));
 		sp->text = p;
@@ -1155,9 +1155,7 @@ out:
 
 #ifdef HAVE_GLOB
 STATIC void
-expandmeta(str, flag)
-	struct strlist *str;
-	int flag;
+expandmeta(struct strlist *str)
 {
 	/* TODO - EXP_REDIR */
 
@@ -1221,7 +1219,7 @@ STATIC unsigned expdir_max;
 
 
 STATIC void
-expandmeta(struct strlist *str, int flag)
+expandmeta(struct strlist *str)
 {
 	static const char metachars[] = {
 		'*', '?', '[', 0
