@@ -67,10 +67,6 @@ MKINIT char basebuf[IBUFSIZ];	/* buffer for top level input file */
 struct parsefile *parsefile = &basepf;	/* current input file */
 int whichprompt;		/* 1 == PS1, 2 == PS2 */
 
-#ifndef SMALL
-EditLine *el;			/* cookie for editline package */
-#endif
-
 STATIC void pushfile(void);
 static int preadfd(void);
 static void setinputfd(int fd, int push);
