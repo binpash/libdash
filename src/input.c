@@ -393,7 +393,7 @@ setinputfile(const char *fname, int flags)
 	int fd;
 
 	INTOFF;
-	if ((fd = open(fname, O_RDONLY)) < 0) {
+	if ((fd = open64(fname, O_RDONLY)) < 0) {
 		if (flags & INPUT_NOFILE_OK)
 			goto out;
 		exitstatus = 127;

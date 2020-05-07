@@ -298,7 +298,7 @@ find_dot_file(char *basename)
 {
 	char *fullname;
 	const char *path = pathval();
-	struct stat statb;
+	struct stat64 statb;
 	int len;
 
 	/* don't try this for absolute or relative paths */
@@ -308,7 +308,7 @@ find_dot_file(char *basename)
 	while ((len = padvance(&path, basename)) >= 0) {
 		fullname = stackblock();
 		if ((!pathopt || *pathopt == 'f') &&
-		    !stat(fullname, &statb) && S_ISREG(statb.st_mode)) {
+		    !stat64(fullname, &statb) && S_ISREG(statb.st_mode)) {
 			/* This will be freed by the caller. */
 			return stalloc(len);
 		}
