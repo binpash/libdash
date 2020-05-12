@@ -11,7 +11,8 @@ env:
     
 install:
   - sudo apt-get install -y autoconf autotools-dev libtool pkg-config libffi-dev
-  - test -e .travis-opam.sh || wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
+  - test -e .travis-ocaml.sh || wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-ocaml.sh
+  - bash -ex .travis-ocaml.sh
 
 script:
   - opam pin -t add .
