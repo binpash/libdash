@@ -15,6 +15,7 @@ test : test.native test.byte $(wildcard tests/*)
 
 test.native : test.ml
 	ocamlfind ocamlopt -g -package str,libdash -linkpkg $^ -o test.native
+	ldd $@ || otool -L $@
 
 test.byte : test.ml 
 	ocamlfind ocamlc -g -package str,libdash -linkpkg $^ -o test.byte
