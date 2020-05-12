@@ -11,7 +11,7 @@ META : mk_meta.sh
 	./mk_meta.sh
 
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml
-	ocamlfind ocamlmklib -g -package str,ctypes,ctypes.foreign -dllpath `opam var lib`/libdash $^ -o dash
+	ocamlfind ocamlmklib -g -package str,ctypes,ctypes.foreign -L$(BUILD) -ldash $^ -o dash
 
 test : test.native test.byte $(wildcard ../test/tests/*)
 	@echo "TESTING test.native"
