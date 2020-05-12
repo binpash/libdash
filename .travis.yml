@@ -3,13 +3,17 @@ dist: xenial
 
 language: generic
 
-services:
-  - docker
-
-before_install:
-  - docker pull ocaml/opam2:debian-9
-  - docker build -t libdash .
+env:
+  - OCAML_VERSION=4.07
+  - OCAML_VERSION=4.09
+  - OCAML_VERSION=4.09 INSTALL_LOCAL=1
+  - OCAML_VERSION=4.11.0+trunk OCAML_BETA=enable
+    
+install:
+  - sudo apt-get install -y autoconf autotools-dev libtool pkg-config libffi-dev
+  - test -e .travis-opam.sh || wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
 
 script:
-  - docker run libdash make -C libdash/test test
+  - opam pin -t add .
+  - (cd test; opam exec -- make test)
 
