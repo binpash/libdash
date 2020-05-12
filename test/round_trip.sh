@@ -8,14 +8,14 @@ fi
 p=$1
 tgt=$2
 
-orig=$(${p} ${tgt})
+orig=$(${p} ${tgt} 2>&1)
 if [ "$?" -ne 0 ];
-then echo ${tgt} FAILED, couldn\'t run; exit 2
+then echo "${tgt} FAILED, couldn't run (output: ${orig})"; exit 2
 fi
 
-rt=$(${p} ${tgt} | ${p})
+rt=$(${p} ${tgt} | ${p} 2>&1)
 if [ "$?" -ne 0 ];
-then echo ${tgt} FAILED round trip, couldn\'t run; exit 3
+then echo "${tgt} FAILED round trip, couldn't run (output: $rt)"; exit 3
 fi
 
 if [ "${orig}" = "${rt}" ];
