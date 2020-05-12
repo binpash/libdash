@@ -34,7 +34,6 @@ build: [
 ]
 install: [
   ["opam-installer" "--prefix=%{prefix}%" "libdash.install"]
-  [make "-C" "test" "test"] {with-test}
 ]
 dev-repo: "git+https:///github.com/mgree/libdash"
 url {
