@@ -1,7 +1,4 @@
-os:
-  - linux
-  - osx
-
+os: linux
 dist: xenial
 
 language: generic
