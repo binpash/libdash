@@ -3,6 +3,10 @@ dist: xenial
 
 language: generic
 
+cache:
+  directories:
+    - $HOME/.opam
+
 env:
   - OCAML_VERSION=4.07
   - OCAML_VERSION=4.09
@@ -16,5 +20,5 @@ install:
 
 script:
   - opam pin -y -v -t add .
-  - (cd test; opam exec -- make test)
+  - (cd test; LD_LIBRARY_PATH=$(opam var libdash:lib) opam exec -- make test)
 
