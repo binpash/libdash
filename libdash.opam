@@ -14,7 +14,7 @@ depends: [
   "ctypes-foreign" {>= "0.4.0"}
   "opam-installer" {>= "2.0.0"}
   "conf-autoconf" {build}
-#  "conf-libtool" {build}
+  "conf-libtool" {build}
 ]
 build: [
   ["libtoolize"] {os != "macos"}
