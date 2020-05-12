@@ -1,5 +1,7 @@
 type linno = int
 
+exception ParseException of string
+           
 type t =
     Command of linno * assign list * args * redirection list
   | Pipe of bool * t list

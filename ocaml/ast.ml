@@ -1,5 +1,7 @@
 type linno = int
 
+exception ParseException of string
+           
 type t =
   | Command of linno * assign list * args * redirection list (* assign, args, redir *)
   | Pipe of bool * t list (* background?, commands *)
@@ -254,6 +256,7 @@ and parse_arg (s : char list) (bqlist : nodelist structure ptr) stack =
      in
      arg_char v s bqlist stack
   (* CTLENDVAR *)
+  | '\130'::_, _ -> raise (ParseException "bad substitution (missing variable name in ${}?")
   | '\131'::s,`CTLVar::stack' -> [],s,bqlist,stack'
   | '\131'::_,`CTLAri::_ -> failwith "Saw CTLENDVAR before CTLENDARI"
   | '\131'::_,`CTLQuo::_ -> failwith "Saw CTLENDVAR before CTLQUOTEMARK"
