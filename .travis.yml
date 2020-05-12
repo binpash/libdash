@@ -1,4 +1,8 @@
-sudo: required
+os:
+  - linux
+  - osx
+
+dist: xenial
 
 language: generic
 
