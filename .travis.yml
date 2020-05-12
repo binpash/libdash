@@ -15,6 +15,6 @@ install:
   - bash -ex .travis-ocaml.sh
 
 script:
-  - opam pin -y -t add .
+  - opam pin -y -v -t add .
   - (cd test; opam exec -- make test)
 
