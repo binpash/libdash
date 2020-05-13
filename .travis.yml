@@ -22,7 +22,8 @@ matrix:
     env: OCAML_VERSION=4.09
         
 install:
-  - sudo apt-get install -y autoconf autotools-dev libtool pkg-config libffi-dev
+  - which apt-get && sudo apt-get install -y autoconf autotools libtool pkg-config libffi-dev
+  - which brew && brew install -y  autoconf automake libtool pkg-config libffi
   - test -e .travis-ocaml.sh || wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-ocaml.sh
   - bash -ex .travis-ocaml.sh
 
