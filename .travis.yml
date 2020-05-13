@@ -44,6 +44,6 @@ install:
 script:
   - opam pin -y -v -t add .
   - ls -l $(opam var libdash:lib)
-  - LD_LIBRARY_PATH=$(opam var libdash:lib) opam exec -- make -C test test
+  - opam exec -- make -C test test
   - opam uninstall libdash # clear the cache
 
