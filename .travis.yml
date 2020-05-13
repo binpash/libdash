@@ -1,4 +1,3 @@
-os: linux
 dist: xenial
 
 language: generic
@@ -7,12 +6,21 @@ cache:
   directories:
     - $HOME/.opam
 
-env:
-  - OCAML_VERSION=4.07
-  - OCAML_VERSION=4.09
-  - OCAML_VERSION=4.09 INSTALL_LOCAL=1
-  - OCAML_VERSION=4.11.0+trunk OCAML_BETA=enable
-    
+matrix:
+  include:
+  - os: osx
+    osx_image: xcode11.3
+    env: OCAML_VERSION=4.09
+  - os: freebsd
+    env: OCAML_VERSION=4.09
+  - os: linux
+    env: OCAML_VERSION=4.09 INSTALL_LOCAL=1
+  - os: linux
+    env: OCAML_VERSION=4.11.0+trunk OCAML_BETA=enable
+  allow_failures:
+  - os: freebsd
+    env: OCAML_VERSION=4.09
+        
 install:
   - sudo apt-get install -y autoconf autotools-dev libtool pkg-config libffi-dev
   - test -e .travis-ocaml.sh || wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-ocaml.sh
