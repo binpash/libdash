@@ -3,7 +3,7 @@
 set -e
 
 LIB="$1"
-: ${LIB:=$(opam var libdash:lib)}
+: ${LIB:=$(opam var lib)/libdash}
 
 cat >META <<EOF
 description = "bindings to the dash shell as a library"
