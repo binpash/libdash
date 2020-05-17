@@ -1565,10 +1565,11 @@ setprompt(int which)
 const char *
 expandstr(const char *ps)
 {
-	struct parsefile *volatile file_stop;
+	struct parsefile *file_stop;
 	struct jmploc *volatile savehandler;
-	const char *volatile result;
-	volatile int saveprompt;
+	struct heredoc *saveheredoclist;
+	const char *result;
+	int saveprompt;
 	struct jmploc jmploc;
 	union node n;
 	int err;
@@ -1578,6 +1579,8 @@ expandstr(const char *ps)
 	/* XXX Fix (char *) cast. */
 	setinputstring((char *)ps);
 
+	saveheredoclist = heredoclist;
+	heredoclist = NULL;
 	saveprompt = doprompt;
 	doprompt = 0;
 	result = ps;
@@ -1603,6 +1606,7 @@ out:
 
 	doprompt = saveprompt;
 	unwindfiles(file_stop);
+	heredoclist = saveheredoclist;
 
 	return result;
 }
