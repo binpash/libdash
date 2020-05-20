@@ -557,7 +557,7 @@ showjobs(struct output *out, int mode)
 
 	TRACE(("showjobs(%x) called\n", mode));
 
-	/* If not even one one job changed, there is nothing to do */
+	/* If not even one job changed, there is nothing to do */
 	dowait(DOWAIT_NONBLOCK, NULL);
 
 	for (jp = curjob; jp; jp = jp->prev_job) {
