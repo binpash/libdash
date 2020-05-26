@@ -1393,7 +1393,7 @@ parsebackq: {
 				goto done;
 
 			case '\\':
-                                pc = pgetc_eatbnl();
+                                pc = pgetc();
                                 if (pc != '\\' && pc != '`' && pc != '$'
                                     && (!synstack->dblquote || pc != '"'))
                                         STPUTC('\\', pout);
