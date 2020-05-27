@@ -796,7 +796,6 @@ xxreadtoken(void)
 		c = pgetc_eatbnl();
 		switch (c) {
 		case ' ': case '\t':
-		case PEOA:
 			continue;
 		case '#':
 			while ((c = pgetc()) != '\n' && c != PEOF);
@@ -838,7 +837,7 @@ static int pgetc_eatbnl(void)
 	int c;
 
 	while ((c = pgetc()) == '\\') {
-		if (pgetc2() != '\n') {
+		if (pgetc() != '\n') {
 			pungetc();
 			break;
 		}
@@ -943,7 +942,7 @@ readtoken1(int firstc, char const *syntax, char *eofmark, int striptabs)
 				break;
 			/* backslash */
 			case CBACK:
-				c = pgetc2();
+				c = pgetc();
 				if (c == PEOF) {
 					USTPUTC(CTLESC, out);
 					USTPUTC('\\', out);
@@ -1048,14 +1047,10 @@ toggledq:
 				break;
 			case CEOF:
 				goto endword;		/* exit outer loop */
-			case CIGN:
-				break;
 			default:
 				if (synstack->varnest == 0)
 					goto endword;	/* exit outer loop */
-				if (c != PEOA) {
-					USTPUTC(c, out);
-				}
+				USTPUTC(c, out);
 			}
 			c = pgetc_top(synstack);
 		}
@@ -1103,13 +1098,9 @@ checkend: {
 		int markloc;
 		char *p;
 
-		if (c == PEOA) {
-			c = pgetc2();
-		}
 		if (striptabs) {
-			while (c == '\t') {
-				c = pgetc2();
-			}
+			while (c == '\t')
+				c = pgetc();
 		}
 
 		markloc = out - (char *)stackblock();
@@ -1117,7 +1108,7 @@ checkend: {
 			if (c != *p)
 				goto more_heredoc;
 
-			c = pgetc2();
+			c = pgetc();
 		}
 
 		if (c == '\n' || c == PEOF) {
@@ -1229,7 +1220,6 @@ parsesub: {
 	c = pgetc_eatbnl();
 	if (
 		(checkkwd & CHKEOFMARK) ||
-		c <= PEOA  ||
 		(c != '(' && c != '{' && !is_name(c) && !is_special(c))
 	) {
 		USTPUTC('$', out);
@@ -1397,13 +1387,9 @@ parsebackq: {
                                 if (pc != '\\' && pc != '`' && pc != '$'
                                     && (!synstack->dblquote || pc != '"'))
                                         STPUTC('\\', pout);
-				if (pc > PEOA) {
-					break;
-				}
-				/* fall through */
+				break;
 
 			case PEOF:
-			case PEOA:
 				synerror("EOF in backquote substitution");
 
 			case '\n':
