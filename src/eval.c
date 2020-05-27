@@ -78,6 +78,9 @@ int exitstatus;			/* exit status of last command */
 int back_exitstatus;		/* exit status of backquoted command */
 int savestatus = -1;		/* exit status of last command outside traps */
 
+/* Prevent PS4 nesting. */
+MKINIT int inps4;
+
 
 #if !defined(__alpha__) || (defined(__GNUC__) && __GNUC__ >= 3)
 STATIC
@@ -123,6 +126,7 @@ EXITRESET {
 	}
 	evalskip = 0;
 	loopnest = 0;
+	inps4 = 0;
 }
 #endif
 
@@ -855,12 +859,14 @@ bail:
 	}
 
 	/* Print the command if xflag is set. */
-	if (xflag) {
+	if (xflag && !inps4) {
 		struct output *out;
 		int sep;
 
 		out = &preverrout;
+		inps4 = 1;
 		outstr(expandstr(ps4val()), out);
+		inps4 = 0;
 		sep = 0;
 		sep = eprintlist(out, varlist.list, sep);
 		eprintlist(out, osp, sep);
