@@ -196,7 +196,7 @@ setjobctl(int on)
 		return;
 	if (on) {
 		int ofd;
-		ofd = fd = open64(_PATH_TTY, O_RDWR);
+		ofd = fd = sh_open(_PATH_TTY, O_RDWR, 1);
 		if (fd < 0) {
 			fd += 3;
 			while (!isatty(fd))
@@ -887,8 +887,7 @@ static void forkchild(struct job *jp, union node *n, int mode)
 		ignoresig(SIGQUIT);
 		if (jp->nprocs == 0) {
 			close(0);
-			if (open64(_PATH_DEVNULL, O_RDONLY) != 0)
-				sh_error("Can't open %s", _PATH_DEVNULL);
+			sh_open(_PATH_DEVNULL, O_RDONLY, 0);
 		}
 	}
 	if (!oldlvl && iflag) {

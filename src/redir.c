@@ -55,6 +55,7 @@
 #include "output.h"
 #include "memalloc.h"
 #include "error.h"
+#include "trap.h"
 
 
 #define EMPTY -2		/* marks an unused slot in redirtab */
@@ -180,56 +181,83 @@ redirect(union node *redir, int flags)
 }
 
 
+static int sh_open_fail(const char *, int, int) __attribute__((__noreturn__));
+static int sh_open_fail(const char *pathname, int flags, int e)
+{
+	const char *word;
+	int action;
+
+	word = "open";
+	action = E_OPEN;
+	if (flags & O_CREAT) {
+		word = "create";
+		action = E_CREAT;
+	}
+
+	sh_error("cannot %s %s: %s", word, pathname, errmsg(e, action));
+}
+
+
+int sh_open(const char *pathname, int flags, int mayfail)
+{
+	int fd;
+	int e;
+
+	do {
+		fd = open64(pathname, flags, 0666);
+		e = errno;
+	} while (fd < 0 && e == EINTR && !pending_sig);
+
+	if (mayfail || fd >= 0)
+		return fd;
+
+	sh_open_fail(pathname, flags, e);
+}
+
+
 STATIC int
 openredirect(union node *redir)
 {
 	struct stat64 sb;
 	char *fname;
+	int flags;
 	int f;
 
 	switch (redir->nfile.type) {
 	case NFROM:
-		fname = redir->nfile.expfname;
-		if ((f = open64(fname, O_RDONLY)) < 0)
-			goto eopen;
+		flags = O_RDONLY;
+do_open:
+		f = sh_open(redir->nfile.expfname, flags, 0);
 		break;
 	case NFROMTO:
-		fname = redir->nfile.expfname;
-		if ((f = open64(fname, O_RDWR|O_CREAT, 0666)) < 0)
-			goto ecreate;
-		break;
+		flags = O_RDWR|O_CREAT;
+		goto do_open;
 	case NTO:
 		/* Take care of noclobber mode. */
 		if (Cflag) {
 			fname = redir->nfile.expfname;
 			if (stat64(fname, &sb) < 0) {
-				if ((f = open64(fname, O_WRONLY|O_CREAT|O_EXCL, 0666)) < 0)
-					goto ecreate;
-			} else if (!S_ISREG(sb.st_mode)) {
-				if ((f = open64(fname, O_WRONLY, 0666)) < 0)
-					goto ecreate;
-				if (!fstat64(f, &sb) && S_ISREG(sb.st_mode)) {
-					close(f);
-					errno = EEXIST;
-					goto ecreate;
-				}
-			} else {
-				errno = EEXIST;
+				flags = O_WRONLY|O_CREAT|O_EXCL;
+				goto do_open;
+			}
+
+			if (S_ISREG(sb.st_mode))
+				goto ecreate;
+
+			f = sh_open(fname, O_WRONLY, 0);
+			if (!fstat64(f, &sb) && S_ISREG(sb.st_mode)) {
+				close(f);
 				goto ecreate;
 			}
 			break;
 		}
 		/* FALLTHROUGH */
 	case NCLOBBER:
-		fname = redir->nfile.expfname;
-		if ((f = open64(fname, O_WRONLY|O_CREAT|O_TRUNC, 0666)) < 0)
-			goto ecreate;
-		break;
+		flags = O_WRONLY|O_CREAT|O_TRUNC;
+		goto do_open;
 	case NAPPEND:
-		fname = redir->nfile.expfname;
-		if ((f = open64(fname, O_WRONLY|O_CREAT|O_APPEND, 0666)) < 0)
-			goto ecreate;
-		break;
+		flags = O_WRONLY|O_CREAT|O_APPEND;
+		goto do_open;
 	case NTOFD:
 	case NFROMFD:
 		f = redir->ndup.dupfd;
@@ -249,9 +277,7 @@ openredirect(union node *redir)
 
 	return f;
 ecreate:
-	sh_error("cannot create %s: %s", fname, errmsg(errno, E_CREAT));
-eopen:
-	sh_error("cannot open %s: %s", fname, errmsg(errno, E_OPEN));
+	sh_open_fail(fname, O_CREAT, EEXIST);
 }
 
 
