@@ -1,4 +1,4 @@
-AC_INIT([dash],[0.5.10.2])
+AC_INIT([dash],[0.5.11])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/main.c])
 
