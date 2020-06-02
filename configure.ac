@@ -151,6 +151,13 @@ AC_CHECK_FUNC(stat64,, [
 		  [64-bit operations are the same as 32-bit])
 ])
 
+AC_CHECK_FUNC(glob64,, [
+	AC_DEFINE(glob64_t, glob_t, [64-bit operations are the same as 32-bit])
+	AC_DEFINE(glob64, glob, [64-bit operations are the same as 32-bit])
+	AC_DEFINE(globfree64, globfree,
+		  [64-bit operations are the same as 32-bit])
+])
+
 dnl OS X apparently has stat64 but not open64.
 AC_CHECK_FUNC(open64,, [
 	AC_DEFINE(open64, open, [64-bit operations are the same as 32-bit])

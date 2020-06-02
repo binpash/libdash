@@ -120,7 +120,7 @@ static size_t memtodest(const char *p, size_t len, int flags);
 STATIC ssize_t varvalue(char *, int, int, int);
 STATIC void expandmeta(struct strlist *);
 #ifdef HAVE_GLOB
-STATIC void addglob(const glob_t *);
+static void addglob(const glob64_t *);
 #else
 STATIC void expmeta(char *, unsigned, unsigned);
 STATIC struct strlist *expsort(struct strlist *);
@@ -1154,6 +1154,20 @@ out:
  */
 
 #ifdef HAVE_GLOB
+#ifdef __GLIBC__
+void *opendir_interruptible(const char *pathname)
+{
+	if (int_pending()) {
+		suppressint = 0;
+		onint();
+	}
+
+	return opendir(pathname);
+}
+#else
+#define GLOB_ALTDIRFUNC 0
+#endif
+
 STATIC void
 expandmeta(struct strlist *str)
 {
@@ -1161,14 +1175,23 @@ expandmeta(struct strlist *str)
 
 	while (str) {
 		const char *p;
-		glob_t pglob;
+		glob64_t pglob;
 		int i;
 
 		if (fflag)
 			goto nometa;
+
+#ifdef __GLIBC__
+		pglob.gl_closedir = (void *)closedir;
+		pglob.gl_readdir = (void *)readdir64;
+		pglob.gl_opendir = opendir_interruptible;
+		pglob.gl_lstat = lstat64;
+		pglob.gl_stat = stat64;
+#endif
+
 		INTOFF;
 		p = preglob(str->text, RMESCAPE_ALLOC | RMESCAPE_HEAP);
-		i = glob(p, GLOB_NOMAGIC, 0, &pglob);
+		i = glob64(p, GLOB_ALTDIRFUNC | GLOB_NOMAGIC, 0, &pglob);
 		if (p != str->text)
 			ckfree(p);
 		switch (i) {
@@ -1177,12 +1200,12 @@ expandmeta(struct strlist *str)
 			    (GLOB_NOMAGIC | GLOB_NOCHECK))
 				goto nometa2;
 			addglob(&pglob);
-			globfree(&pglob);
+			globfree64(&pglob);
 			INTON;
 			break;
 		case GLOB_NOMATCH:
 nometa2:
-			globfree(&pglob);
+			globfree64(&pglob);
 			INTON;
 nometa:
 			*exparg.lastp = str;
@@ -1201,9 +1224,7 @@ nometa:
  * Add the result of glob(3) to the list.
  */
 
-STATIC void
-addglob(pglob)
-	const glob_t *pglob;
+static void addglob(const glob64_t *pglob)
 {
 	char **p = pglob->gl_pathv;
 
