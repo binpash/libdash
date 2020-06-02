@@ -76,7 +76,7 @@ static char gotsig[NSIG - 1];
 /* last pending signal */
 volatile sig_atomic_t pending_sig;
 /* received SIGCHLD */
-int gotsigchld;
+volatile sig_atomic_t gotsigchld;
 
 extern char *signal_names[];
 
