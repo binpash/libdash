@@ -39,7 +39,7 @@
 extern int trapcnt;
 extern char sigmode[];
 extern volatile sig_atomic_t pending_sig;
-extern int gotsigchld;
+extern volatile sig_atomic_t gotsigchld;
 
 int trapcmd(int, char **);
 void setsignal(int);

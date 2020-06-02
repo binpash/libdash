@@ -1135,7 +1135,6 @@ static int dowait(int block, struct job *jp)
 	rpid = 1;
 
 	do {
-		gotsigchld = 0;
 		pid = waitone(block, jp);
 		rpid &= !!pid;
 
@@ -1175,6 +1174,7 @@ waitproc(int block, int *status)
 #endif
 
 	do {
+		gotsigchld = 0;
 		do
 			err = wait3(status, flags, NULL);
 		while (err < 0 && errno == EINTR);
