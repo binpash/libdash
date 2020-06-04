@@ -213,6 +213,9 @@ evaltree(union node *n, int flags)
 
 	setstackmark(&smark);
 
+	if (nflag)
+		goto out;
+
 	if (n == NULL) {
 		TRACE(("evaltree(NULL) called\n"));
 		goto out;
