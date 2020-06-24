@@ -202,7 +202,7 @@ and
 formats, or the maximum number of characters to be printed
 from a string
 .Sm off
-.Pf ( Cm b No ,
+.Pf ( Cm b Ns \&,
 .Sm on
 .Cm B
 and
@@ -281,16 +281,16 @@ value is the 1\-, 2\-, or 3\-digit
 octal number
 .Ar num .
 .It Cm \e^ Ns Ar c
-Write the control character 
+Write the control character
 .Ar c .
 Generates characters `\e000' through `\e037`, and `\e177' (from `\e^?').
 .It Cm \eM\- Ns Ar c
-Write the character 
+Write the character
 .Ar c
 with the 8th bit set.
 Generates characters `\e241' through `\e376`.
 .It Cm \eM^ Ns Ar c
-Write the control character 
+Write the control character
 .Ar c
 with the 8th bit set.
 Generates characters `\e000' through `\e037`, and `\e177' (from `\eM^?').
@@ -330,7 +330,7 @@ exits 0 on success, 1 on failure.
 .Sh SEE ALSO
 .Xr echo 1 ,
 .Xr printf 3 ,
-.Xr printf 9
+.Xr printf 9 ,
 .Xr vis 3
 .Sh STANDARDS
 The
@@ -350,5 +350,6 @@ to floating-point and
 then back again, floating-point precision may be lost.
 .Pp
 Hexadecimal character constants are restricted to, and should be specified
-as, two character constants.  This is contrary to the ISO C standard but
+as, two character constants.
+This is contrary to the ISO C standard but
 does guarantee detection of the end of the constant.

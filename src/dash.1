@@ -33,8 +33,8 @@
 .\"	@(#)sh.1	8.6 (Berkeley) 5/4/95
 .\"
 .Dd January 19, 2003
-.Os
 .Dt DASH 1
+.Os
 .Sh NAME
 .Nm dash
 .Nd command interpreter (shell)
@@ -439,7 +439,7 @@ instead of
 then leading tabs in the here-doc-text are stripped.
 .Ss Search and Execution
 There are three types of commands: shell functions, builtin commands, and
-normal programs -- and the command is searched for (by name) in that order.
+normal programs \(en and the command is searched for (by name) in that order.
 They each are executed in a different way.
 .Pp
 When a shell function is executed, all of the shell positional parameters
@@ -578,11 +578,11 @@ the preceding AND-OR-list.
 .Pp
 Note that unlike some other shells, each process in the pipeline is a
 child of the invoking shell (unless it is a shell builtin, in which case
-it executes in the current shell -- but any effect it has on the
+it executes in the current shell \(en but any effect it has on the
 environment is wiped).
-.Ss Background Commands -- &
+.Ss Background Commands \(en &
 If a command is terminated by the control operator ampersand (&), the
-shell executes the command asynchronously -- that is, the shell does not
+shell executes the command asynchronously \(en that is, the shell does not
 wait for the command to finish before executing the next command.
 .Pp
 The format for running a command in background is:
@@ -592,7 +592,7 @@ The format for running a command in background is:
 If the shell is not interactive, the standard input of an asynchronous
 command is set to
 .Pa /dev/null .
-.Ss Lists -- Generally Speaking
+.Ss Lists \(en Generally Speaking
 A list is a sequence of zero or more commands separated by newlines,
 semicolons, or ampersands, and optionally terminated by one of these three
 characters.
@@ -615,7 +615,7 @@ of the first command is nonzero.
 and
 .Dq ||
 both have the same priority.
-.Ss Flow-Control Constructs -- if, while, for, case
+.Ss Flow-Control Constructs \(en if, while, for, case
 The syntax of the if command is
 .Bd -literal -offset indent
 if list
@@ -694,7 +694,7 @@ Builtin commands grouped into a (list) will not affect the current shell.
 The second form does not fork another shell so is slightly more efficient.
 Grouping commands together this way allows you to redirect
 their output as though they were one program:
-.Pp
+.\".Pp
 .Bd -literal -offset indent
 { printf \*q hello \*q ; printf \*q world\\n" ; } \*[Gt] greeting
 .Ed
@@ -1177,13 +1177,14 @@ mechanism was used or because the argument is a single dash.
 The
 .Fl P
 option causes the physical directory structure to be used, that is, all
-symbolic links are resolved to their respective values.  The
+symbolic links are resolved to their respective values.
+The
 .Fl L
 option turns off the effect of any preceding
 .Fl P
 options.
 .It Xo echo Op Fl n
-.Ar args... 
+.Ar args...
 .Xc
 Print the arguments on the standard output, separated by spaces.
 Unless the
@@ -1191,13 +1192,15 @@ Unless the
 option is present, a newline is output following the arguments.
 .Pp
 If any of the following sequences of characters is encountered during
-output, the sequence is not output.  Instead, the specified action is
+output, the sequence is not output.
+Instead, the specified action is
 performed:
 .Bl -tag -width indent
 .It Li \eb
 A backspace character is output.
 .It Li \ec
-Subsequent output is suppressed.  This is normally used at the end of the
+Subsequent output is suppressed.
+This is normally used at the end of the
 last argument to suppress the trailing newline that
 .Ic echo
 would otherwise output.
@@ -1417,7 +1420,7 @@ and
 and the option
 .Op c ,
 which requires an argument.
-.Pp
+.\".Pp
 .Bd -literal -offset indent
 while getopts abc: f
 do
@@ -1431,7 +1434,7 @@ shift `expr $OPTIND - 1`
 .Ed
 .Pp
 This code will accept any of the following as equivalent:
-.Pp
+.\".Pp
 .Bd -literal -offset indent
 cmd \-acarg file file
 cmd \-a \-c arg file file
@@ -1471,7 +1474,8 @@ will continue to print the old name for the directory.
 The
 .Fl P
 option causes the physical value of the current working directory to be shown,
-that is, all symbolic links are resolved to their respective values.  The
+that is, all symbolic links are resolved to their respective values.
+The
 .Fl L
 option turns off the effect of any preceding
 .Fl P
@@ -1522,7 +1526,7 @@ variables.
 With the
 .Fl p
 option specified the output will be formatted suitably for non-interactive use.
-.Pp
+.\".Pp
 .It Xo printf Ar format
 .Op Ar arguments  ...
 .Xc
@@ -1780,9 +1784,11 @@ If options are given, it sets the specified option
 flags, or clears them as described in the section called
 .Sx Argument List Processing .
 As a special case, if the option is -o or +o and no argument is
-supplied, the shell prints the settings of all its options.  If the
-option is -o, the settings are printed in a human-readable format; if
-the option is +o, the settings are printed in a format suitable for
+supplied, the shell prints the settings of all its options.
+If the option is -o,
+the settings are printed in a human-readable format;
+if the option is +o,
+the settings are printed in a format suitable for
 reinput to the shell to affect the same option settings.
 .Pp
 The third use of the set command is to set the values of the shell's
@@ -2058,7 +2064,8 @@ operator has higher precedence than the
 operator.
 .It times
 Print the accumulated user and system times for the shell and for processes
-run from the shell.  The return status is 0.
+run from the shell.
+The return status is 0.
 .It Xo trap
 .Op Ar action Ar signal ...
 .Xc
@@ -2179,7 +2186,7 @@ the current limit is displayed.
 Limits of an arbitrary process can be displayed or set using the
 .Xr sysctl 8
 utility.
-.Pp
+.\".Pp
 .It umask Op Ar mask
 Set the value of umask (see
 .Xr umask 2 )
@@ -2308,11 +2315,13 @@ children of the shell, and is used in the history editing modes.
 .It Ev HISTSIZE
 The number of lines in the history buffer for the shell.
 .It Ev PWD
-The logical value of the current working directory.  This is set by the
+The logical value of the current working directory.
+This is set by the
 .Ic cd
 command.
 .It Ev OLDPWD
-The previous logical value of the current working directory.  This is set by
+The previous logical value of the current working directory.
+This is set by
 the
 .Ic cd
 command.
@@ -2320,7 +2329,7 @@ command.
 The process ID of the parent process of the shell.
 .El
 .Sh FILES
-.Bl -item -width HOMEprofilexxxx
+.Bl -item
 .It
 .Pa $HOME/.profile
 .It
