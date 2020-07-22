@@ -145,10 +145,6 @@ AC_CHECK_FUNC(stat64,, [
 	AC_DEFINE(fstat64, fstat, [64-bit operations are the same as 32-bit])
 	AC_DEFINE(lstat64, lstat, [64-bit operations are the same as 32-bit])
 	AC_DEFINE(stat64, stat, [64-bit operations are the same as 32-bit])
-	AC_DEFINE(readdir64, readdir,
-		  [64-bit operations are the same as 32-bit])
-	AC_DEFINE(dirent64, dirent,
-		  [64-bit operations are the same as 32-bit])
 ])
 
 AC_CHECK_FUNC(glob64,, [
@@ -161,6 +157,10 @@ AC_CHECK_FUNC(glob64,, [
 dnl OS X apparently has stat64 but not open64.
 AC_CHECK_FUNC(open64,, [
 	AC_DEFINE(open64, open, [64-bit operations are the same as 32-bit])
+	AC_DEFINE(readdir64, readdir,
+		  [64-bit operations are the same as 32-bit])
+	AC_DEFINE(dirent64, dirent,
+		  [64-bit operations are the same as 32-bit])
 ])
 
 dnl Check if struct stat has st_mtim.
