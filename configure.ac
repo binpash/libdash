@@ -39,8 +39,7 @@ fi
 
 AC_ARG_ENABLE(fnmatch, AS_HELP_STRING(--disable-fnmatch, \
 				      [Do not use fnmatch(3) from libc]))
-AC_ARG_ENABLE(glob, AS_HELP_STRING(--disable-glob, \
-				   [Do not use glob(3) from libc]))
+AC_ARG_ENABLE(glob, AS_HELP_STRING(--enable-glob, [Use glob(3) from libc]))
 
 dnl Checks for libraries.
 
@@ -128,7 +127,7 @@ if test "$enable_fnmatch" != no; then
 	AC_CHECK_FUNCS(fnmatch, use_fnmatch=yes)
 fi
 
-if test "$use_fnmatch" = yes && test "$enable_glob" != no; then
+if test "$use_fnmatch" = yes && test "$enable_glob" = yes; then
 	AC_CHECK_FUNCS(glob)
 fi
 
