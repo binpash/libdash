@@ -87,6 +87,7 @@ INIT {
 RESET {
 	/* clear input buffer */
 	basepf.lleft = basepf.nleft = 0;
+	basepf.unget = 0;
 	popallfiles();
 }
 
