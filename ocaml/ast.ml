@@ -377,14 +377,23 @@ let show_unless expected actual =
   else string_of_int actual
 
 let background s = "{ " ^ s ^ " & }"
-                            
+
+let is_compound = function
+  | Command _ -> false
+  | _ -> true
+
+let is_bg = function
+  | Pipe (bg,_) -> bg
+  | Background _ -> true
+  | _ -> false
+                           
 let rec to_string = function
   | Command (_,assigns,cmds,redirs) ->
      separated string_of_assign assigns ^
      (if List.length assigns = 0 || List.length cmds = 0 then "" else " ") ^
      separated string_of_arg cmds ^ string_of_redirs redirs
   | Pipe (bg,ps) ->
-     let p = intercalate " | " (List.map to_string ps) in
+     let p = intercalate " | " (List.map inner ps) in
      if bg then background p else p
   | Redir (_,a,redirs) ->
      to_string a ^ string_of_redirs redirs
@@ -401,13 +410,13 @@ let rec to_string = function
         backgrounded?" so the braces resolve the issue. testing
         indicates that they're semantically equivalent.
       *)
-     background (to_string a ^ string_of_redirs redirs)
+     background (inner a ^ string_of_redirs redirs)
   | Subshell (_,a,redirs) ->
      parens (to_string a ^ string_of_redirs redirs)
-  | And (a1,a2) -> to_string  a1 ^ " && " ^ to_string a2
-  | Or (a1,a2) -> to_string a1 ^ " || " ^ to_string a2
-  | Not a -> "! " ^ braces (to_string a)
-  | Semi (a1,a2) -> to_string a1 ^ " ; " ^ to_string a2
+  | And (a1,a2) -> inner  a1 ^ " && " ^ inner a2
+  | Or (a1,a2) -> inner a1 ^ " || " ^ inner a2
+  | Not a -> "! " ^ braces (inner a)
+  | Semi (a1,a2) -> inner a1 ^ " ; " ^ to_string a2
   | If (c,t,e) -> string_of_if c t e
   | While (Not t,b) ->
      "until " ^ to_string t ^ "; do " ^ to_string b ^ "; done "
@@ -420,6 +429,12 @@ let rec to_string = function
      "case " ^ string_of_arg a ^ " in " ^
      separated string_of_case cs ^ " esac"
   | Defun (_,name,body) -> name ^ "() {\n" ^ to_string body ^ "\n}"
+
+and inner a =
+  let bg = is_bg a in
+  if is_compound a
+  then "{ " ^ to_string a ^ " " ^ (if bg then "&" else ";") ^ " }"
+  else to_string a ^ (if bg then " &" else "")
                                                  
 and string_of_if c t e =
   "if " ^ to_string c ^
