@@ -1512,7 +1512,13 @@ showpipe(struct job *jp, struct output *out)
 STATIC void
 xtcsetpgrp(int fd, pid_t pgrp)
 {
-	if (tcsetpgrp(fd, pgrp))
+	int err;
+
+	sigblockall(NULL);
+	err = tcsetpgrp(fd, pgrp);
+	sigclearmask();
+
+	if (err)
 		sh_error("Cannot set tty process group (%s)", strerror(errno));
 }
 #endif
