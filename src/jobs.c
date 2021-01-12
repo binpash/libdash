@@ -892,10 +892,8 @@ static void forkchild(struct job *jp, union node *n, int mode)
 		}
 	}
 	if (!oldlvl && iflag) {
-		if (mode != FORK_BG) {
-			setsignal(SIGINT);
-			setsignal(SIGQUIT);
-		}
+		setsignal(SIGINT);
+		setsignal(SIGQUIT);
 		setsignal(SIGTERM);
 	}
 
