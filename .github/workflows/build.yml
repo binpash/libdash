@@ -29,7 +29,7 @@ jobs:
 
       - run: opam pin add libdash . --no-action
 
-      - run: opam depext mgt --yes --with-test
+      - run: opam depext libdash --yes --with-test
 
       - run: opam install . --with-test
         
