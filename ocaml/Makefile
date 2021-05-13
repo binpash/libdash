@@ -11,7 +11,7 @@ META : mk_meta.sh
 	./mk_meta.sh
 
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml
-	ocamlfind ocamlmklib -g -package str,ctypes,ctypes.foreign -L$(BUILD) -ldash $^ -o dash
+	ocamlfind ocamlmklib -g -thread -package threads,str,ctypes,ctypes.foreign -L$(BUILD) -ldash $^ -o dash
 
 test : test.native test.byte $(wildcard ../test/tests/*)
 	@echo "TESTING test.native"
@@ -24,10 +24,10 @@ test : test.native test.byte $(wildcard ../test/tests/*)
 	done
 
 test.native : test.ml dash.cmxa
-	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlopt -g -package str,ctypes,ctypes.foreign -linkpkg -ccopt -L$(BUILD) -ccopt -Wl,-rpath -ccopt -Wl,$(BUILD) -cclib -ldash dash.cmxa test.ml -o $@
+	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlopt -g -thread -package threads,str,ctypes,ctypes.foreign -linkpkg -ccopt -L$(BUILD) -ccopt -Wl,-rpath -ccopt -Wl,$(BUILD) -cclib -ldash dash.cmxa test.ml -o $@
 
 test.byte : test.ml dash.cmxa
-	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlc -g -package str,ctypes,ctypes.foreign -linkpkg -I $(BUILD) -ccopt -L$(BUILD) -dllpath $(BUILD) -cclib -ldash dash.cma test.ml -o $@
+	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlc -g -thread -package threads,str,ctypes,ctypes.foreign -linkpkg -I $(BUILD) -ccopt -L$(BUILD) -dllpath $(BUILD) -cclib -ldash dash.cma test.ml -o $@
 
 test.ml : ../test/test.ml
 	cp $< $@
