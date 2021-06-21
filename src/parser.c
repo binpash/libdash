@@ -1262,7 +1262,8 @@ varname:
 			do {
 				STPUTC(c, out);
 				c = pgetc_eatbnl();
-			} while (!subtype && is_digit(c));
+			} while ((subtype <= 0 || subtype >= VSLENGTH) &&
+				 is_digit(c));
 		} else if (c != '}') {
 			int cc = c;
 
@@ -1322,6 +1323,8 @@ varname:
 				break;
 			}
 		} else {
+			if (subtype == VSLENGTH && c != '}')
+				subtype = 0;
 badsub:
 			pungetc();
 		}
