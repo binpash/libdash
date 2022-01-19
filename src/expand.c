@@ -135,8 +135,6 @@ STATIC int pmatch(const char *, const char *);
 #endif
 static size_t cvtnum(intmax_t num, int flags);
 STATIC size_t esclen(const char *, const char *);
-STATIC char *scanleft(char *, char *, char *, char *, int, int);
-STATIC char *scanright(char *, char *, char *, char *, int, int);
 STATIC void varunset(const char *, const char *, const char *, int)
 	__attribute__((__noreturn__));
 
@@ -541,10 +539,8 @@ out:
 }
 
 
-STATIC char *
-scanleft(
-	char *startp, char *rmesc, char *rmescend, char *str, int quotes,
-	int zero
+static char *scanleft(char *startp, char *endp, char *rmesc, char *rmescend,
+		      char *str, int quotes, int zero
 ) {
 	char *loc;
 	char *loc2;
@@ -573,16 +569,14 @@ scanleft(
 }
 
 
-STATIC char *
-scanright(
-	char *startp, char *rmesc, char *rmescend, char *str, int quotes,
-	int zero
+static char *scanright(char *startp, char *endp, char *rmesc, char *rmescend,
+		       char *str, int quotes, int zero
 ) {
 	int esc = 0;
 	char *loc;
 	char *loc2;
 
-	for (loc = str - 1, loc2 = rmescend; loc >= startp; loc2--) {
+	for (loc = endp, loc2 = rmescend; loc >= startp; loc2--) {
 		int match;
 		char c = *loc2;
 		const char *s = loc2;
@@ -618,7 +612,9 @@ static char *subevalvar(char *start, char *str, int strloc, int startloc,
 	long amount;
 	char *rmesc, *rmescend;
 	int zero;
-	char *(*scan)(char *, char *, char *, char *, int , int);
+	char *(*scan)(char *, char *, char *, char *, char *, int , int);
+	int nstrloc = strloc;
+	char *endp;
 	char *p;
 
 	p = argstr(start, (flag & EXP_DISCARD) | EXP_TILDE |
@@ -646,33 +642,40 @@ static char *subevalvar(char *start, char *str, int strloc, int startloc,
 		abort();
 #endif
 
-	rmesc = startp;
 	rmescend = stackblock() + strloc;
+	str = preglob(rmescend, FNMATCH_IS_ENABLED ?
+				RMESCAPE_ALLOC | RMESCAPE_GROW : 0);
+	if (FNMATCH_IS_ENABLED) {
+		startp = stackblock() + startloc;
+		rmescend = stackblock() + strloc;
+		nstrloc = str - (char *)stackblock();
+	}
+
+	rmesc = startp;
 	if (quotes) {
 		rmesc = _rmescapes(startp, RMESCAPE_ALLOC | RMESCAPE_GROW);
-		if (rmesc != startp) {
+		if (rmesc != startp)
 			rmescend = expdest;
-			startp = stackblock() + startloc;
-		}
+		startp = stackblock() + startloc;
+		str = stackblock() + nstrloc;
 	}
 	rmescend--;
-	str = stackblock() + strloc;
-	preglob(str, 0);
 
 	/* zero = subtype == VSTRIMLEFT || subtype == VSTRIMLEFTMAX */
 	zero = subtype >> 1;
 	/* VSTRIMLEFT/VSTRIMRIGHTMAX -> scanleft */
 	scan = (subtype & 1) ^ zero ? scanleft : scanright;
 
-	loc = scan(startp, rmesc, rmescend, str, quotes, zero);
+	endp = stackblock() + strloc - 1;
+	loc = scan(startp, endp, rmesc, rmescend, str, quotes, zero);
 	if (loc) {
 		if (zero) {
-			memmove(startp, loc, str - loc);
-			loc = startp + (str - loc) - 1;
+			memmove(startp, loc, endp - loc);
+			loc = startp + (endp - loc);
 		}
 		*loc = '\0';
 	} else
-		loc = str - 1;
+		loc = endp;
 
 out:
 	amount = loc - expdest;
@@ -1501,7 +1504,9 @@ msort(struct strlist *list, int len)
 STATIC inline int
 patmatch(char *pattern, const char *string)
 {
-	return pmatch(preglob(pattern, 0), string);
+	return pmatch(preglob(pattern, FNMATCH_IS_ENABLED ?
+				       RMESCAPE_ALLOC | RMESCAPE_GROW : 0),
+		      string);
 }
 
 
@@ -1654,15 +1659,22 @@ _rmescapes(char *str, int flag)
 	int notescaped;
 	int globbing;
 
-	p = strpbrk(str, qchars);
+	p = strpbrk(str, cqchars);
 	if (!p) {
 		return str;
 	}
 	q = p;
 	r = str;
+	globbing = flag & RMESCAPE_GLOB;
+
 	if (flag & RMESCAPE_ALLOC) {
 		size_t len = p - str;
-		size_t fulllen = len + strlen(p) + 1;
+		size_t fulllen = strlen(p);
+
+		if (FNMATCH_IS_ENABLED && globbing)
+			fulllen *= 2;
+
+		fulllen += len + 1;
 
 		if (flag & RMESCAPE_GROW) {
 			int strloc = str - (char *)stackblock();
@@ -1680,7 +1692,6 @@ _rmescapes(char *str, int flag)
 			q = mempcpy(q, str, len);
 		}
 	}
-	globbing = flag & RMESCAPE_GLOB;
 	notescaped = globbing;
 	while (*p) {
 		if (*p == (char)CTLQUOTEMARK) {
@@ -1693,8 +1704,11 @@ _rmescapes(char *str, int flag)
 			notescaped = 0;
 			goto copy;
 		}
+		if (FNMATCH_IS_ENABLED && *p == '^')
+			goto add_escape;
 		if (*p == (char)CTLESC) {
 			p++;
+add_escape:
 			if (notescaped)
 				*q++ = '\\';
 		}

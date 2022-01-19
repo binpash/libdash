@@ -62,7 +62,12 @@ const char spcstr[] = " ";
 const char snlfmt[] = "%s\n";
 const char dolatstr[] = { CTLQUOTEMARK, CTLVAR, VSNORMAL, '@', '=',
 			  CTLQUOTEMARK, '\0' };
-const char qchars[] = { CTLESC, CTLQUOTEMARK, 0 };
+const char cqchars[] = {
+#ifdef HAVE_FNMATCH
+	'^',
+#endif
+	CTLESC, CTLQUOTEMARK, 0
+};
 const char illnum[] = "Illegal number: %s";
 const char homestr[] = "HOME";
 
