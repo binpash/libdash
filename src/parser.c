@@ -50,7 +50,6 @@
 #include "var.h"
 #include "error.h"
 #include "memalloc.h"
-#include "init.h"       /* defines reset() */ // libdash
 #include "mystring.h"
 #include "alias.h"
 #include "show.h"
@@ -154,7 +153,6 @@ parsecmd(int interact)
 	if (doprompt)
 		setprompt(doprompt);
 	needprompt = 0;
-
 	return list(1);
 }
 
@@ -495,9 +493,6 @@ next_case:
 		break;
 	case TWORD:
 	case TREDIR:
-// libdash
-/* 2019-04-25 to allow for proper handling of empty aliases */
-        case TNL:
 		tokpushback++;
 		return simplecmd();
 	}
@@ -759,15 +754,10 @@ top:
 	if (kwd & CHKALIAS) {
 		struct alias *ap;
 		if ((ap = lookupalias(wordtext, 1)) != NULL) {
-// libdash
-/* 2019-04-25 to handle empty aliases */
 			if (*ap->val) {
 				pushstring(ap->val, ap);
-				goto top;
-			} else {
-				t = xxreadtoken();
-				goto ignorenl;
-   		        }
+			}
+			goto top;
 		}
 	}
 out:
