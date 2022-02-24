@@ -100,4 +100,3 @@ void setinputstring(char *);
 void popfile(void);
 void unwindfiles(struct parsefile *);
 void popallfiles(void);
-void closescript(void);

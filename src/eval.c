@@ -41,6 +41,8 @@
  * Evaluate a command.
  */
 
+#include "init.h"
+#include "main.h"
 #include "shell.h"
 #include "nodes.h"
 #include "syntax.h"
@@ -243,18 +245,10 @@ evaltree(union node *n, int flags)
 			popredir(0);
 		goto setstatus;
 	case NCMD:
-#ifdef notyet
-		if (eflag && !(flags & EV_TESTED))
-			checkexit = ~0;
-		status = evalcommand(n, flags, (struct backcmd *)NULL);
-		goto setstatus;
-#else
 		evalfn = evalcommand;
 checkexit:
-		if (eflag && !(flags & EV_TESTED))
-			checkexit = ~0;
+		checkexit = ~flags & EV_TESTED;
 		goto calleval;
-#endif
 	case NFOR:
 		evalfn = evalfor;
 		goto calleval;
@@ -314,7 +308,7 @@ setstatus:
 out:
 	dotrap();
 
-	if (checkexit & status)
+	if (eflag && checkexit && status)
 		goto exexit;
 
 	if (flags & EV_EXIT) {
@@ -482,16 +476,18 @@ evalsubshell(union node *n, int flags)
 		lineno -= funcline - 1;
 
 	expredir(n->nredir.redirect);
-	if (!backgnd && flags & EV_EXIT && !have_traps())
-		goto nofork;
 	INTOFF;
+	if (!backgnd && flags & EV_EXIT && !have_traps()) {
+		forkreset();
+		goto nofork;
+	}
 	jp = makejob(n, 1);
 	if (forkshell(jp, n, backgnd) == 0) {
-		INTON;
 		flags |= EV_EXIT;
 		if (backgnd)
 			flags &=~ EV_TESTED;
 nofork:
+		INTON;
 		redirect(n->nredir.redirect, 0);
 		evaltreenr(n->nredir.n, flags);
 		/* never returns */

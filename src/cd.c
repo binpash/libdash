@@ -96,7 +96,7 @@ cdcmd(int argc, char **argv)
 	const char *path;
 	const char *p;
 	char c;
-	struct stat statb;
+	struct stat64 statb;
 	int flags;
 	int len;
 
@@ -132,7 +132,7 @@ dotdot:
 		c = *p;
 		p = stalloc(len);
 
-		if (stat(p, &statb) >= 0 && S_ISDIR(statb.st_mode)) {
+		if (stat64(p, &statb) >= 0 && S_ISDIR(statb.st_mode)) {
 			if (c && c != ':')
 				flags |= CD_PRINT;
 docd:

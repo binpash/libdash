@@ -71,6 +71,7 @@ int *dash_errno;
 short profile_buf[16384];
 extern int etext();
 #endif
+MKINIT struct jmploc main_handler;
 
 STATIC void read_profile(const char *);
 STATIC char *find_dot_file(char *);
@@ -103,7 +104,6 @@ main(int argc, char **argv)
 {
 	char *shinit;
 	volatile int state;
-	struct jmploc jmploc;
 	struct stackmark smark;
 	int login;
 
@@ -115,7 +115,7 @@ main(int argc, char **argv)
 	monitor(4, etext, profile_buf, sizeof profile_buf, 50);
 #endif
 	state = 0;
-	if (unlikely(setjmp(jmploc.loc))) {
+	if (unlikely(setjmp(main_handler.loc))) {
 		int e;
 		int s;
 
@@ -150,7 +150,7 @@ main(int argc, char **argv)
 		else
 			goto state4;
 	}
-	handler = &jmploc;
+	handler = &main_handler;
 #ifdef DEBUG
 	opentrace();
 	trputs("Shell args:  ");  trargs(argv);
@@ -312,7 +312,7 @@ find_dot_file(char *basename)
 {
 	char *fullname;
 	const char *path = pathval();
-	struct stat statb;
+	struct stat64 statb;
 	int len;
 
 	/* don't try this for absolute or relative paths */
@@ -322,7 +322,7 @@ find_dot_file(char *basename)
 	while ((len = padvance(&path, basename)) >= 0) {
 		fullname = stackblock();
 		if ((!pathopt || *pathopt == 'f') &&
-		    !stat(fullname, &statb) && S_ISREG(statb.st_mode)) {
+		    !stat64(fullname, &statb) && S_ISREG(statb.st_mode)) {
 			/* This will be freed by the caller. */
 			return stalloc(len);
 		}
@@ -367,3 +367,11 @@ exitcmd(int argc, char **argv)
 	exraise(EXEXIT);
 	/* NOTREACHED */
 }
+
+#ifdef mkinit
+INCLUDE "error.h"
+
+FORKRESET {
+	handler = &main_handler;
+}
+#endif

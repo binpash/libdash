@@ -55,6 +55,7 @@
 #endif
 #include "exec.h"
 #include "eval.h"
+#include "init.h"
 #include "redir.h"
 #include "show.h"
 #include "main.h"
@@ -77,9 +78,10 @@
 #define CUR_STOPPED 0
 
 /* mode flags for dowait */
-#define DOWAIT_NORMAL 0
+#define DOWAIT_NONBLOCK 0
 #define DOWAIT_BLOCK 1
 #define DOWAIT_WAITCMD 2
+#define DOWAIT_WAITCMD_ALL 4
 
 /* array of jobs */
 static struct job *jobtab;
@@ -195,7 +197,7 @@ setjobctl(int on)
 		return;
 	if (on) {
 		int ofd;
-		ofd = fd = open(_PATH_TTY, O_RDWR);
+		ofd = fd = open64(_PATH_TTY, O_RDWR);
 		if (fd < 0) {
 			fd += 3;
 			while (!isatty(fd))
@@ -556,8 +558,8 @@ showjobs(struct output *out, int mode)
 
 	TRACE(("showjobs(%x) called\n", mode));
 
-	/* If not even one one job changed, there is nothing to do */
-	dowait(DOWAIT_NORMAL, NULL);
+	/* If not even one job changed, there is nothing to do */
+	dowait(DOWAIT_NONBLOCK, NULL);
 
 	for (jp = curjob; jp; jp = jp->prev_job) {
 		if (!(mode & SHOW_CHANGED) || jp->changed)
@@ -614,7 +616,7 @@ waitcmd(int argc, char **argv)
 				jp->waited = 1;
 				jp = jp->prev_job;
 			}
-			if (!dowait(DOWAIT_WAITCMD, 0))
+			if (!dowait(DOWAIT_WAITCMD_ALL, 0))
 				goto sigout;
 		}
 	}
@@ -857,8 +859,7 @@ static void forkchild(struct job *jp, union node *n, int mode)
 	if (!lvforked) {
 		shlvl++;
 
-		closescript();
-		clear_traps();
+		forkreset();
 
 #if JOBS
 		/* do job control only in root shell */
@@ -887,7 +888,7 @@ static void forkchild(struct job *jp, union node *n, int mode)
 		ignoresig(SIGQUIT);
 		if (jp->nprocs == 0) {
 			close(0);
-			if (open(_PATH_DEVNULL, O_RDONLY) != 0)
+			if (open64(_PATH_DEVNULL, O_RDONLY) != 0)
 				sh_error("Can't open %s", _PATH_DEVNULL);
 		}
 	}
@@ -1013,7 +1014,7 @@ waitforjob(struct job *jp)
 	int st;
 
 	TRACE(("waitforjob(%%%d) called\n", jp ? jobno(jp) : 0));
-	dowait(jp ? DOWAIT_BLOCK : DOWAIT_NORMAL, jp);
+	dowait(jp ? DOWAIT_BLOCK : DOWAIT_NONBLOCK, jp);
 	if (!jp)
 		return exitstatus;
 
@@ -1123,15 +1124,28 @@ out:
 
 static int dowait(int block, struct job *jp)
 {
-	int pid = block == DOWAIT_NORMAL ? gotsigchld : 1;
+	int gotchld = *(volatile int *)&gotsigchld;
+	int rpid;
+	int pid;
 
-	while (jp ? jp->state == JOBRUNNING : pid > 0) {
-		if (!jp)
-			gotsigchld = 0;
+	if (jp && jp->state != JOBRUNNING)
+		block = DOWAIT_NONBLOCK;
+
+	if (block == DOWAIT_NONBLOCK && !gotchld)
+		return 1;
+
+	rpid = 1;
+
+	do {
 		pid = waitone(block, jp);
-	}
+		rpid &= !!pid;
 
-	return pid;
+		block &= ~DOWAIT_WAITCMD_ALL;
+		if (!pid || (jp && jp->state != JOBRUNNING))
+			block = DOWAIT_NONBLOCK;
+	} while (pid >= 0);
+
+	return rpid;
 }
 
 /*
@@ -1163,7 +1177,11 @@ waitproc(int block, int *status)
 #endif
 
 	do {
-		err = wait3(status, flags, NULL);
+		gotsigchld = 0;
+		do
+			err = wait3(status, flags, NULL);
+		while (err < 0 && errno == EINTR);
+
 		if (err || (err = -!block))
 			break;
 
@@ -1173,8 +1191,6 @@ waitproc(int block, int *status)
 			sigsuspend(&oldmask);
 
 		sigclearmask();
-
-		err = 0;
 	} while (gotsigchld);
 
 	return err;

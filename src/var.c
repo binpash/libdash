@@ -125,7 +125,7 @@ INIT {
 	char **envp;
 	static char ppid[32] = "PPID=";
 	const char *p;
-	struct stat st1, st2;
+	struct stat64 st1, st2;
 
 	initvar();
 	for (envp = environ ; *envp ; envp++) {
@@ -143,7 +143,7 @@ INIT {
 
 	p = lookupvar("PWD");
 	if (p)
-		if (*p != '/' || stat(p, &st1) || stat(".", &st2) ||
+		if (*p != '/' || stat64(p, &st1) || stat64(".", &st2) ||
 		    st1.st_dev != st2.st_dev || st1.st_ino != st2.st_ino)
 			p = 0;
 	setpwd(p, 0);
@@ -504,8 +504,8 @@ void mklocal(char *name, int flags)
  * Interrupts must be off.
  */
 
-void
-poplocalvars(int keep)
+static void
+poplocalvars(void)
 {
 	struct localvar_list *ll;
 	struct localvar *lvp, *next;
@@ -522,23 +522,7 @@ poplocalvars(int keep)
 		next = lvp->next;
 		vp = lvp->vp;
 		TRACE(("poplocalvar %s\n", vp ? vp->text : "-"));
-		if (keep) {
-			int bits = VSTRFIXED;
-
-			if (lvp->flags != VUNSET) {
-				if (vp->text == lvp->text)
-					bits |= VTEXTFIXED;
-				else if (!(lvp->flags & (VTEXTFIXED|VSTACK)))
-					ckfree(lvp->text);
-			}
-
-			vp->flags &= ~bits;
-			vp->flags |= (lvp->flags & bits);
-
-			if ((vp->flags &
-			     (VEXPORT|VREADONLY|VSTRFIXED|VUNSET)) == VUNSET)
-				unsetvar(vp->text);
-		} else if (vp == NULL) {	/* $- saved */
+		if (vp == NULL) {	/* $- saved */
 			memcpy(optlist, lvp->text, sizeof(optlist));
 			ckfree(lvp->text);
 			optschanged();
@@ -586,7 +570,7 @@ out:
 void unwindlocalvars(struct localvar_list *stop)
 {
 	while (localvar_stack != stop)
-		poplocalvars(0);
+		poplocalvars();
 }
 
 

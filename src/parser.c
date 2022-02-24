@@ -116,7 +116,6 @@ STATIC union node *simplecmd(void);
 STATIC union node *makename(void);
 STATIC void parsefname(void);
 STATIC void parseheredoc(void);
-STATIC int peektoken(void);
 STATIC int readtoken(void);
 STATIC int xxreadtoken(void);
 STATIC int pgetc_eatbnl();
@@ -185,21 +184,23 @@ parsecmd_safe(int interact)
 STATIC union node *
 list(int nlflag)
 {
+	int chknl = nlflag & 1 ? 0 : CHKNL;
 	union node *n1, *n2, *n3;
 	int tok;
 
 	n1 = NULL;
 	for (;;) {
-		switch (readtoken()) {
+		checkkwd = chknl | CHKKWD | CHKALIAS;
+		tok = readtoken();
+		switch (tok) {
 		case TNL:
-			if (!(nlflag & 1))
-				break;
 			parseheredoc();
 			return n1;
 
 		case TEOF:
-			if (!n1 && (nlflag & 1))
+			if (!n1 && !chknl)
 				n1 = NEOF;
+out_eof:
 			parseheredoc();
 			tokpushback++;
 			lasttoken = TEOF;
@@ -207,8 +208,7 @@ list(int nlflag)
 		}
 
 		tokpushback++;
-		checkkwd = CHKNL | CHKKWD | CHKALIAS;
-		if (nlflag == 2 && tokendlist[peektoken()])
+		if (nlflag == 2 && tokendlist[tok])
 			return n1;
 		nlflag |= 2;
 
@@ -238,15 +238,16 @@ list(int nlflag)
 			n1 = n3;
 		}
 		switch (tok) {
-		case TNL:
 		case TEOF:
+			goto out_eof;
+		case TNL:
 			tokpushback++;
 			/* fall through */
 		case TBACKGND:
 		case TSEMI:
 			break;
 		default:
-			if ((nlflag & 1))
+			if (!chknl)
 				synexpect(-1);
 			tokpushback++;
 			return n1;
@@ -713,16 +714,6 @@ parseheredoc(void)
 }
 
 STATIC int
-peektoken(void)
-{
-	int t;
-
-	t = readtoken();
-	tokpushback++;
-	return (t);
-}
-
-STATIC int
 readtoken(void)
 {
 	int t;
@@ -740,13 +731,14 @@ top:
 	if (kwd & CHKNL) {
 		while (t == TNL) {
 			parseheredoc();
+			checkkwd = 0;
 			t = xxreadtoken();
 		}
 	}
 
-// libdash
-/* 2019-04-25 to handle empty aliases */
-ignorenl:
+	kwd |= checkkwd;
+	checkkwd = 0;
+
 	if (t != TWORD || quoteflag) {
 		goto out;
 	}
@@ -764,7 +756,7 @@ ignorenl:
 		}
 	}
 
-	if (checkkwd & CHKALIAS) {
+	if (kwd & CHKALIAS) {
 		struct alias *ap;
 		if ((ap = lookupalias(wordtext, 1)) != NULL) {
 // libdash
@@ -779,7 +771,6 @@ ignorenl:
 		}
 	}
 out:
-	checkkwd = 0;
 #ifdef DEBUG
 	if (!alreadyseen)
 	    TRACE(("token %s %s\n", tokname[t], t == TWORD ? wordtext : ""));
@@ -1303,7 +1294,8 @@ varname:
 			do {
 				STPUTC(c, out);
 				c = pgetc_eatbnl();
-			} while (is_digit(c));
+			} while ((subtype <= 0 || subtype >= VSLENGTH) &&
+				 is_digit(c));
 		} else if (c != '}') {
 			int cc = c;
 
@@ -1363,6 +1355,8 @@ varname:
 				break;
 			}
 		} else {
+			if (subtype == VSLENGTH && c != '}')
+				subtype = 0;
 badsub:
 			pungetc();
 		}
@@ -1434,7 +1428,7 @@ parsebackq: {
 				goto done;
 
 			case '\\':
-                                pc = pgetc_eatbnl();
+                                pc = pgetc();
                                 if (pc != '\\' && pc != '`' && pc != '$'
                                     && (!synstack->dblquote || pc != '"'))
                                         STPUTC('\\', pout);
@@ -1486,9 +1480,9 @@ done:
 		if (readtoken() != TRP)
 			synexpect(TRP);
 		setinputstring(nullstr);
-		parseheredoc();
 	}
 
+	parseheredoc();
 	heredoclist = saveheredoclist;
 
 	(*nlpp)->n = n;
@@ -1606,20 +1600,31 @@ setprompt(int which)
 const char *
 expandstr(const char *ps)
 {
-	union node n;
+	struct parsefile *file_stop;
+	struct jmploc *volatile savehandler;
+	struct heredoc *saveheredoclist;
+	const char *result;
 	int saveprompt;
+	struct jmploc jmploc;
+	union node n;
+	int err;
+
+	file_stop = parsefile;
 
 	/* XXX Fix (char *) cast. */
 	setinputstring((char *)ps);
 
+	saveheredoclist = heredoclist;
+	heredoclist = NULL;
 	saveprompt = doprompt;
 	doprompt = 0;
+	result = ps;
+	savehandler = handler;
+	if (unlikely(err = setjmp(jmploc.loc)))
+		goto out;
+	handler = &jmploc;
 
 	readtoken1(pgetc_eatbnl(), DQSYNTAX, FAKEEOFMARK, 0);
-
-	doprompt = saveprompt;
-
-	popfile();
 
 	n.narg.type = NARG;
 	n.narg.next = NULL;
@@ -1627,7 +1632,18 @@ expandstr(const char *ps)
 	n.narg.backquote = backquotelist;
 
 	expandarg(&n, NULL, EXP_QUOTED);
-	return stackblock();
+	result = stackblock();
+
+out:
+	handler = savehandler;
+	if (err && exception != EXERROR)
+		longjmp(handler->loc, 1);
+
+	doprompt = saveprompt;
+	unwindfiles(file_stop);
+	heredoclist = saveheredoclist;
+
+	return result;
 }
 
 /*

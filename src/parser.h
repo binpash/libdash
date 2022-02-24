@@ -62,6 +62,7 @@
 #define VSTRIMLEFT	0x8		/* ${var#pattern} */
 #define VSTRIMLEFTMAX	0x9		/* ${var##pattern} */
 #define VSLENGTH	0xa		/* ${#var} */
+/* VSLENGTH must come last. */
 
 /* values of checkkwd variable */
 #define CHKALIAS	0x1

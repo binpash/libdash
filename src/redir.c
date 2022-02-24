@@ -401,6 +401,10 @@ EXITRESET {
 	unwindredir(0);
 }
 
+FORKRESET {
+	redirlist = NULL;
+}
+
 #endif
 
 /* 
