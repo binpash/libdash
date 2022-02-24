@@ -19,6 +19,7 @@ json-c-0.15/build/Makefile:
 
 # C binaries
 parse_to_json2: parse_to_json2.o ast2a.o ast2json.o dash2.o Stack2.o arg_char.o ArgCharStack2.o json-c-0.15/install/lib/libjson-c.5.dylib
+	echo JSON_C_DIR=$(JSON_C_DIR) PWD=$(PWD)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) -ldash
 	if [ $(uname) = "Darwin" ]; then install_name_tool -change "libjson-c.5.dylib" "@loader_path/json-c-0.15/install/lib/libjson-c.5.dylib" $@; fi
 
