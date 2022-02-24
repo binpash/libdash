@@ -43,4 +43,6 @@ jobs:
           autoconf
           ./configure
           make
+          echo PWD=$PWD
+          ls -r python
           make -C python
