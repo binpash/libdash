@@ -1,12 +1,14 @@
 MAKE_PATH:=$(abspath $(lastword $(MAKEFILE_LIST)))
 CWD:=$(patsubst %/,%,$(dir $(MAKE_PATH)))
 
+DASH_DIR=$(CWD)/../src/.libs
 JSON_C_DIR=$(CWD)/json-c-0.15/install
 SCRIPTS_DIR=~/pash/
 
 CC=gcc
 CFLAGS=-fPIC -g -O2 -Wall -Werror -I"$(JSON_C_DIR)/include/json-c" -I"../src"
 LDFLAGS=-ljson-c -L"$(JSON_C_DIR)/lib" -Wl,-rpath -Wl,"$(JSON_C_DIR)/lib"
+DASH_LDFLAGS=-ldash -L"$(DASH_DIR)" -Wl,-rpath -Wl,"$(DASH_DIR)"
 
 all: parse_to_json2 json_to_shell2 libdash2.so
 
@@ -21,7 +23,7 @@ json-c-0.15/build/Makefile:
 # C binaries
 parse_to_json2: json-c-0.15/install/lib parse_to_json2.o ast2a.o ast2json.o dash2.o Stack2.o arg_char.o ArgCharStack2.o
 	echo JSON_C_DIR=$(JSON_C_DIR) PWD=$(PWD)
-	$(CC) $(CFLAGS) $(filter-out json-c-0.15/install/lib,$^) -o $@ $(LDFLAGS) -ldash
+	$(CC) $(CFLAGS) $(filter-out json-c-0.15/install/lib,$^) -o $@ $(LDFLAGS) $(DASH_LDFLAGS)
 	if [ $(shell uname) = "Darwin" ]; then install_name_tool -change "libjson-c.5.dylib" "@loader_path/json-c-0.15/install/lib/libjson-c.5.dylib" $@; fi
 
 json_to_shell2: json-c-0.15/install/lib json_to_shell2.o ast2b.o
@@ -34,7 +36,7 @@ json_to_shell2: json-c-0.15/install/lib json_to_shell2.o ast2b.o
 
 # Shared objects
 libdash2.so: dash2.o
-	$(CC) -shared $^ -o $@ $(LDFLAGS) -ldash
+	$(CC) -shared $^ -o $@ $(LDFLAGS) $(DASH_LDFLAGS)
 
 
 # Tests for C binaries
