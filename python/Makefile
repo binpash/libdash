@@ -12,7 +12,7 @@ all: parse_to_json2 json_to_shell2 libdash2.so
 
 json-c-0.15/install/lib: json-c-0.15/build/Makefile
 	mkdir -p $@
-	$(MAKE) -C $@ install
+	$(MAKE) -C json-c-0.15/build install
 
 json-c-0.15/build/Makefile:
 	mkdir -p json-c-0.15/build 
