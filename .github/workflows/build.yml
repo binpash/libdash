@@ -34,4 +34,13 @@ jobs:
         
       - run: opam exec -- make -C test test
         
-      - run: make -C python
+      - name: Build plain dash and Python bindings
+        run: |
+          libtoolize
+          aclocal
+          autoheader
+          automake --add-missing
+          autoconf
+          ./configure
+          make
+          make -C python
