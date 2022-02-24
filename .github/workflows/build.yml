@@ -36,7 +36,7 @@ jobs:
         
       - name: Build plain dash and Python bindings
         run: |
-          if [ $(uname) = "Darwin" ]; then glibtoolize; else; libtoolize; fi
+          if [ $(uname) = "Darwin" ]; then glibtoolize; else libtoolize; fi
           aclocal
           autoheader
           automake --add-missing
