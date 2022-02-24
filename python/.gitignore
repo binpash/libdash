@@ -1,0 +1,4 @@
+*.o
+*.so
+json_to_shell2
+parse_to_json2
