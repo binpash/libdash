@@ -11,10 +11,11 @@ LDFLAGS=-ljson-c -L"$(JSON_C_DIR)/lib" -Wl,-rpath -Wl,"$(JSON_C_DIR)/lib"
 all: parse_to_json2 json_to_shell2 libdash2.so
 
 json-c-0.15/install/lib/libjson-c.5.dylib: json-c-0.15/build/Makefile
-	mkdir -p json-c-0.15/build json-c-0.15/install
+	mkdir -p json-c-0.15/install
 	$(MAKE) -C json-c-0.15/build install
 
 json-c-0.15/build/Makefile:
+	mkdir -p json-c-0.15/build 
 	(cd json-c-0.15/build; cmake -DCMAKE_INSTALL_PREFIX=../install ..)
 
 # C binaries
