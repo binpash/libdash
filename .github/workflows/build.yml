@@ -42,5 +42,5 @@ jobs:
           automake --add-missing
           autoconf
           ./configure
-          make
+          make install
           make -C python
