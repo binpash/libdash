@@ -34,3 +34,4 @@ jobs:
         
       - run: opam exec -- make -C test test
         
+      - run: make -C python

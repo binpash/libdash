@@ -7,13 +7,19 @@ LDFLAGS=-ljson-c -L"$(JSON_C_DIR)/lib" -Wl,-rpath -Wl,"$(JSON_C_DIR)/lib"
 
 all: parse_to_json2 json_to_shell2 libdash2.so
 
+json-c-0.15/install/lib/libjson-c.5.dylib: json-c-0.15/build/Makefile
+	mkdir -p json-c-0.15/build json-c-0.15/install
+	$(MAKE) -C json-c-0.15/build install
+
+json-c-0.15/build/Makefile:
+	(cd json-c-0.15/build; cmake -DCMAKE_INSTALL_PREFIX=../install ..)
 
 # C binaries
-parse_to_json2: parse_to_json2.o ast2a.o ast2json.o dash2.o Stack2.o arg_char.o ArgCharStack2.o
+parse_to_json2: parse_to_json2.o ast2a.o ast2json.o dash2.o Stack2.o arg_char.o ArgCharStack2.o json-c-0.15/install/lib/libjson-c.5.dylib
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) -ldash
 	install_name_tool -change "libjson-c.5.dylib" "@loader_path/json-c-0.15/install/lib/libjson-c.5.dylib" $@
 
-json_to_shell2: json_to_shell2.o ast2b.o
+json_to_shell2: json_to_shell2.o ast2b.o json-c-0.15/install/lib/libjson-c.5.dylib
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 	install_name_tool -change "libjson-c.5.dylib" "@loader_path/json-c-0.15/install/lib/libjson-c.5.dylib" $@
 
