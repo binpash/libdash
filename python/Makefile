@@ -1,4 +1,7 @@
-JSON_C_DIR=/Users/mgree/libdash/python/json-c-0.15/install
+MAKE_PATH:=$(abspath $(lastword $(MAKEFILE_LIST)))
+CWD:=$(patsubst %/,%,$(dir $(MAKE_PATH)))
+
+JSON_C_DIR=$(CWD)/json-c-0.15/install
 SCRIPTS_DIR=~/pash/
 
 CC=gcc
