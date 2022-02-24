@@ -118,7 +118,7 @@ STATIC char *evalvar(char *, int);
 static size_t strtodest(const char *p, int flags);
 static size_t memtodest(const char *p, size_t len, int flags);
 STATIC ssize_t varvalue(char *, int, int, int);
-STATIC void expandmeta(struct strlist *, int);
+STATIC void expandmeta(struct strlist *);
 #ifdef HAVE_GLOB
 STATIC void addglob(const glob_t *);
 #else
@@ -205,7 +205,7 @@ expandarg(union node *arg, struct arglist *arglist, int flag)
 		ifsbreakup(p, -1, &exparg);
 		*exparg.lastp = NULL;
 		exparg.lastp = &exparg.list;
-		expandmeta(exparg.list, flag);
+		expandmeta(exparg.list);
 	} else {
 		sp = (struct strlist *)stalloc(sizeof (struct strlist));
 		sp->text = p;
@@ -285,7 +285,7 @@ start:
 			q = stnputs(p, length, expdest);
 			q[-1] &= end - 1;
 			expdest = q - (flag & EXP_WORD ? end : 0);
-			newloc = expdest - (char *)stackblock() - end;
+			newloc = q - (char *)stackblock() - end;
 			if (breakall && !inquotes && newloc > startloc) {
 				recordregion(startloc, newloc, 0);
 			}
@@ -525,7 +525,7 @@ read:
 
 	/* Eat all trailing newlines */
 	dest = expdest;
-	for (; dest > (char *)stackblock() && dest[-1] == '\n';)
+	for (; dest > ((char *)stackblock() + startloc) && dest[-1] == '\n';)
 		STUNPUTC(dest);
 	expdest = dest;
 
@@ -1155,9 +1155,7 @@ out:
 
 #ifdef HAVE_GLOB
 STATIC void
-expandmeta(str, flag)
-	struct strlist *str;
-	int flag;
+expandmeta(struct strlist *str)
 {
 	/* TODO - EXP_REDIR */
 
@@ -1221,7 +1219,7 @@ STATIC unsigned expdir_max;
 
 
 STATIC void
-expandmeta(struct strlist *str, int flag)
+expandmeta(struct strlist *str)
 {
 	static const char metachars[] = {
 		'*', '?', '[', 0
@@ -1286,7 +1284,7 @@ expmeta(char *name, unsigned name_len, unsigned expdir_len)
 	int metaflag;
 	struct stat64 statb;
 	DIR *dirp;
-	struct dirent *dp;
+	struct dirent64 *dp;
 	int atend;
 	int matchdot;
 	int esc;
@@ -1363,7 +1361,7 @@ expmeta(char *name, unsigned name_len, unsigned expdir_len)
 		p++;
 	if (*p == '.')
 		matchdot++;
-	while (! int_pending() && (dp = readdir(dirp)) != NULL) {
+	while (! int_pending() && (dp = readdir64(dirp)) != NULL) {
 		if (dp->d_name[0] == '.' && ! matchdot)
 			continue;
 		if (pmatch(start, dp->d_name)) {

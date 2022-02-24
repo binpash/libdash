@@ -473,17 +473,17 @@ static int isoperand(char **tp)
 static int
 newerf (const char *f1, const char *f2)
 {
-	struct stat b1, b2;
+	struct stat64 b1, b2;
 
 #ifdef HAVE_ST_MTIM
-	return (stat (f1, &b1) == 0 &&
-		stat (f2, &b2) == 0 &&
+	return (stat64(f1, &b1) == 0 &&
+		stat64(f2, &b2) == 0 &&
 		( b1.st_mtim.tv_sec > b2.st_mtim.tv_sec ||
 		 (b1.st_mtim.tv_sec == b2.st_mtim.tv_sec && (b1.st_mtim.tv_nsec > b2.st_mtim.tv_nsec )))
 	);
 #else
-	return (stat (f1, &b1) == 0 &&
-		stat (f2, &b2) == 0 &&
+	return (stat64(f1, &b1) == 0 &&
+		stat64(f2, &b2) == 0 &&
 		b1.st_mtime > b2.st_mtime);
 #endif
 }
@@ -491,17 +491,17 @@ newerf (const char *f1, const char *f2)
 static int
 olderf (const char *f1, const char *f2)
 {
-	struct stat b1, b2;
+	struct stat64 b1, b2;
 
 #ifdef HAVE_ST_MTIM
-	return (stat (f1, &b1) == 0 &&
-		stat (f2, &b2) == 0 &&
+	return (stat64(f1, &b1) == 0 &&
+		stat64(f2, &b2) == 0 &&
 		(b1.st_mtim.tv_sec < b2.st_mtim.tv_sec ||
 		 (b1.st_mtim.tv_sec == b2.st_mtim.tv_sec && (b1.st_mtim.tv_nsec < b2.st_mtim.tv_nsec )))
 	);
 #else
-	return (stat (f1, &b1) == 0 &&
-		stat (f2, &b2) == 0 &&
+	return (stat64(f1, &b1) == 0 &&
+		stat64(f2, &b2) == 0 &&
 		b1.st_mtime < b2.st_mtime);
 #endif
 }
@@ -509,10 +509,10 @@ olderf (const char *f1, const char *f2)
 static int
 equalf (const char *f1, const char *f2)
 {
-	struct stat b1, b2;
+	struct stat64 b1, b2;
 
-	return (stat (f1, &b1) == 0 &&
-		stat (f2, &b2) == 0 &&
+	return (stat64(f1, &b1) == 0 &&
+		stat64(f2, &b2) == 0 &&
 		b1.st_dev == b2.st_dev &&
 		b1.st_ino == b2.st_ino);
 }

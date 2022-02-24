@@ -148,7 +148,6 @@ int exportcmd(int, char **);
 int localcmd(int, char **);
 void mklocal(char *name, int flags);
 struct localvar_list *pushlocalvars(int push);
-void poplocalvars(int);
 void unwindlocalvars(struct localvar_list *stop);
 int unsetcmd(int, char **);
 void unsetvar(const char *);

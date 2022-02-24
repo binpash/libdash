@@ -1,4 +1,4 @@
-AC_INIT([dash],[0.5.10.2])
+AC_INIT([dash],[0.5.11.5])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS(config.h)
@@ -9,10 +9,10 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
 dnl Checks for programs.
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
+
 AC_PROG_YACC
 dnl MMG 2018-09-26 support building the library
 AM_PROG_AR
-
 
 AC_MSG_CHECKING([for build system compiler])
 if test "$cross_compiling" = yes; then
@@ -150,8 +150,13 @@ AC_CHECK_FUNC(stat64,, [
 	AC_DEFINE(stat64, stat, [64-bit operations are the same as 32-bit])
 ])
 
+dnl OS X apparently has stat64 but not open64.
 AC_CHECK_FUNC(open64,, [
 	AC_DEFINE(open64, open, [64-bit operations are the same as 32-bit])
+	AC_DEFINE(readdir64, readdir,
+		  [64-bit operations are the same as 32-bit])
+	AC_DEFINE(dirent64, dirent,
+		  [64-bit operations are the same as 32-bit])
 ])
 
 dnl Check if struct stat has st_mtim.
