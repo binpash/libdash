@@ -3,8 +3,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "ast2b.h"
-
+#include "pretty.h"
 
 // 640MB ought to be enough for anybody
 // With copy-on-write, the large malloc practically doesn't cost anything

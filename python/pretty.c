@@ -17,7 +17,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "ast2b.h"
+#include "pretty.h"
 
 #include "json_tokener.h"
 

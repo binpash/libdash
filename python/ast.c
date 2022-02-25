@@ -29,8 +29,8 @@
 #include "nodes.h"
 #include "parser.h"
 
-#include "dash2.h"
-#include "ast2a.h"
+#include "dash.h"
+#include "ast.h"
 #include "ast2json.h"
 
 #include "json_object.h"

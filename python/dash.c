@@ -14,7 +14,7 @@
 #include "redir.h"
 #include "var.h"
 
-#include "dash2.h"
+#include "dash.h"
 
 
 // As a poor man's namespace, we prepend everything with "Dash_"
