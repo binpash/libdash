@@ -3,25 +3,25 @@ type linno = int
 exception ParseException of string
            
 type t =
-  | Command of linno * assign list * args * redirection list (* assign, args, redir *)
-  | Pipe of bool * t list (* background?, commands *)
-  | Redir of linno * t * redirection list
-  | Background of linno * t * redirection list 
-  | Subshell of linno * t * redirection list
-  | And of t * t
-  | Or of t * t
-  | Not of t
-  | Semi of t * t
-  | If of t * t * t (* cond, then, else *)
-  | While of t * t (* test, body *) (* until encoded as a While . Not *)
-  | For of linno * arg * t * string (* args, body, var *)
-  | Case of linno * arg * case list
-  | Defun of linno * string * t (* name, body *)
+  | Command of (linno * assign list * args * redirection list) (* assign, args, redir *)
+  | Pipe of (bool * t list) (* background?, commands *)
+  | Redir of (linno * t * redirection list)
+  | Background of (linno * t * redirection list)
+  | Subshell of (linno * t * redirection list)
+  | And of (t * t)
+  | Or of (t * t)
+  | Not of (t)
+  | Semi of (t * t)
+  | If of (t * t * t) (* cond, then, else *)
+  | While of (t * t) (* test, body *) (* until encoded as a While . Not *)
+  | For of (linno * arg * t * string) (* args, body, var *)
+  | Case of (linno * arg * case list)
+  | Defun of (linno * string * t) (* name, body *)
  and assign = string * arg
  and redirection =
-   | File of redir_type * int * arg
-   | Dup of dup_type * int * arg
-   | Heredoc of heredoc_type * int * arg
+   | File of (redir_type * int * arg)
+   | Dup of (dup_type * int * arg)
+   | Heredoc of (heredoc_type * int * arg)
  and redir_type = To | Clobber | From | FromTo | Append
  and dup_type = ToFD | FromFD
  and heredoc_type = Here | XHere (* for when in a quote... not sure when this comes up *)
@@ -32,7 +32,7 @@ type t =
    | E of char (* escape... necessary for expansion *)
    | T of string option (* tilde *)
    | A of arg (* arith *)
-   | V of var_type * bool (* VSNUL? *) * string * arg
+   | V of (var_type * bool (* VSNUL? *) * string * arg)
    | Q of arg (* quoted *)
    | B of t (* backquote *)
  and var_type =

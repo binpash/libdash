@@ -2,7 +2,7 @@ BUILD=$(abspath ../_build/lib)
 
 .PHONY : all install clean
 
-all : dash.cmxa dash.cma META
+all : dash.cmxa dash.cma META shell_to_json json_to_shell
 
 install : all
 	ocamlfind install libdash META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx
@@ -10,8 +10,23 @@ install : all
 META : mk_meta.sh
 	./mk_meta.sh
 
+shell_to_json: dash.cmxa ast_json.mli ast_json.ml shell_to_json.ml
+	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign -linkpkg $^ -o $@
+
+json_to_shell: dash.cmxa ast_json.mli ast_json.ml json_to_shell.ml
+	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign -linkpkg $^ -o $@
+
+ast_json.mli: ast_json.ml
+
+ast_json.ml : ast_atd.atd
+	atdgen -j -j-std ast_atd.atd
+	sed -i -e '/type char = Ast.char/d' ast_atd_j.ml
+	sed -i -e '/type char = Ast.char/d' ast_atd_j.mli
+	mv ast_atd_j.ml $@
+	mv ast_atd_j.mli $(subst ml,mli,$@)
+
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml
-	ocamlfind ocamlmklib -g -package threads,str,ctypes,ctypes.foreign -L$(BUILD) -ldash $^ -o dash
+	ocamlfind ocamlmklib -g -package str,ctypes,ctypes.foreign -L$(BUILD) -ldash $^ -o dash
 
 test : test.native test.byte $(wildcard ../test/tests/*)
 	@echo "TESTING test.native"
