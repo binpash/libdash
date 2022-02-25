@@ -12,8 +12,10 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-        ocaml-version:
-          - 4.11.0
+        ocaml-compiler:
+          - 4.11.x
+          - 4.12.x
+          - 4.13.x
 
     runs-on: ${{ matrix.os }}
 
@@ -21,16 +23,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Use OCaml ${{ matrix.ocaml-version }}
-        uses: avsm/setup-ocaml@v1
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-version: ${{ matrix.ocaml-version }}
-
-      - run: opam pin add libdash . --no-action
-
-      - run: opam depext libdash --yes --with-test
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
       - run: opam install . --with-test
-        
+
       - run: opam exec -- make -C test test
-        
