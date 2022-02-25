@@ -3,16 +3,18 @@ CWD:=$(patsubst %/,%,$(dir $(MAKE_PATH)))
 
 DASH_DIR=$(CWD)/../src/.libs
 JSON_C_DIR=$(CWD)/json-c-0.15/install
-SCRIPTS_DIR=~/pash/
+SCRIPTS_DIR=$(HOME)/pash
 
 CC=gcc
 CFLAGS=-fPIC -g -O2 -Wall -Werror -I"$(JSON_C_DIR)/include/json-c" -I"../src"
 LDFLAGS=-ljson-c -L"$(JSON_C_DIR)/lib" -Wl,-rpath -Wl,"$(JSON_C_DIR)/lib"
 DASH_LDFLAGS=-ldash -L"$(DASH_DIR)" -Wl,-rpath -Wl,"$(DASH_DIR)"
 
-.PHONY: all clean
+.PHONY: all test clean veryclean
 
 all: parse_to_json json_to_shell libdash.so
+
+test: test_roundtrip.log
 
 json-c-0.15/install/lib: json-c-0.15/build/Makefile
 	mkdir -p $@
@@ -32,40 +34,32 @@ json_to_shell: json-c-0.15/install/lib json_to_shell.o pretty.o
 	$(CC) $(CFLAGS) $(filter-out json-c-0.15/install/lib,$^) -o $@ $(LDFLAGS)
 	if [ $(shell uname) = "Darwin" ]; then install_name_tool -change "libjson-c.5.dylib" "@loader_path/json-c-0.15/install/lib/libjson-c.5.dylib" $@; fi
 
-#prettyprint_json: prettyprint_json.o
-#	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
-
-
 # Shared objects
 libdash.so: dash.o
 	$(CC) -shared $^ -o $@ $(LDFLAGS) $(DASH_LDFLAGS)
 
-
 # Tests for C binaries
-testsA: parse_to_json
-	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do sh test_parse_to_JSON2.sh "$$f"; done | tee /tmp/cdashA.log
+test_roundtrip.log: test_rt.sh parse_to_json json_to_shell
+	@find "../test/tests" -type f | while read f; do sh test_rt.sh "$$f"; done | tee $@
 	@echo
-	@cat /tmp/cdashA.log | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
+	@cat $@ | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
 
-testsB: json_to_shell
-	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do sh test_JSON_to_shell2.sh "$$f"; done | tee /tmp/cdashB.log
-	@echo
-	@cat /tmp/cdashB.log | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
-
-testsRT: test_rt.sh parse_to_json json_to_shell
-	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do sh test_rt.sh "$$f"; done | tee /tmp/cdash_rt.log
-	@echo
-	@cat /tmp/cdash_rt.log | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
+# TODO tests that compare against OCaml
 
 # Tests for Python scripts
-testsRT_py: test_rt_py.sh
-	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do sh test_rt_py.sh "$$f"; done | tee /tmp/cdash_rt_py.log
-	@echo
-	@cat /tmp/cdash_rt_py.log | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
+#test_python_roundtrip.log: test_rt_py.sh
+#	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do sh test_rt_py.sh "$$f"; done | tee $@
+#	@echo
+#	@cat $@ | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
+
+#test_python_ast2shell.log: test_ast2shell_py.sh
+#	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do sh test_ast2shell_py.sh "$$f"; done | tee $@
+#	@echo
+#	@cat $@ | egrep '^[A-Z]+:' | cut -d ':' -f 1 | sort | uniq -c
 
 
 # Clean
 clean:
-	rm parse_to_json json_to_shell *.o *.so
+	rm parse_to_json json_to_shell *.o *.so *.log
 veryclean: clean
 	rm -r $(JSON_C_DIR)/install $(JSON_C_DIR)/build

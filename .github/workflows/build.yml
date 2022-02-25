@@ -43,4 +43,7 @@ jobs:
           autoconf
           ./configure
           make
-          make -C python
+          make -C python all
+
+      - name: Test Python bindings
+        run: make -C python test

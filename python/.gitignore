@@ -2,3 +2,4 @@
 *.so
 json_to_shell
 parse_to_json
+*.log
