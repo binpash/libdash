@@ -47,10 +47,10 @@ test_roundtrip.log: test_rt.sh parse_to_json json_to_shell
 # TODO tests that compare against OCaml
 
 # Tests for Python scripts
-#test_python_roundtrip.log: test_rt_py.sh
-#	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do sh test_rt_py.sh "$$f"; done | tee $@
-#	@echo
-#	@cat $@ | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
+test_python_roundtrip.log: test_rt_py.sh
+	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do sh test_rt_py.sh "$$f"; done | tee $@
+	@echo
+	@cat $@ | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
 
 #test_python_ast2shell.log: test_ast2shell_py.sh
 #	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do sh test_ast2shell_py.sh "$$f"; done | tee $@

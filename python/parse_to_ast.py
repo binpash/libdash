@@ -1,8 +1,8 @@
 import os
 import subprocess
 from ctypes import *
-from ast2a import of_node
-from dash2 import *
+from ast import of_node
+from dash import *
 
 if 'PASH_TOP' in os.environ:
     PASH_TOP = os.environ['PASH_TOP']

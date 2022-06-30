@@ -48,3 +48,4 @@ m4
 libtool
 ltmain.sh
 ocamlprof.dump
+__pycache__
