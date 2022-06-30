@@ -10,10 +10,7 @@ else:
     GIT_TOP_CMD = [ 'git', 'rev-parse', '--show-toplevel', '--show-superproject-working-tree']
     PASH_TOP = subprocess.run(GIT_TOP_CMD, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True).stdout.rstrip()
 
-
-# TODO: use Pash root directory
 LIBDASH_LIBRARY_PATH = os.path.join(PASH_TOP, "compiler/parser/libdash/src/.libs/libdash.so")
-
 
 EOF_NLEFT = -99; # libdash/src/input.c
 
