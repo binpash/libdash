@@ -301,10 +301,11 @@ and parse_arg ?tilde_ok:(tilde_ok=false) ~assign:(assign:bool) (s : char list) (
 
 and parse_tilde acc s =
   match s with
-  (* CTLESC, CTLQUOTEMARK means no tilde prefix *)
-  | '\129'::_ | '\136'::_ -> None, s
-  (* terminal: CTLVAR, CTLENDVAR, /, :, EOF *)
-  | '\130'::_ | '\131'::_ | ':'::_ | '/'::_ | [] ->
+  (* CTLESC, CTLVAR, CTLQUOTEMARK, CTLBACKQ, CTLARI: no tilde prefix *)
+  | '\129'::_ | '\130'::_ | '\132'::_ | '\134'::_ | '\136'::_ -> None, s
+  (* CTLENDVAR, CTLENDARI, /, :, EOF: terminate tilde prefix *)
+  | '\131'::_ | '\135'::_
+  | ':'::_ | '/'::_ | [] ->
      if acc = [] then (None, s) else (Some (implode acc), s)
   (* ordinary char *)
   (* TODO 2019-01-03 only characters from the portable character set *)

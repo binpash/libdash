@@ -472,15 +472,9 @@ def parse_tilde (s):
         else:
             s_last = s [-1]
 
-            if (s_last == CTLESC):
+            if (s_last in [CTLESC, CTLVAR, CTLQUOTEMARK, CTLBACKQ, CTLARI]):
                 return ("None")
-            elif (s_last == CTLQUOTEMARK):
-                return ("None")
-            elif (s_last == CTLENDVAR):
-                return (stringOrNull (acc_str))
-            elif (s_last == ORD_COLON):
-                return (stringOrNull (acc_str))
-            elif (s_last == ORD_SLASH):
+            elif (s_last in [CTLENDVAR, CTLENDARI, ORD_COLON, ORD_SLASH]):
                 return (stringOrNull (acc_str))
             else:
                 c = s.pop ()
