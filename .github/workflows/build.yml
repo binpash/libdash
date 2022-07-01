@@ -21,6 +21,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: avsm/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+
+      - name: Install system dependencies (via OPAM)
+        run: |
+          opam pin add libdash . --no-action
+          opam depext libdash --yes --with-test
+          
       - name: Build dash
         run: |
           if [ $(uname) = "Darwin" ]; then glibtoolize; else libtoolize; fi
@@ -36,16 +46,8 @@ jobs:
       - name: Test Python bindings
         run: make -C python test
             
-      - name: Use OCaml ${{ matrix.ocaml-compiler }}
-        uses: avsm/setup-ocaml@v2
-        with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-
       - name: Install OCaml bindings
-        run: |
-          opam pin add libdash . --no-action
-          opam depext libdash --yes --with-test
-          opam install . --with-test
+        run: opam install . --with-test
         
       - name: Test OCaml bindings
         run: opam exec -- make -C ocaml test
