@@ -29,6 +29,7 @@ dash.cmxa : dash.mli dash.ml ast.mli ast.ml
 	ocamlfind ocamlmklib -g -package str,ctypes,ctypes.foreign -L$(BUILD) -ldash $^ -o dash
 
 test : json_to_shell shell_to_json $(wildcard ../tests/*)
+	ls -lR $(BUILD)
 	@for f in ../test/tests/*; do \
 		LD_LIBRARY_PATH=$(BUILD):$(LD_LIBRARY_PATH) ../test/round_trip.sh ./rt.sh $$f; \
 	done
