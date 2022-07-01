@@ -1,24 +1,18 @@
-.PHONY : all test clean
+SCRIPTS_DIR=$(PASH_TOP)
 
-all : test.native test.byte
+PYTHON_FILES=../python/rt.py ../python/ast.py ../python/ast2shell.py ../python/dash.py ../python/parse_to_ast.py
+OCAML_FILES=../ocaml/rt.sh
 
-test : test.native test.byte $(wildcard tests/*)
-	@echo "TESTING test.native"
-	@for f in tests/*; do \
-		./round_trip.sh ./test.native $$f 2>test.err; \
-	done
-	@echo "TESTING test.byte"
-	@for f in tests/*; do \
-		./round_trip.sh ./test.byte $$f 2>test.err; \
-	done
+.PHONY : test clean
 
+test: test_ocaml_python.sh $(PYTHON_FILES) $(OCAML_FILES)
+	@echo "LOCAL TESTS"
+	@find . | grep '[.]sh$$' | while read f; do ./test_ocaml_python.sh "$$f"; done | tee ocaml_python.log
 
-test.native : test.ml
-	ocamlfind ocamlopt -g -thread -package threads,str,libdash -linkpkg $^ -o test.native
-	ldd $@ || otool -L $@
-
-test.byte : test.ml 
-	ocamlfind ocamlc -g -thread -package threads,str,libdash -linkpkg $^ -o test.byte
+	@echo "PASH TESTS"
+	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do ./test_ocaml_python.sh "$$f"; done | tee -a ocaml_python.log
+	@echo
+	@cat ocaml_python.log | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
 
 clean :
-	rm -f *.o *.cmo *.cmi *.cmx test.native test.byte test.err
+	rm -f ocaml_python.log

@@ -260,8 +260,14 @@ and parse_arg ?tilde_ok:(tilde_ok=false) ~assign:(assign:bool) (s : char list) (
      | _,[] -> failwith "Expected '=' terminating variable name, found EOF"
      in
      arg_char assign v s bqlist stack
+  | '\130'::s, _ ->
+     (* original behavior *)
+     (* raise (ParseException "bad substitution (missing variable name in ${}?") *)
+     (* ignoring malformed stuff (e.g., from arrays) to behave the same as pash's python bindings *)
+     let a,s,bqlist,stack = parse_arg ~assign s bqlist stack in
+     (C '\194'::C '\130'::a,s,bqlist,stack)
+
   (* CTLENDVAR *)
-  | '\130'::_, _ -> raise (ParseException "bad substitution (missing variable name in ${}?")
   | '\131'::s,`CTLVar::stack' -> [],s,bqlist,stack'
   | '\131'::_,`CTLAri::_ -> failwith "Saw CTLENDVAR before CTLENDARI"
   | '\131'::_,`CTLQuo::_ -> failwith "Saw CTLENDVAR before CTLQUOTEMARK"
@@ -466,7 +472,7 @@ and string_of_redir = function
   | Dup (ToFD,fd,tgt)   -> show_unless 1 fd ^ ">&" ^ string_of_arg tgt
   | Dup (FromFD,fd,tgt) -> show_unless 0 fd ^ "<&" ^ string_of_arg tgt
   | Heredoc (t,fd,a) ->
-     let heredoc = string_of_arg a in
+     let heredoc = string_of_arg ~quoted:true a in
      let marker = fresh_marker (lines heredoc) "EOF" in
      show_unless 0 fd ^ "<<" ^
      (if t = XHere then marker else "'" ^ marker ^ "'") ^ "\n" ^ heredoc ^ marker ^ "\n"

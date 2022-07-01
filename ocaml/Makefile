@@ -28,24 +28,10 @@ ast_json.ml : ast_atd.atd
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml
 	ocamlfind ocamlmklib -g -package str,ctypes,ctypes.foreign -L$(BUILD) -ldash $^ -o dash
 
-test : test.native test.byte $(wildcard ../test/tests/*)
-	@echo "TESTING test.native"
+test : json_to_shell shell_to_json $(wildcard ../tests/*)
 	@for f in ../test/tests/*; do \
-		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.native $$f 2>test.err; \
+		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./rt.sh $$f; \
 	done
-	@echo "TESTING test.byte"
-	@for f in ../test/tests/*; do \
-		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./test.byte $$f 2>test.err; \
-	done
-
-test.native : test.ml dash.cmxa
-	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlopt -g -thread -package threads,str,ctypes,ctypes.foreign -linkpkg -ccopt -L$(BUILD) -ccopt -Wl,-rpath -ccopt -Wl,$(BUILD) -cclib -ldash dash.cmxa test.ml -o $@
-
-test.byte : test.ml dash.cmxa
-	LD_LIBRARY_PATH=$(BUILD) ocamlfind ocamlc -g -thread -package threads,str,ctypes,ctypes.foreign -linkpkg -I $(BUILD) -ccopt -L$(BUILD) -dllpath $(BUILD) -cclib -ldash dash.cma test.ml -o $@
-
-test.ml : ../test/test.ml
-	cp $< $@
 
 clean :
 	rm -f *.o *.cmo *.cmi *.cmx dash.a dash.cma dash.cmxa

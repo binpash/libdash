@@ -526,7 +526,7 @@ def string_of_redir (redir):
     elif (type == "Heredoc"):
         (t, fd, a) = params;
 
-        heredoc = string_of_arg (a);
+        heredoc = string_of_arg (a, is_quoted = True);
         marker = fresh_marker (heredoc);
 
         stri = show_unless (0, fd) + "<<";
