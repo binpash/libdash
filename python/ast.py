@@ -178,7 +178,7 @@ def mk_dup (ty, n):
             for i in range (len (dupfd_str)):
                 tgt.append (["C", ord (dupfd_str [i])])
     else:
-        tgt = to_arg (vname.narg)
+        tgt = to_arg (vname.contents.narg)
 
     return (["Dup", [ty, ndup.fd, tgt]])
 
