@@ -342,7 +342,10 @@ def string_of_arg_char (c, is_quoted=False):
         else:
             return escaped (param)
     elif (type == "C"):
-        return chr (param);
+        if chr(param) == '"':
+            return '\\"'
+        else:
+            return chr (param);
     elif (type == "T"):
         if (param == "None"):
             return "~";

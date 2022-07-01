@@ -428,6 +428,7 @@ and string_of_arg_char ?quoted:(quoted=false) = function
      else if String.contains chars_to_escape_when_no_quotes c && not quoted
      then "\\" ^ String.make 1 c
      else Char.escaped c
+  | C '"' when quoted -> "\\\""
   | C c -> String.make 1 c
   | T None -> "~"
   | T (Some u) -> "~" ^ u

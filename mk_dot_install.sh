@@ -3,20 +3,23 @@
 set -e
 
 libdash_files=$(ls _build/lib)
-bindings_files="META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx shell_to_json json_to_shell"
+bindings_files="META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx"
 
-files=
+lib_files=
 for f in ${libdash_files}
 do
-    files="${files} \"_build/lib/${f}\""
+    lib_files="${lib_files} \"_build/lib/${f}\""
 done
 
 for f in ${bindings_files}
 do
-    files="${files} \"ocaml/${f}\""
+    lib_files="${lib_files} \"ocaml/${f}\""
 done
 
+bin_files="shell_to_json json_to_shell"
+
 cat >libdash.install <<EOF
-lib: [${files} ]
+bin: [${bin_files}]
+lib: [${lib_files}]
 EOF
 
