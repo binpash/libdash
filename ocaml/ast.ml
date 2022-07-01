@@ -14,7 +14,7 @@ type t =
   | Semi of (t * t)
   | If of (t * t * t) (* cond, then, else *)
   | While of (t * t) (* test, body *) (* until encoded as a While . Not *)
-  | For of (linno * arg * t * string) (* args, body, var *)
+  | For of (linno * arg list * t * string) (* args, body, var *)
   | Case of (linno * arg * case list)
   | Defun of (linno * string * t) (* name, body *)
  and assign = string * arg
@@ -138,7 +138,7 @@ let rec of_node (n : node union ptr) : t =
   | 11 ->
      let n = n @-> node_nfor in
      For (getf n nfor_linno,
-          to_arg (getf n nfor_args @-> node_narg),
+          to_args (getf n nfor_args),
           of_node (getf n nfor_body),
           getf n nfor_var)
   (* NCASE *)
@@ -364,17 +364,17 @@ let rec to_string = function
      background (to_string a ^ string_of_redirs redirs)
   | Subshell (_,a,redirs) ->
      parens (to_string a ^ string_of_redirs redirs)
-  | And (a1,a2) -> to_string  a1 ^ " && " ^ to_string a2
-  | Or (a1,a2) -> to_string a1 ^ " || " ^ to_string a2
+  | And (a1,a2) -> braces (to_string  a1) ^ " && " ^ braces (to_string a2)
+  | Or (a1,a2) -> braces (to_string a1) ^ " || " ^ braces (to_string a2)
   | Not a -> "! " ^ braces (to_string a)
-  | Semi (a1,a2) -> to_string a1 ^ " ; " ^ to_string a2
+  | Semi (a1,a2) -> braces (to_string a1) ^ " \n " ^ braces (to_string a2)
   | If (c,t,e) -> string_of_if c t e
   | While (Not t,b) ->
      "until " ^ to_string t ^ "; do " ^ to_string b ^ "; done "
   | While (t,b) ->
      "while " ^ to_string t ^ "; do " ^ to_string b ^ "; done "
   | For (_,a,body,var) ->
-     "for " ^ var ^ " in " ^ string_of_arg a ^ "; do " ^
+     "for " ^ var ^ " in " ^ separated string_of_arg a ^ "; do " ^
      to_string body ^ "; done"
   | Case (_,a,cs) ->
      "case " ^ string_of_arg a ^ " in " ^
@@ -389,32 +389,28 @@ and string_of_if c t e =
    | If (c,t,e) -> "; el" ^ string_of_if c t e
    | _ -> "; else " ^ to_string e ^ "; fi")
                                                  
-and string_of_arg_char = function
-  | E '\'' -> "\\'"
-  | E '\"' -> "\\\""
-  | E '(' -> "\\("
-  | E ')' -> "\\)"
-  | E '{' -> "\\{"
-  | E '}' -> "\\}"
-  | E '$' -> "\\$"
-  | E '!' -> "\\!"
-  | E '&' -> "\\&"
-  | E '|' -> "\\|" 
-  | E ';' -> "\\;"
+and string_of_arg_char ?quoted:(quoted=false) = function
+  | E c ->
+     let chars_to_escape = "'\"`(){}$!&|;" in
+     let chars_to_escape_when_no_quotes = "*?[]#<>~ " in
+     if String.contains chars_to_escape c
+     then "\\" ^ String.make 1 c
+     else if String.contains chars_to_escape_when_no_quotes c && not quoted
+     then "\\" ^ String.make 1 c
+     else Char.escaped c
   | C c -> String.make 1 c
-  | E c -> Char.escaped c
   | T None -> "~"
   | T (Some u) -> "~" ^ u
-  | A a -> "$((" ^ string_of_arg a ^ "))"
+  | A a -> "$((" ^ string_of_arg ~quoted a ^ "))"
   | V (Length,_,name,_) -> "${#" ^ name ^ "}"
   | V (vt,nul,name,a) ->
      "${" ^ name ^ (if nul then ":" else "") ^ string_of_var_type vt ^ string_of_arg a ^ "}"
-  | Q a -> "\"" ^ string_of_arg a ^ "\""
+  | Q a -> "\"" ^ string_of_arg ~quoted:true a ^ "\""
   | B t -> "$(" ^ to_string t ^ ")"
 
-and string_of_arg = function
+and string_of_arg ?quoted:(quoted=false) = function
   | [] -> ""
-  | c :: a -> string_of_arg_char c ^ string_of_arg a
+  | c :: a -> string_of_arg_char ~quoted c ^ string_of_arg ~quoted a
 
 and string_of_assign (v,a) = v ^ "=" ^ string_of_arg a
                                                    

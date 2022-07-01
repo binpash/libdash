@@ -14,7 +14,7 @@ type t =
   | Semi of (t * t)
   | If of (t * t * t)
   | While of (t * t)
-  | For of (linno * arg * t * string)
+  | For of (linno * arg list * t * string)
   | Case of (linno * arg * case list)
   | Defun of (linno * string * t)
 and assign = string * arg
