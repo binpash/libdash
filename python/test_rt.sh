@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 SHELL_TO_JSON_OCAML=../ocaml/shell_to_json
 JSON_TO_SHELL_OCAML=../ocaml/json_to_shell
 
@@ -22,8 +21,6 @@ then
     exit 1
 fi
 
-echo "OCaml $testFile" >&2
-
 "$SHELL_TO_JSON_OCAML" < "$testFile" > /tmp/json_ocaml.$$
 if [ $? -ne 0 ]
 then
@@ -37,8 +34,6 @@ then
     echo "REF_ABORT_2: '$testFile' | /tmp/json_ocaml.$$"
     exit 1
 fi
-
-echo "Python $testFile" >&2
 
 python3 "$RT_PYTHON" < "$testFile" > /tmp/rt_python.$$
 if [ $? -ne 0 ]
