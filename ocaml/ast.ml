@@ -299,18 +299,13 @@ and parse_arg ?tilde_ok:(tilde_ok=false) ~assign:(assign:bool) (s : char list) (
   | c::s,_ ->
      arg_char assign (C c) s bqlist stack
 
-and parse_tilde acc = 
-  let ret = if acc = [] then None else Some (implode acc) in
-  function
-  | [] -> (ret , [])
-  (* CTLESC *)
-  | '\129'::_ as s -> None, s
-  (* CTLQUOTEMARK *)
-  | '\136'::_ as s -> None, s
-  (* terminal: CTLENDVAR, /, : *)
-  | '\131'::_ as s -> ret, s
-  | ':'::_ as s -> ret, s
-  | '/'::_ as s -> ret, s
+and parse_tilde acc s =
+  match s with
+  (* CTLESC, CTLQUOTEMARK means no tilde prefix *)
+  | '\129'::_ | '\136'::_ -> None, s
+  (* terminal: CTLVAR, CTLENDVAR, /, :, EOF *)
+  | '\130'::_ | '\131'::_ | ':'::_ | '/'::_ | [] ->
+     if acc = [] then (None, s) else (Some (implode acc), s)
   (* ordinary char *)
   (* TODO 2019-01-03 only characters from the portable character set *)
   | c::s' -> parse_tilde (acc @ [c]) s'  
