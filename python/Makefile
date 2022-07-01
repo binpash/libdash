@@ -2,7 +2,7 @@
 
 test: rt.py ast.py ast2shell.py dash.py parse_to_ast.py
 	@for f in ../test/tests/*; do \
-		../test/round_trip.sh ./rt.py $$f; \
+		LD_LIBRARY_PATH=. ../test/round_trip.sh ./rt.py $$f; \
 	done
 
 # Clean
