@@ -30,7 +30,9 @@ jobs:
           autoconf
           ./configure
           make
-
+          cp src/.libs/dlldash.so python/libdash.so
+          if [ $(uname) = "Darwin" ]; then cp src/.libs/libdash.dylib python/ fi
+            
       - name: Test Python bindings
         run: make -C python test
             

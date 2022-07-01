@@ -4,13 +4,7 @@ from ctypes import *
 from ast import of_node
 from dash import *
 
-if 'PASH_TOP' in os.environ:
-    PASH_TOP = os.environ['PASH_TOP']
-else:
-    GIT_TOP_CMD = [ 'git', 'rev-parse', '--show-toplevel', '--show-superproject-working-tree']
-    PASH_TOP = subprocess.run(GIT_TOP_CMD, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True).stdout.rstrip()
-
-LIBDASH_LIBRARY_PATH = os.path.join(PASH_TOP, "compiler/parser/libdash/src/.libs/libdash.so")
+LIBDASH_LIBRARY_PATH = "libdash.so"
 
 EOF_NLEFT = -99; # libdash/src/input.c
 
