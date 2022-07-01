@@ -30,7 +30,7 @@ dash.cmxa : dash.mli dash.ml ast.mli ast.ml
 
 test : json_to_shell shell_to_json $(wildcard ../tests/*)
 	@for f in ../test/tests/*; do \
-		LD_LIBRARY_PATH=$(BUILD) ../test/round_trip.sh ./rt.sh $$f; \
+		LD_LIBRARY_PATH=$(BUILD):$(LD_LIBRARY_PATH) ../test/round_trip.sh ./rt.sh $$f; \
 	done
 
 clean :

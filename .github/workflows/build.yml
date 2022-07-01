@@ -47,7 +47,7 @@ jobs:
         run: make -C python test
             
       - name: Install OCaml bindings
-        run: opam install . --with-test
+        run: opam install . #--with-test
         
       - name: Test OCaml bindings
         run: opam exec -- make -C ocaml test
