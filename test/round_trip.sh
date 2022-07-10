@@ -8,22 +8,48 @@ fi
 p=$1
 tgt=$2
 
-orig=$(${p} ${tgt} 2>&1)
-if [ "$?" -ne 0 ];
-then echo "${tgt} FAILED, couldn't run (output: ${orig})"; exit 2
+orig=$(mktemp)
+
+"$p" "$tgt" >"$orig"
+if [ "$?" -ne 0 ]
+then
+    echo "RT_ABORT_1: '$tgt' -> '$orig'"
+    exit 3
 fi
 
-rt=$(${p} ${tgt} | ${p} 2>&1)
-if [ "$?" -ne 0 ];
-then echo "${tgt} FAILED round trip, couldn't run (output: $rt)"; exit 3
+rt=$(mktemp)
+
+"$p" "$orig" >"$rt"
+if [ "$?" -ne 0 ]
+then
+    echo "RT_ABORT_2: '$tgt' -> '$orig' -> '$rt'"
+    exit 4
 fi
 
-if [ "${orig}" = "${rt}" ];
-then echo ${tgt} OK; exit 0
+if diff -b "$orig" "$rt" >/dev/null
+then 
+     echo "PASS '$tgt'"
+     exit 0
 else
-    echo ${tgt} FAILED
-    echo ${orig}
-    echo ==========
-    echo ${rt}
+    # try one more time around the loop
+    rtrt=$(mktemp)
+
+    "$p" "$rt" >"$rtrt"
+    if [ "$?" -ne 0 ]
+    then
+        echo "RT_ABORT_3: '$tgt' -> '$orig' -> '$rt' -> '$rtrt'"
+        exit 5
+    fi
+
+    if diff -b "$rt" "$rtrt" >/dev/null
+    then
+        echo "PASS '$tgt' (two runs to fixpoint)"
+        exit 0
+    fi
+    
+    echo "FAIL: '$tgt' first time"
+    diff -ub "$orig" "$rt"
+    echo ">>> '$tgt' second time"
+    diff -ub "$rt" "$rtrt"
     exit 1
 fi

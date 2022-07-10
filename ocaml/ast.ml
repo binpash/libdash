@@ -3,25 +3,25 @@ type linno = int
 exception ParseException of string
            
 type t =
-  | Command of linno * assign list * args * redirection list (* assign, args, redir *)
-  | Pipe of bool * t list (* background?, commands *)
-  | Redir of linno * t * redirection list
-  | Background of linno * t * redirection list 
-  | Subshell of linno * t * redirection list
-  | And of t * t
-  | Or of t * t
-  | Not of t
-  | Semi of t * t
-  | If of t * t * t (* cond, then, else *)
-  | While of t * t (* test, body *) (* until encoded as a While . Not *)
-  | For of linno * arg * t * string (* args, body, var *)
-  | Case of linno * arg * case list
-  | Defun of linno * string * t (* name, body *)
+  | Command of (linno * assign list * args * redirection list) (* assign, args, redir *)
+  | Pipe of (bool * t list) (* background?, commands *)
+  | Redir of (linno * t * redirection list)
+  | Background of (linno * t * redirection list)
+  | Subshell of (linno * t * redirection list)
+  | And of (t * t)
+  | Or of (t * t)
+  | Not of (t)
+  | Semi of (t * t)
+  | If of (t * t * t) (* cond, then, else *)
+  | While of (t * t) (* test, body *) (* until encoded as a While . Not *)
+  | For of (linno * arg list * t * string) (* args, body, var *)
+  | Case of (linno * arg * case list)
+  | Defun of (linno * string * t) (* name, body *)
  and assign = string * arg
  and redirection =
-   | File of redir_type * int * arg
-   | Dup of dup_type * int * arg
-   | Heredoc of heredoc_type * int * arg
+   | File of (redir_type * int * arg)
+   | Dup of (dup_type * int * arg)
+   | Heredoc of (heredoc_type * int * arg)
  and redir_type = To | Clobber | From | FromTo | Append
  and dup_type = ToFD | FromFD
  and heredoc_type = Here | XHere (* for when in a quote... not sure when this comes up *)
@@ -32,7 +32,7 @@ type t =
    | E of char (* escape... necessary for expansion *)
    | T of string option (* tilde *)
    | A of arg (* arith *)
-   | V of var_type * bool (* VSNUL? *) * string * arg
+   | V of (var_type * bool (* VSNUL? *) * string * arg)
    | Q of arg (* quoted *)
    | B of t (* backquote *)
  and var_type =
@@ -89,6 +89,11 @@ open Ctypes
 open Foreign
 open Dash
 
+let rec last = function
+  | [] -> None
+  | [x] -> Some x
+  | x::xs -> last xs
+
 let skip = Command (-1,[],[],[])
 
 let special_chars : char list = explode "|&;<>()$`\\\"'"
@@ -138,7 +143,7 @@ let rec of_node (n : node union ptr) : t =
   | 11 ->
      let n = n @-> node_nfor in
      For (getf n nfor_linno,
-          to_arg (getf n nfor_args @-> node_narg),
+          to_args (getf n nfor_args),
           of_node (getf n nfor_body),
           getf n nfor_var)
   (* NCASE *)
@@ -215,21 +220,21 @@ and of_binary (n : node union ptr) =
   (of_node (getf n nbinary_ch1), of_node (getf n nbinary_ch2))
 
 and to_arg (n : narg structure) : arg =
-  let a,s,bqlist,stack = parse_arg (explode (getf n narg_text)) (getf n narg_backquote) [] in
+  let a,s,bqlist,stack = parse_arg ~tilde_ok:true ~assign:false (explode (getf n narg_text)) (getf n narg_backquote) [] in
   (* we should have used up the string and have no backquotes left in our list *)
   assert (s = []);
   assert (nullptr bqlist);
   assert (stack = []);
   a  
 
-and parse_arg (s : char list) (bqlist : nodelist structure ptr) stack =
+and parse_arg ?tilde_ok:(tilde_ok=false) ~assign:(assign:bool) (s : char list) (bqlist : nodelist structure ptr) stack =
   match s,stack with
   | [],[] -> [],[],bqlist,[]
   | [],`CTLVar::_ -> failwith "End of string before CTLENDVAR"
   | [],`CTLAri::_ -> failwith "End of string before CTLENDARI"
   | [],`CTLQuo::_ -> failwith "End of string before CTLQUOTEMARK"
   (* CTLESC *)
-  | '\129'::c::s,_ -> arg_char (E c) s bqlist stack
+  | '\129'::c::s,_ -> arg_char assign (E c) s bqlist stack
   (* CTLVAR *)
   | '\130'::t::s,_ ->
      let var_name,s = split_at (fun c -> c = '=') s in
@@ -249,14 +254,20 @@ and parse_arg (s : char list) (bqlist : nodelist structure ptr) stack =
         failwith ("Missing CTLENDVAR for VSNORMAL/VSLENGTH, found " ^ Char.escaped c)
      (* every other VSTYPE takes mods before CTLENDVAR *)
      | vstype,'='::s ->
-        let a,s,bqlist,stack' = parse_arg s bqlist (`CTLVar::stack) in
+        let a,s,bqlist,stack' = parse_arg ~tilde_ok:true ~assign s bqlist (`CTLVar::stack) in
         V (var_type vstype,t land 0x10 = 0x10,implode var_name,a), s, bqlist, stack'
      | _,c::_ -> failwith ("Expected '=' terminating variable name, found " ^ Char.escaped c)
      | _,[] -> failwith "Expected '=' terminating variable name, found EOF"
      in
-     arg_char v s bqlist stack
+     arg_char assign v s bqlist stack
+  | '\130'::s, _ ->
+     (* original behavior *)
+     (* raise (ParseException "bad substitution (missing variable name in ${}?") *)
+     (* ignoring malformed stuff (e.g., from arrays) to behave the same as pash's python bindings *)
+     let a,s,bqlist,stack = parse_arg ~assign s bqlist stack in
+     (C '\194'::C '\130'::a,s,bqlist,stack)
+
   (* CTLENDVAR *)
-  | '\130'::_, _ -> raise (ParseException "bad substitution (missing variable name in ${}?")
   | '\131'::s,`CTLVar::stack' -> [],s,bqlist,stack'
   | '\131'::_,`CTLAri::_ -> failwith "Saw CTLENDVAR before CTLENDARI"
   | '\131'::_,`CTLQuo::_ -> failwith "Saw CTLENDVAR before CTLQUOTEMARK"
@@ -265,12 +276,12 @@ and parse_arg (s : char list) (bqlist : nodelist structure ptr) stack =
   | '\132'::s,_ ->
      if nullptr bqlist
      then failwith "Saw CTLBACKQ but bqlist was null"
-     else arg_char (B (of_node (bqlist @-> nodelist_n))) s (bqlist @-> nodelist_next) stack
+     else arg_char assign (B (of_node (bqlist @-> nodelist_n))) s (bqlist @-> nodelist_next) stack
   (* CTLARI *)
   | '\134'::s,_ ->
-     let a,s,bqlist,stack' = parse_arg s bqlist (`CTLAri::stack) in
+     let a,s,bqlist,stack' = parse_arg ~assign s bqlist (`CTLAri::stack) in
      assert (stack = stack');
-     arg_char (A a) s bqlist stack'
+     arg_char assign (A a) s bqlist stack'
   (* CTLENDARI *)
   | '\135'::s,`CTLAri::stack' -> [],s,bqlist,stack'
   | '\135'::_,`CTLVar::_' -> failwith "Saw CTLENDARI before CTLENDVAR"
@@ -279,48 +290,73 @@ and parse_arg (s : char list) (bqlist : nodelist structure ptr) stack =
   (* CTLQUOTEMARK *)
   | '\136'::s,`CTLQuo::stack' -> [],s,bqlist,stack'
   | '\136'::s,_ ->
-     let a,s,bqlist,stack' = parse_arg s bqlist (`CTLQuo::stack) in
+     let a,s,bqlist,stack' = parse_arg ~assign s bqlist (`CTLQuo::stack) in
      assert (stack' = stack);
-     arg_char (Q a) s bqlist stack'
+     arg_char assign (Q a) s bqlist stack'
   (* tildes *)
   | '~'::s,stack ->
      if List.exists (fun m -> m = `CTLQuo || m = `CTLAri) stack
      then (* we're in arithmetic or double quotes, so tilde is ignored *)
-       arg_char (C '~') s bqlist stack
+       arg_char assign (C '~') s bqlist stack
      else
        let uname,s' = parse_tilde [] s in
-       arg_char (T uname) s' bqlist stack
+       arg_char assign (T uname) s' bqlist stack
   (* ordinary character *)
   | c::s,_ ->
-     arg_char (C c) s bqlist stack
+     arg_char assign (C c) s bqlist stack
 
-and parse_tilde acc = 
-  let ret = if acc = [] then None else Some (implode acc) in
-  function
-  | [] -> (ret , [])
-  (* CTLESC *)
-  | '\129'::_ as s -> None, s
-  (* CTLQUOTEMARK *)
-  | '\136'::_ as s -> None, s
-  (* terminal: CTLENDVAR, /, : *)
-  | '\131'::_ as s -> ret, s
-  | ':'::_ as s -> ret, s
-  | '/'::_ as s -> ret, s
+and parse_tilde acc s =
+  match s with
+  (* CTLESC, CTLVAR, CTLQUOTEMARK, CTLBACKQ, CTLARI: no tilde prefix *)
+  | '\129'::_ | '\130'::_ | '\132'::_ | '\134'::_ | '\136'::_ -> None, s
+  (* CTLENDVAR, CTLENDARI, /, :, EOF: terminate tilde prefix *)
+  | '\131'::_ | '\135'::_
+  | ':'::_ | '/'::_ | [] ->
+     if acc = [] then (None, s) else (Some (implode acc), s)
   (* ordinary char *)
   (* TODO 2019-01-03 only characters from the portable character set *)
   | c::s' -> parse_tilde (acc @ [c]) s'  
               
-and arg_char c s bqlist stack =
-  let a,s,bqlist,stack = parse_arg s bqlist stack in
+and arg_char assign c s bqlist stack =
+  let tilde_ok = 
+    match c with
+    | C c -> assign && (match last s with
+                       | Some ':' -> true
+                       | _ -> false)
+    | _ -> false
+  in
+  let a,s,bqlist,stack = parse_arg ~tilde_ok ~assign s bqlist stack in
   (c::a,s,bqlist,stack)
 
-and to_assign v = function
-  | [] -> failwith ("Never found an '=' sign in assignment, got " ^ implode v)
-  | C '=' :: a -> (implode v,a)
-  | C c :: a -> to_assign (v @ [c]) a
-  | _ -> failwith "Unexpected special character in assignment"
+and extract_assign v = function
+  | [] -> failwith ("Never found an '=' sign in assignment, got " ^ implode (List.rev v))
+  | '=' :: a -> (implode (List.rev v),a)
+  | '\129'::_ -> failwith "Unexpected CTLESC in variable name"
+  | '\130'::_ -> failwith "Unexpected CTLVAR in variable name"
+  | '\131'::_ -> failwith "Unexpected CTLENDVAR in variable name"
+  | '\132'::_ -> failwith "Unexpected CTLBACKQ in variable name"
+  | '\133'::_ -> failwith "Unexpected CTL??? in variable name"
+  | '\134'::_ -> failwith "Unexpected CTLARI in variable name"
+  | '\135'::_ -> failwith "Unexpected CTLENDARI in variable name"
+  | '\136'::_ -> failwith "Unexpected CTLQUOTEMARK in variable name"
+  | c :: a ->
+     extract_assign (c::v) a
+
+and to_assign (n : narg structure) : (string * arg) =
+  let (v,t) = extract_assign [] (explode (getf n narg_text)) in
+  let a,s,bqlist,stack = parse_arg ~tilde_ok:true ~assign:true t (getf n narg_backquote) [] in
+  (* we should have used up the string and have no backquotes left in our list *)
+  assert (s = []);
+  assert (nullptr bqlist);
+  assert (stack = []);
+  (v,a)
     
-and to_assigns n = List.map (to_assign []) (to_args n)
+and to_assigns n = 
+  if nullptr n
+  then [] 
+  else (assert (n @-> node_type = 15);
+        let n = n @-> node_narg in
+        to_assign n::to_assigns (getf n narg_next))
     
 and to_args (n : node union ptr) : args =
   if nullptr n
@@ -337,7 +373,24 @@ let show_unless expected actual =
   else string_of_int actual
 
 let background s = "{ " ^ s ^ " & }"
-                            
+
+let lines = Str.split (Str.regexp "[\n]+")
+
+let fresh_marker heredoc =  
+  let eofs_in_line line =
+    if String.length line > 2 && String.get line 0 = 'E' && String.get line 1 == 'O'
+    then
+      try String.rindex line 'F' - 1
+      with Not_found -> 0
+    else 0
+  in
+  let rec find_eofs lines max_fs =
+    match lines with
+    | [] -> max_fs
+    | line::lines -> find_eofs lines (max max_fs (eofs_in_line line))
+  in
+  "EOF" ^ String.make (find_eofs heredoc 0) 'F'
+  
 let rec to_string = function
   | Command (_,assigns,cmds,redirs) ->
      separated string_of_assign assigns ^
@@ -364,17 +417,17 @@ let rec to_string = function
      background (to_string a ^ string_of_redirs redirs)
   | Subshell (_,a,redirs) ->
      parens (to_string a ^ string_of_redirs redirs)
-  | And (a1,a2) -> to_string  a1 ^ " && " ^ to_string a2
-  | Or (a1,a2) -> to_string a1 ^ " || " ^ to_string a2
+  | And (a1,a2) -> braces (to_string  a1) ^ " && " ^ braces (to_string a2)
+  | Or (a1,a2) -> braces (to_string a1) ^ " || " ^ braces (to_string a2)
   | Not a -> "! " ^ braces (to_string a)
-  | Semi (a1,a2) -> to_string a1 ^ " ; " ^ to_string a2
+  | Semi (a1,a2) -> braces (to_string a1) ^ " \n " ^ braces (to_string a2)
   | If (c,t,e) -> string_of_if c t e
   | While (Not t,b) ->
      "until " ^ to_string t ^ "; do " ^ to_string b ^ "; done "
   | While (t,b) ->
      "while " ^ to_string t ^ "; do " ^ to_string b ^ "; done "
   | For (_,a,body,var) ->
-     "for " ^ var ^ " in " ^ string_of_arg a ^ "; do " ^
+     "for " ^ var ^ " in " ^ separated string_of_arg a ^ "; do " ^
      to_string body ^ "; done"
   | Case (_,a,cs) ->
      "case " ^ string_of_arg a ^ " in " ^
@@ -389,33 +442,38 @@ and string_of_if c t e =
    | If (c,t,e) -> "; el" ^ string_of_if c t e
    | _ -> "; else " ^ to_string e ^ "; fi")
                                                  
-and string_of_arg_char = function
-  | E '\'' -> "\\'"
-  | E '\"' -> "\\\""
-  | E '(' -> "\\("
-  | E ')' -> "\\)"
-  | E '{' -> "\\{"
-  | E '}' -> "\\}"
-  | E '$' -> "\\$"
-  | E '!' -> "\\!"
-  | E '&' -> "\\&"
-  | E '|' -> "\\|" 
-  | E ';' -> "\\;"
+and string_of_arg_char ?quoted:(quoted=false) = function
+  | E c ->
+     let chars_to_escape = "'\"`(){}$!&|;" in
+     let chars_to_escape_when_no_quotes = "*?[]#<>~ " in
+     if String.contains chars_to_escape c
+     then "\\" ^ String.make 1 c
+     else if String.contains chars_to_escape_when_no_quotes c && not quoted
+     then "\\" ^ String.make 1 c
+     else Char.escaped c
+  | C '"' when quoted -> "\\\""
   | C c -> String.make 1 c
-  | E c -> Char.escaped c
   | T None -> "~"
   | T (Some u) -> "~" ^ u
-  | A a -> "$((" ^ string_of_arg a ^ "))"
+  | A a -> "$((" ^ string_of_arg ~quoted a ^ "))"
   | V (Length,_,name,_) -> "${#" ^ name ^ "}"
   | V (vt,nul,name,a) ->
-     "${" ^ name ^ (if nul then ":" else "") ^ string_of_var_type vt ^ string_of_arg a ^ "}"
-  | Q a -> "\"" ^ string_of_arg a ^ "\""
+     "${" ^ name ^ (if nul then ":" else "") ^ string_of_var_type vt ^ string_of_arg ~quoted a ^ "}"
+  | Q a -> "\"" ^ string_of_arg ~quoted:true a ^ "\""
   | B t -> "$(" ^ to_string t ^ ")"
 
-and string_of_arg = function
+and string_of_arg ?quoted:(quoted=false) = function
   | [] -> ""
-  | c :: a -> string_of_arg_char c ^ string_of_arg a
+  | c :: a ->
+     let char = string_of_arg_char ~quoted c in
+     if char = "$" && next_is_escaped a
+     then "\\$" ^ string_of_arg ~quoted a
+     else char ^ string_of_arg ~quoted a
 
+and next_is_escaped = function
+  | E _ :: _ -> true
+  | _ -> false
+                
 and string_of_assign (v,a) = v ^ "=" ^ string_of_arg a
                                                    
 and string_of_case c =
@@ -431,8 +489,8 @@ and string_of_redir = function
   | Dup (ToFD,fd,tgt)   -> show_unless 1 fd ^ ">&" ^ string_of_arg tgt
   | Dup (FromFD,fd,tgt) -> show_unless 0 fd ^ "<&" ^ string_of_arg tgt
   | Heredoc (t,fd,a) ->
-     let heredoc = string_of_arg a in
-     let marker = fresh_marker (lines heredoc) "EOF" in
+     let heredoc = string_of_arg ~quoted:true a in
+     let marker = fresh_marker (lines heredoc) in
      show_unless 0 fd ^ "<<" ^
      (if t = XHere then marker else "'" ^ marker ^ "'") ^ "\n" ^ heredoc ^ marker ^ "\n"
                                                                                

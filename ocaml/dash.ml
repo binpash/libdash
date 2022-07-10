@@ -401,7 +401,7 @@ let rec show (n : node union ptr) : string =
   (* NFOR *)
   | 11 ->
      let n = n @-> node_nfor in
-     "for " ^ (getf n nfor_var) ^ " in " ^ sharg (getf n nfor_args @-> node_narg) ^ "; do " ^ show (getf n nfor_body) ^ "; done"
+     "for " ^ (getf n nfor_var) ^ " in " ^ intercalate " " (List.map sharg (arglist (getf n nfor_args @-> node_narg))) ^ "; do " ^ show (getf n nfor_body) ^ "; done"
   (* NCASE *)
   | 12 ->
      let n = n @-> node_ncase in
