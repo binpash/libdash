@@ -18,42 +18,40 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+     - name: Checkout code
+       uses: actions/checkout@v2
 
-      - name: Use OCaml ${{ matrix.ocaml-compiler }}
-        uses: avsm/setup-ocaml@v2
-        with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-
-      - name: Install system dependencies (via OPAM)
-        run: |
-          opam pin add libdash . --no-action
-          opam depext libdash --yes --with-test
-          
-#      - name: Build dash
-#        run: |
-#          if [ $(uname) = "Darwin" ]; then glibtoolize; else libtoolize; fi
-#          aclocal
-#          autoheader
-#          automake --add-missing
-#          autoconf
-#          ./configure
-#          make
-#          cp src/.libs/dlldash.so python/libdash.so
-#          if [ $(uname) = "Darwin" ]; then cp src/.libs/libdash.dylib python/; fi
-#            
-#      - name: Test Python bindings
-#        run: make -C python test
-#            
-      - name: Install OCaml bindings
-        run: opam install .
+     - name: Use OCaml ${{ matrix.ocaml-compiler }}
+       uses: avsm/setup-ocaml@v2
+       with:
+         ocaml-compiler: ${{ matrix.ocaml-compiler }}
         
-      - name: Test OCaml bindings
-        run: |
-          ldd $(opam exec -- which shell_to_json) || otool -L $(opam exec -- which shell_to_json)
-          opam exec -- make -C ocaml test
+     - name: Install system dependencies (via OPAM)
+       run: |
+         opam pin add libdash . --no-action
+         opam depext libdash --yes --with-test
+         
+     - name: Build dash
+       run: |
+         if [ $(uname) = "Darwin" ]; then glibtoolize; else libtoolize; fi
+         aclocal
+         autoheader
+         automake --add-missing
+         autoconf
+         ./configure
+         make
+         cp src/.libs/dlldash.so python/libdash.so
+         if [ $(uname) = "Darwin" ]; then cp src/.libs/libdash.dylib python/; fi
+            
+     - name: Test Python bindings
+       run: make -C python test
+            
+     - name: Install OCaml bindings
+       run: opam install .
+       
+     - name: Test OCaml bindings
+       run: opam exec -- make -C ocaml test
 
-#      - name: Compare OCaml and Python bindings
-#        run: opam exec -- make -C test test
+     - name: Compare OCaml and Python bindings
+       run: opam exec -- make -C test test
         
