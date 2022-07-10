@@ -13,7 +13,9 @@ jobs:
           - macos-latest
           - ubuntu-latest
         ocaml-compiler:
+          - 4.12.x
           - 4.13.x
+          - 4.14.x
 
     runs-on: ${{ matrix.os }}
 
@@ -54,4 +56,3 @@ jobs:
 
      - name: Compare OCaml and Python bindings
        run: opam exec -- make -C test test
-        
