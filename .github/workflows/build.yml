@@ -4,8 +4,8 @@ on:
   - pull_request
   - push
 
-jobs:
-  build:
+jobs:                
+  build-and-test:
     strategy:
       fail-fast: false
       matrix:
@@ -47,10 +47,12 @@ jobs:
         run: make -C python test
             
       - name: Install OCaml bindings
-        run: opam install . #--with-test
+        run: opam install .
         
       - name: Test OCaml bindings
-        run: opam exec -- make -C ocaml test
+        run: |
+          ldd $(which shell_to_json)
+          opam exec -- make -C ocaml test
 
       - name: Compare OCaml and Python bindings
         run: opam exec -- make -C test test

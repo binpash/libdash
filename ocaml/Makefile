@@ -2,7 +2,7 @@ BUILD=$(abspath ../_build/lib)
 
 .PHONY : all install clean
 
-all : dash.cmxa dash.cma META shell_to_json json_to_shell
+all : dash.cmxa META shell_to_json json_to_shell
 
 install : all
 	ocamlfind install libdash META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx
