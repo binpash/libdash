@@ -2,6 +2,8 @@
 
 *libdash* is a fork of the Linux Kernel's `dash` shell that builds a linkable library with extra exposed interfaces. The primary use of libdash is to parse shell scripts, but it could be used for more.
 
+The OCaml bindings---packaged as the [`libdash` OPAM package](https://opam.ocaml.org/packages/libdash/)---include two executables, `shell_to_json` and `json_to_shell`.
+
 # What are the dependencies?
 
 The C code for dash should build on a wide variety of systems. The library may not build on platforms with esoteric linkers; it's been tested on OS X.
