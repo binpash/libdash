@@ -16,7 +16,7 @@ do
     lib_files="${lib_files} \"ocaml/${f}\""
 done
 
-bin_files="shell_to_json json_to_shell"
+bin_files="\"ocaml/shell_to_json\" \"ocaml/json_to_shell\""
 
 cat >libdash.install <<EOF
 bin: [${bin_files}]

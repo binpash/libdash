@@ -1,7 +1,16 @@
 #!/bin/sh
 
-: ${SHELL_TO_JSON=$(dirname $0)/shell_to_json}
-: ${JSON_TO_SHELL=$(dirname $0)/json_to_shell}
+: ${SHELL_TO_JSON=shell_to_json}
+if ! type shell_to_json >/dev/null 2>&1
+then
+  SHELL_TO_JSON=$(dirname $0)/$SHELL_TO_JSON
+fi
+
+: ${JSON_TO_SHELL=json_to_shell}
+if ! type json_to_shell >/dev/null 2>&1
+then
+  JSON_TO_SHELL=$(dirname $0)/json_to_shell
+fi
 
 if [ $# -ne 1 ]
 then

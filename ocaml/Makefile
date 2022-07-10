@@ -28,8 +28,8 @@ ast_json.ml : ast_atd.atd
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml
 	ocamlfind ocamlmklib -g -package str,ctypes,ctypes.foreign -L$(BUILD) -ldash $^ -o dash
 
-test : json_to_shell shell_to_json $(wildcard ../tests/*)
-	ls -lR $(BUILD)
+test : $(wildcard ../tests/*)
+	type json_to_shell >/dev/null 2>&1 && type shell_to_json >/dev/null 2>&1 || $(MAKE) json_to_shell shell_to_json
 	@for f in ../test/tests/*; do \
 		LD_LIBRARY_PATH=$(BUILD):$(LD_LIBRARY_PATH) ../test/round_trip.sh ./rt.sh $$f; \
 	done

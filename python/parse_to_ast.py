@@ -4,7 +4,8 @@ from ctypes import *
 from ast import of_node
 from dash import *
 
-LIBDASH_LIBRARY_PATH = "libdash.so"
+FILE_PATH = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))
+LIBDASH_LIBRARY_PATH = os.path.join(FILE_PATH, "libdash.so")
 
 EOF_NLEFT = -99; # libdash/src/input.c
 
