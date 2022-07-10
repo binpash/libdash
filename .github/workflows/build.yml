@@ -51,7 +51,7 @@ jobs:
         
       - name: Test OCaml bindings
         run: |
-          opam exec -- ldd $(which shell_to_json)
+          ldd $(opam exec -- which shell_to_json) || otool -L $(opam exec -- which shell_to_json)
           opam exec -- make -C ocaml test
 
 #      - name: Compare OCaml and Python bindings
