@@ -5,16 +5,16 @@ BUILD=$(abspath ../_build/lib)
 all : dash.cmxa META shell_to_json json_to_shell
 
 install : all
-	ocamlfind install libdash META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx
+	ocamlfind install libdash META dash.cmxa dash.cma dash.a dash.mli dash.cmi dash.cmo dash.cmx ast.mli ast.cmi ast.cmo ast.cmx shell_to_json json_to_shell
 
 META : mk_meta.sh
 	./mk_meta.sh
 
 shell_to_json: dash.cmxa ast_json.mli ast_json.ml shell_to_json.ml
-	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign -linkpkg $^ -o $@
+	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign $^ -o $@
 
 json_to_shell: dash.cmxa ast_json.mli ast_json.ml json_to_shell.ml
-	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign -linkpkg $^ -o $@
+	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign $^ -o $@
 
 ast_json.mli: ast_json.ml
 
