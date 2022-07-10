@@ -44,7 +44,9 @@ ar-lib
 config.*
 src/libdash.a
 *.lo
+*.dylib
 m4
 libtool
 ltmain.sh
 ocamlprof.dump
+__pycache__
