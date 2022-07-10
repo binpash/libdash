@@ -47,7 +47,7 @@ else
         exit 0
     fi
     
-    echo "FAIL '$tgt' first time"
+    echo "FAIL: '$tgt' first time"
     diff -ub "$orig" "$rt"
     echo ">>> '$tgt' second time"
     diff -ub "$rt" "$rtrt"

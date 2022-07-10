@@ -14,3 +14,4 @@ ast_json.mli
 json_to_shell
 shell_to_json
 *-e
+ocaml.log

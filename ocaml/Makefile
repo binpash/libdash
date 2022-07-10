@@ -28,11 +28,11 @@ ast_json.ml : ast_atd.atd
 dash.cmxa : dash.mli dash.ml ast.mli ast.ml
 	ocamlfind ocamlmklib -g -package str,ctypes,ctypes.foreign -L$(BUILD) -ldash $^ -o dash
 
-test : $(wildcard ../tests/*)
-	type json_to_shell >/dev/null 2>&1 && type shell_to_json >/dev/null 2>&1 || $(MAKE) json_to_shell shell_to_json
-	@for f in ../test/tests/*; do \
-		LD_LIBRARY_PATH=$(BUILD):$(LD_LIBRARY_PATH) ../test/round_trip.sh ./rt.sh $$f; \
-	done
+test : $(wildcard ../test/*)
+	@type json_to_shell >/dev/null 2>&1 && type shell_to_json >/dev/null 2>&1 || $(MAKE) json_to_shell shell_to_json
+	@find ../test/tests ../test/pash_tests -type f | while read f; do ../test/round_trip.sh ./rt.sh "$$f"; done | tee ocaml.log
+	@cat ocaml.log | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
+	@grep ':' ocaml.log && echo "FAILED" && exit 1 || exit 0
 
 clean :
 	rm -f *.o *.cmo *.cmi *.cmx dash.a dash.cma dash.cmxa

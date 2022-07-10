@@ -373,7 +373,24 @@ let show_unless expected actual =
   else string_of_int actual
 
 let background s = "{ " ^ s ^ " & }"
-                            
+
+let lines = Str.split (Str.regexp "[\n]+")
+
+let fresh_marker heredoc =  
+  let eofs_in_line line =
+    if String.length line > 2 && String.get line 0 = 'E' && String.get line 1 == 'O'
+    then
+      try String.rindex line 'F' - 1
+      with Not_found -> 0
+    else 0
+  in
+  let rec find_eofs lines max_fs =
+    match lines with
+    | [] -> max_fs
+    | line::lines -> find_eofs lines (max max_fs (eofs_in_line line))
+  in
+  "EOF" ^ String.make (find_eofs heredoc 0) 'F'
+  
 let rec to_string = function
   | Command (_,assigns,cmds,redirs) ->
      separated string_of_assign assigns ^
@@ -473,7 +490,7 @@ and string_of_redir = function
   | Dup (FromFD,fd,tgt) -> show_unless 0 fd ^ "<&" ^ string_of_arg tgt
   | Heredoc (t,fd,a) ->
      let heredoc = string_of_arg ~quoted:true a in
-     let marker = fresh_marker (lines heredoc) "EOF" in
+     let marker = fresh_marker (lines heredoc) in
      show_unless 0 fd ^ "<<" ^
      (if t = XHere then marker else "'" ^ marker ^ "'") ^ "\n" ^ heredoc ^ marker ^ "\n"
                                                                                

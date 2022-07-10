@@ -31,7 +31,7 @@ python_ec=$?
 
 if [ "$ocaml_ec" -ne 0 ] && [ "$python_ec" -ne 0 ]
 then
-    echo "PASS: '$testFile' | both abort"
+    echo "PASS '$testFile' | both abort"
     exit 0
 elif [ "$ocaml_ec" -ne 0 ]
 then
@@ -60,4 +60,4 @@ then
     exit 1
 fi
 
-echo "PASS: '$testFile' | $ocaml_rt $python_rt"
+echo "PASS '$testFile'"

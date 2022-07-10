@@ -443,7 +443,7 @@ def string_of_case (c):
 #
 # OCaml implementation above is O(n^1.5). Algorithm below is linear.
 def fresh_marker (heredoc):
-    respectsFound = {};
+    respectsFound = set();
 
     for line in heredoc.split ('\n'):
         respects = 0;
@@ -453,7 +453,7 @@ def fresh_marker (heredoc):
                 if (line [i] == 'F'):
                     respects = i - 2;
 
-            respectsFound [respects] = 1;
+            respectsFound.add(respects);
 
     i = 0;
     while (True):
@@ -527,7 +527,7 @@ def string_of_redir (redir):
         (t, fd, a) = params;
 
         heredoc = string_of_arg (a, is_quoted = True);
-        marker = fresh_marker (heredoc);
+        marker = fresh_marker0 (heredoc);
 
         stri = show_unless (0, fd) + "<<";
         if (t == "XHere"):

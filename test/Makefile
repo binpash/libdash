@@ -7,11 +7,10 @@ OCAML_FILES=../ocaml/rt.sh
 
 test: test_ocaml_python.sh $(PYTHON_FILES) $(OCAML_FILES)
 	@echo "LOCAL TESTS"
-	@find . | grep '[.]sh$$' | while read f; do ./test_ocaml_python.sh "$$f"; done | tee ocaml_python.log
+	@find tests -type f | while read f; do ./test_ocaml_python.sh "$$f"; done | tee ocaml_python.log
 
 	@echo "PASH TESTS"
-	@find "$(SCRIPTS_DIR)" | grep '[.]sh$$' | while read f; do ./test_ocaml_python.sh "$$f"; done | tee -a ocaml_python.log
-	@echo
+	@find pash_tests -type f | while read f; do ./test_ocaml_python.sh "$$f"; done | tee -a ocaml_python.log
 	@cat ocaml_python.log | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
 
 clean :
