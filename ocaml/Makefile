@@ -11,10 +11,10 @@ META : mk_meta.sh
 	./mk_meta.sh
 
 shell_to_json: dash.cmxa ast_json.mli ast_json.ml shell_to_json.ml
-	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign $^ -o $@
+	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign -linkpkg -cclib -L$(BUILD) -cclib -ldash $^ -o $@
 
 json_to_shell: dash.cmxa ast_json.mli ast_json.ml json_to_shell.ml
-	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign $^ -o $@
+	ocamlfind ocamlopt -g -thread -package threads,str,atdgen,ctypes,ctypes.foreign -linkpkg -cclib -L$(BUILD) -cclib -ldash $^ -o $@
 
 ast_json.mli: ast_json.ml
 
