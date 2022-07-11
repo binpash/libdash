@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 
-
 import os;
-# from os import abort;
-
 
 STRING_OF_VAR_TYPE_DICT = {
     "Normal"   : "",
@@ -138,7 +135,10 @@ def background (s):
 #      "case " ^ string_of_arg a ^ " in " ^
 #      separated string_of_case cs ^ " esac"
 #   | Defun (_,name,body) -> name ^ "() {\n" ^ to_string body ^ "\n}"
-def to_string (ast):
+def to_string(ast):
+    """
+    Renders an AST back in shell syntax. 
+    """
     # print (ast);
 
     if (len (ast) == 0):
