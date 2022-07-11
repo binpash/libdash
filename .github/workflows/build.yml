@@ -29,7 +29,7 @@ jobs:
          ocaml-compiler: ${{ matrix.ocaml-compiler }}
                 
      - name: Build Python packages
-       run: sudo python setup.py install
+       run: sudo python3 setup.py install
          
      - name: Test Python bindings
        run: make -C python test
