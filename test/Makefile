@@ -1,6 +1,6 @@
 SCRIPTS_DIR=$(PASH_TOP)
 
-PYTHON_FILES=../python/rt.py ../python/libdash/__init__.py ../python/libdash/_dash.py ../python/libdash/ast.py ../python/libdash/parser.py ../python/libdash/printer.py
+PYTHON_FILES=../python/rt.py $addprefix(../libdash/,__init__.py _dash.py ast.py parser.py printer.py)
 OCAML_FILES=../ocaml/rt.sh
 
 .PHONY : test clean

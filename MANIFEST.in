@@ -1,0 +1,5 @@
+global-exclude *.py[cod] __pycache__ Makefile *.log
+prune src/
+prune ocaml/
+prune test/
+exclude python/rt.py
