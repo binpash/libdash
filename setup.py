@@ -10,7 +10,7 @@ def try_exec(*cmds):
     proc = subprocess.run(cmds)
     
     if proc.returncode != 0:
-        print(f'`{cmds.join(" ")}` failed', file=sys.stderr)
+        print('`{}` failed'.format(' '.join(cmds)), file=sys.stderr)
         proc.check_returncode()
 
 class libdash_build_py(build_py):
