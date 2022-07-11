@@ -34,7 +34,7 @@ jobs:
          opam depext libdash --yes --with-test
          
      - name: Build Python packages
-       run: python setup.py install
+       run: sudo python setup.py install
          
      - name: Test Python bindings
        run: make -C python test
