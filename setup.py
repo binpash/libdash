@@ -1,6 +1,7 @@
 from setuptools import setup
 from setuptools.command.build_py import build_py
 
+import os
 import shutil
 import subprocess
 import sys
@@ -14,6 +15,8 @@ def try_exec(*cmds):
 
 class libdash_build_py(build_py):
     def run(self):
+        build_py.run(self)
+        
         if sys.platform == 'darwin':           
             libtoolize = "glibtoolize"
         else:
@@ -27,11 +30,9 @@ class libdash_build_py(build_py):
         try_exec('./configure')
         try_exec('make')
 
-        shutil.copy2('src/.libs/dlldash.so', 'libdash/libdash.so')
+        shutil.copy2('src/.libs/dlldash.so', os.path.join(self.build_lib, 'libdash/libdash.so'))
         if sys.platform == 'darwin':
-            shutil.copy2('src/.libs/libdash.dylib', 'libdash/libdash.dylib')
-        
-        build_py.run(self)
+            shutil.copy2('src/.libs/libdash.dylib', os.path.join(self.build_lib, 'libdash/libdash.dylib'))
 
 setup(name='libdash',
       packages=['libdash'],
