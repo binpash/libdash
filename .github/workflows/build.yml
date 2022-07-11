@@ -27,12 +27,7 @@ jobs:
        uses: avsm/setup-ocaml@v2
        with:
          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-        
-     - name: Install system dependencies (via OPAM)
-       run: |
-         opam pin add libdash . --no-action
-         opam depext libdash --yes --with-test
-         
+                
      - name: Build Python packages
        run: sudo python setup.py install
          
