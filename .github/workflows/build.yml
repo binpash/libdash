@@ -44,7 +44,10 @@ jobs:
          make
          cp src/.libs/dlldash.so libdash/libdash.so
          if [ $(uname) = "Darwin" ]; then cp src/.libs/libdash.dylib libdash/libdash.dylib; fi
-            
+
+     - name: Build Python packages
+       run: python -m build
+         
      - name: Test Python bindings
        run: make -C python test
             
