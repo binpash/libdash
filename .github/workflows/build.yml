@@ -33,20 +33,8 @@ jobs:
          opam pin add libdash . --no-action
          opam depext libdash --yes --with-test
          
-     - name: Build dash
-       run: |
-         if [ $(uname) = "Darwin" ]; then glibtoolize; else libtoolize; fi
-         aclocal
-         autoheader
-         automake --add-missing
-         autoconf
-         ./configure
-         make
-         cp src/.libs/dlldash.so libdash/libdash.so
-         if [ $(uname) = "Darwin" ]; then cp src/.libs/libdash.dylib libdash/libdash.dylib; fi
-
      - name: Build Python packages
-       run: python -m build
+       run: python setup.py install
          
      - name: Test Python bindings
        run: make -C python test

@@ -14,9 +14,10 @@ prune src/mkinit.dSYM
 prune src/mknodes.dSYM
 prune src/mksignames.dSYM
 prune src/mksyntax.dSYM
-global-exclude  *.dSYM *.o *.lo *.la *.py[cod] __pycache__ Makefile *.log .gitignore
+global-exclude *.dSYM *.o *.lo *.la *.py[cod] __pycache__ Makefile *.log .gitignore
 prune src/.libs
 prune ocaml/
 prune test/
+prune build/
 exclude python/rt.py
 include libdash/libdash.so libdash/libdash.dylib
