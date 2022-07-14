@@ -5,6 +5,13 @@ on:
   - push
 
 jobs:
+  check-version-numbers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check version numbers
+        run: ./version.sh
+  
   build-and-package-python:
     strategy:
       fail-fast: false
@@ -26,13 +33,13 @@ jobs:
              echo Unsupported RUNNER_OS=$RUNNER_OS
              exit 1
            fi
+           sudo pip3 install build
       
       - name: Checkout code
         uses: actions/checkout@v2
       
       - name: Build Python packages
         run: |
-          sudo pip3 install build
           python3 -m build --sdist --wheel --outdir dist/
           echo BUILT:
           ls dist
@@ -80,7 +87,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
- 
+
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: avsm/setup-ocaml@v2
         with:
