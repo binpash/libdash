@@ -30,6 +30,7 @@ jobs:
                 
      - name: Build Python packages
        run: |
+         sudo pip install build
          python -m build --sdist --wheel --outdir dist/
          echo BUILT:
          ls dist
