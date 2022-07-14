@@ -4,8 +4,65 @@ on:
   - pull_request
   - push
 
-jobs:                
-  build-and-test:
+jobs:
+  build-and-package-python:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+     - name: Install dependencies (libtool, aclocal, autoconf)
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo apt-get install libtool automake
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            brew install libtool autoconf automake
+          else
+            echo Unsupported RUNNER_OS=$RUNNER_OS
+            exit 1
+          fi
+
+     - name: Checkout code
+       uses: actions/checkout@v2
+
+     - name: Build Python packages
+       run: |
+         sudo pip install build
+         python -m build --sdist --wheel --outdir dist/
+         echo BUILT:
+         ls dist
+
+     - name: Install Python packages from wheel
+       run: sudo pip3 install dist/libdash-*.whl
+
+     - name: Test Python bindings
+       run: make -C python test
+           
+     - name: Upload macOS wheel
+       uses: actions/upload-artifact@v2
+       if: contains(matrix.os, 'macos')
+       with:
+         name: libdash-ci-py3-none-macosx.whl
+         path: dist/libdash-*.whl
+
+     - name: Upload Linux wheel
+       uses: actions/upload-artifact@v2
+       if: contains(matrix.os, 'ubuntu')
+       with:
+         name: libdash-ci-py3-none-linux_x86_64.whl
+         path: dist/libdash-*.whl
+
+     - name: Upload source distribution (from Linux)
+       uses: actions/upload-artifact@v2
+       if: contains(matrix.os, 'ubuntu')
+       with:
+         path: dist/libdash-*.tar.gz
+      
+  build-both-and-compare:
     strategy:
       fail-fast: false
       matrix:
@@ -27,45 +84,16 @@ jobs:
        uses: avsm/setup-ocaml@v2
        with:
          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-                
-     - name: Build Python packages
-       run: |
-         sudo pip install build
-         python -m build --sdist --wheel --outdir dist/
-         echo BUILT:
-         ls dist
-
-     - name: Install Python packages from wheel
-       run: sudo pip install dist/libdash-*.whl
-
-     - name: Upload macOS wheel
-       uses: actions/upload-artifact@v2
-       if: contains(matrix.os, 'macos')
-       with:
-         name: libdash-ci-py3-none-macosx.whl
-         path: dist/libdash-*.whl
-
-     - name: Upload Linux wheel
-       uses: actions/upload-artifact@v2
-       if: contains(matrix.os, 'ubuntu')
-       with:
-         name: libdash-ci-py3-none-linux_x86_64.whl
-         path: dist/libdash-*.whl
-
-     - name: Upload source distribution (from Linux)
-       uses: actions/upload-artifact@v2
-       if: contains(matrix.os, 'ubuntu')
-       with:
-         path: dist/libdash-*.tar.gz
-
-     - name: Test Python bindings
-       run: make -C python test
-            
+                            
      - name: Install OCaml bindings
        run: opam install .
        
      - name: Test OCaml bindings
        run: opam exec -- make -C ocaml test
 
+       # we don't reuse the wheels so that all of the CI runs can happen concurrently, i.e., we can test OCaml and Python at the same time
+     - name: Install Python directly
+       run: sudo python3 setup.py install
+       
      - name: Compare OCaml and Python bindings
        run: opam exec -- make -C test test
