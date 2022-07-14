@@ -29,8 +29,34 @@ jobs:
          ocaml-compiler: ${{ matrix.ocaml-compiler }}
                 
      - name: Build Python packages
-       run: sudo python3 setup.py install
-         
+       run: |
+         python -m build --sdist --wheel --outdir dist/
+         echo BUILT:
+         ls dist
+
+     - name: Install Python packages from wheel
+       run: sudo pip install dist/libdash-*.whl
+
+     - name: Upload macOS wheel
+       uses: actions/upload-artifact@v2
+       if: contains(matrix.os, 'macos')
+       with:
+         name: libdash-ci-py3-none-macosx.whl
+         path: dist/libdash-*.whl
+
+     - name: Upload Linux wheel
+       uses: actions/upload-artifact@v2
+       if: contains(matrix.os, 'ubuntu')
+       with:
+         name: libdash-ci-py3-none-linux_x86_64.whl
+         path: dist/libdash-*.whl
+
+     - name: Upload source distribution (from Linux)
+       uses: actions/upload-artifact@v2
+       if: contains(matrix.os, 'ubuntu')
+       with:
+         path: dist/libdash-*.tar.gz
+
      - name: Test Python bindings
        run: make -C python test
             
