@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Install dependencies (libtool, aclocal, autoconf)
-         run: |
+        run: |
            if [ "$RUNNER_OS" = "Linux" ]; then
              sudo apt-get install libtool automake
            elif [ "$RUNNER_OS" = "macOS" ]; then
