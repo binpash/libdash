@@ -22,7 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
+          - macos-11
+          - macos-10.15
           - ubuntu-latest
 
     runs-on: ${{ matrix.os }}
@@ -55,13 +56,20 @@ jobs:
       - name: Test Python bindings
         run: make -C python test
             
-      - name: Upload macOS wheel
+      - name: Upload macOS 11.x wheel
         uses: actions/upload-artifact@v2
-        if: contains(matrix.os, 'macos')
+        if: contains(matrix.os, 'macos-11')
         with:
-          name: bdist.macos
+          name: bdist.macos11
           path: dist/libdash-*.whl
-      
+
+      - name: Upload macOS 10.x wheel
+        uses: actions/upload-artifact@v2
+        if: contains(matrix.os, 'macos-10')
+        with:
+          name: bdist.macos10
+          path: dist/libdash-*.whl
+            
       - name: Upload Linux wheel
         uses: actions/upload-artifact@v2
         if: contains(matrix.os, 'ubuntu')
@@ -128,9 +136,13 @@ jobs:
         run: |
           mkdir dist
           VERSION=$(./version.sh)
-          mv bdist.linux/libdash-*.whl dist/libdash-$VERSION-py3-none-linux_x86_64.whl
-          mv bdist.macos/libdash-*.whl dist/libdash-$VERSION-py3-none-macosx.whl
+          ls bdist.*/
+          mv bdist.linux/libdash-*.whl dist/
+          mv bdist.macos11/libdash-*.whl dist/
+          mv bdist.macos10/libdash-*.whl dist/
           mv sdist/libdash-*.tar.gz dist/
+          echo Look on my Works, ye Mighty, and despair!
+          ls dist
   
       - name: Deploy 'latest' release
         uses: "marvinpinto/action-automatic-releases@latest"
