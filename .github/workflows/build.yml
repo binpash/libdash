@@ -46,10 +46,7 @@ jobs:
         uses: actions/checkout@v2
       
       - name: Build Python packages
-        run: |
-          python3 -m build --sdist --wheel --outdir dist/
-          echo BUILT:
-          ls dist
+        run: python3 -m build --sdist --wheel --outdir dist/
       
       - name: Install Python packages from wheel
         run: sudo pip3 install dist/libdash-*.whl
@@ -57,32 +54,10 @@ jobs:
       - name: Test Python bindings
         run: make -C python test
             
-      - name: Upload macOS 12.x wheel
+      - name: Upload binary wheel
         uses: actions/upload-artifact@v2
-        if: contains(matrix.os, 'macos-12')
         with:
-          name: bdist.macos12
-          path: dist/libdash-*.whl
-
-      - name: Upload macOS 11.x wheel
-        uses: actions/upload-artifact@v2
-        if: contains(matrix.os, 'macos-11')
-        with:
-          name: bdist.macos11
-          path: dist/libdash-*.whl
-
-      - name: Upload macOS 10.x wheel
-        uses: actions/upload-artifact@v2
-        if: contains(matrix.os, 'macos-10')
-        with:
-          name: bdist.macos10
-          path: dist/libdash-*.whl
-            
-      - name: Upload Linux wheel
-        uses: actions/upload-artifact@v2
-        if: contains(matrix.os, 'ubuntu')
-        with:
-          name: bdist.linux
+          name: ${{ format('bdist.{0}', matrix.os) }}
           path: dist/libdash-*.whl
       
       - name: Upload source distribution (from Linux)
@@ -145,10 +120,7 @@ jobs:
           mkdir dist
           VERSION=$(./version.sh)
           ls bdist.*/
-          mv bdist.linux/libdash-*.whl dist/
-          mv bdist.macos12/libdash-*.whl dist/
-          mv bdist.macos11/libdash-*.whl dist/            
-          mv bdist.macos10/libdash-*.whl dist/
+          mv bdist.*/libdash-*.whl dist/
           mv sdist/libdash-*.tar.gz dist/
           echo Look on my Works, ye Mighty, and despair!
           ls dist
