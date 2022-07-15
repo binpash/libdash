@@ -22,6 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
+          - macos-12
           - macos-11
           - macos-10.15
           - ubuntu-latest
@@ -56,6 +57,13 @@ jobs:
       - name: Test Python bindings
         run: make -C python test
             
+      - name: Upload macOS 12.x wheel
+        uses: actions/upload-artifact@v2
+        if: contains(matrix.os, 'macos-12')
+        with:
+          name: bdist.macos12
+          path: dist/libdash-*.whl
+
       - name: Upload macOS 11.x wheel
         uses: actions/upload-artifact@v2
         if: contains(matrix.os, 'macos-11')
@@ -89,11 +97,11 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
+          - macos-12
+          - macos-11
+          - macos-10.15
           - ubuntu-latest
         ocaml-compiler:
-          - 4.12.x
-          - 4.13.x
           - 4.14.x
 
     runs-on: ${{ matrix.os }}
@@ -138,7 +146,8 @@ jobs:
           VERSION=$(./version.sh)
           ls bdist.*/
           mv bdist.linux/libdash-*.whl dist/
-          mv bdist.macos11/libdash-*.whl dist/
+          mv bdist.macos12/libdash-*.whl dist/
+          mv bdist.macos11/libdash-*.whl dist/            
           mv bdist.macos10/libdash-*.whl dist/
           mv sdist/libdash-*.tar.gz dist/
           echo Look on my Works, ye Mighty, and despair!
