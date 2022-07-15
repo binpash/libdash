@@ -37,4 +37,5 @@ class libdash_build_py(build_py):
 setup(name='libdash',
       packages=['libdash'],
       cmdclass={'build_py': libdash_build_py},
-      include_package_data=True)
+      include_package_data=True,
+      has_ext_modules=lambda: True)
