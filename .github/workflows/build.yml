@@ -3,6 +3,8 @@ name: Main workflow
 on:
   - pull_request
   - push
+  schedule:
+    - cron: '5 14 * * *'
 
 jobs:
   check-version-numbers:
@@ -57,20 +59,21 @@ jobs:
         uses: actions/upload-artifact@v2
         if: contains(matrix.os, 'macos')
         with:
-          name: libdash-ci-py3-none-macosx.whl
+          name: bdist.macos
           path: dist/libdash-*.whl
       
       - name: Upload Linux wheel
         uses: actions/upload-artifact@v2
         if: contains(matrix.os, 'ubuntu')
         with:
-          name: libdash-ci-py3-none-linux_x86_64.whl
+          name: bdist.linux
           path: dist/libdash-*.whl
       
       - name: Upload source distribution (from Linux)
         uses: actions/upload-artifact@v2
         if: contains(matrix.os, 'ubuntu')
         with:
+          name: sdist
           path: dist/libdash-*.tar.gz
       
   build-both-and-compare:
@@ -108,3 +111,34 @@ jobs:
         
       - name: Compare OCaml and Python bindings
         run: opam exec -- make -C test test
+
+  prerelease:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+      
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v2
+
+      - name: Rename distributions
+        run: |
+          mkdir dist
+          VERSION=$(./version.sh)
+          mv bdist.linux/libdash-*.whl dist/libdash-$VERSION-py3-none-linux_x86_64.whl
+          mv bdist.macos/libdash-*.whl dist/libdash-$VERSION-py3-none-macosx.whl
+          mv sdist/libdash-*.tar.gz dist/
+  
+      - name: Deploy 'latest' release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Python source and binary distributions"
+          files: |
+            dist/*
+
+        
+        
+        
