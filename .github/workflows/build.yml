@@ -116,6 +116,7 @@ jobs:
     needs:
       - check-version-numbers
       - build-and-package-python
+      - build-both-and-compare
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
       
