@@ -113,7 +113,9 @@ jobs:
         run: opam exec -- make -C test test
 
   prerelease:
-    needs: build
+    needs:
+      - check-version-numbers
+      - build-and-package-python
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
       
