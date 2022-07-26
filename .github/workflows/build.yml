@@ -48,7 +48,7 @@ jobs:
              echo Unsupported RUNNER_OS=$RUNNER_OS
              exit 1
            fi
-           sudo pip3 install build
+           sudo pip install build
       
       - name: Checkout code
         uses: actions/checkout@v2
