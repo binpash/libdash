@@ -19,7 +19,7 @@ jobs:
   
   build-and-package-python:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os:
           - macos-12
@@ -77,7 +77,7 @@ jobs:
       
   build-both-and-compare:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os:
           - macos-12
