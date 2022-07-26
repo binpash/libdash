@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Set up Python
         uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies (libtool, aclocal, autoconf)
         run: |
@@ -52,10 +54,10 @@ jobs:
         uses: actions/checkout@v2
           
       - name: Build Python packages
-        run: python3 -m build --sdist --wheel --outdir dist/
+        run: python -m build --sdist --wheel --outdir dist/
       
       - name: Install Python packages from wheel
-        run: sudo pip3 install dist/libdash-*.whl
+        run: sudo pip install dist/libdash-*.whl
       
       - name: Test Python bindings
         run: make -C python test
