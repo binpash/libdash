@@ -54,7 +54,11 @@ jobs:
         uses: actions/checkout@v2
           
       - name: Build Python packages
-        run: python -m build --sdist --wheel --outdir dist/
+        run: |
+            if [ "$RUNNER_OS" = "macOS" ]; then
+              export MACOSX_DEPLOYMENT_TARGET=$(python -c 'import distutils.util; print(distutils.util.get_platform().split("-")[1].replace(".", "_"))')
+            fi
+            python -m build --sdist --wheel --outdir dist/
       
       - name: Install Python packages from wheel
         run: python -m pip install dist/libdash-*.whl
