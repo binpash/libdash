@@ -48,7 +48,7 @@ jobs:
              echo Unsupported RUNNER_OS=$RUNNER_OS
              exit 1
            fi
-           sudo pip install build
+           python -m pip install build
       
       - name: Checkout code
         uses: actions/checkout@v2
@@ -57,7 +57,7 @@ jobs:
         run: python -m build --sdist --wheel --outdir dist/
       
       - name: Install Python packages from wheel
-        run: sudo pip install dist/libdash-*.whl
+        run: python -m pip install dist/libdash-*.whl
       
       - name: Test Python bindings
         run: make -C python test
