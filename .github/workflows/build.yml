@@ -27,9 +27,6 @@ jobs:
           - macos-10.15
           - ubuntu-latest
 
-        python-version:
-          - 3.7
-
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -96,7 +93,7 @@ jobs:
       - name: Test OCaml bindings
         run: opam exec -- make -C ocaml test
  
-        # we don't reuse the wheels so that all of the CI runs can happen concurrently, i.e., we can test OCaml and Python at the same time
+        # we don't reuse the wheels so that all of the CI runs can happen concurrently
       - name: Install Python directly
         run: sudo python3 setup.py install
       
@@ -106,7 +103,7 @@ jobs:
       - name: Compare OCaml and Python bindings
         run: opam exec -- make -C test test
 
-  prerelease:
+  deploy:
     needs:
       - check-version-numbers
       - package-python
@@ -128,8 +125,8 @@ jobs:
           echo Look on my Works, ye Mighty, and despair!
           ls dist
   
-      - name: Deploy 'latest' release
-        uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Deploy 'latest' release on GH
+        uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
@@ -138,8 +135,9 @@ jobs:
           files: |
             dist/*
 
-      - name: Publish distribution 📦 to PyPI
+      - name: Deploy tagged release on PyPI
         if: startsWith(github.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
