@@ -6,6 +6,10 @@ import shutil
 import subprocess
 import sys
 
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text().split('\n')[2:]
+
 def try_exec(*cmds):
     proc = subprocess.run(cmds)
     
@@ -37,5 +41,7 @@ class libdash_build_py(build_py):
 setup(name='libdash',
       packages=['libdash'],
       cmdclass={'build_py': libdash_build_py},
+      long_description=long_description,
+      long_description_content_type='text/markdown',
       include_package_data=True,
       has_ext_modules=lambda: True)
