@@ -17,7 +17,7 @@ jobs:
       - name: Check version numbers
         run: ./version.sh
   
-  build-and-package-python:
+  package-python:
     strategy:
       fail-fast: false
       matrix:
@@ -33,11 +33,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Install dependencies (libtool, aclocal, autoconf)
         run: |
            if [ "$RUNNER_OS" = "Linux" ]; then
@@ -52,12 +47,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Python package
-        run: python setup.py install
-      
-      - name: Test Python bindings
-        run: make -C python test
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.8.1
             
@@ -66,7 +55,11 @@ jobs:
         with:
           name: ${{ format('bdist.{0}', matrix.os) }}
           path: wheelhouse/libdash-*.whl
-      
+
+      - name: Build source distribution (Linux only)
+        if: contains(matrix.os, 'ubuntu')
+        run: python setup.py sdist
+            
       - name: Upload source distribution (from Linux)
         uses: actions/upload-artifact@v2
         if: contains(matrix.os, 'ubuntu')
@@ -106,7 +99,10 @@ jobs:
         # we don't reuse the wheels so that all of the CI runs can happen concurrently, i.e., we can test OCaml and Python at the same time
       - name: Install Python directly
         run: sudo python3 setup.py install
-        
+      
+      - name: Test Python bindings
+        run: make -C python test
+          
       - name: Compare OCaml and Python bindings
         run: opam exec -- make -C test test
 
