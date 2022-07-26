@@ -52,19 +52,22 @@ jobs:
       
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.8.1
           
-      - name: Build Python packages
-        run: |
-            case ${{ matrix.os }} in
-              (macos-12)    MACOSX_DEPLOYMENT_TARGET=12_0;;
-              (macos-11)    MACOSX_DEPLOYMENT_TARGET=11_0;;
-              (macos-10.15) MACOSX_DEPLOYMENT_TARGET=10_15;;
-            esac
-            export MACOSX_DEPLOYMENT_TARGET
-            echo $MACOSX_DEPLOYMENT_TARGET
-            python -m build --sdist --wheel --outdir dist/
+#      - name: Build Python packages
+#        run: |
+#            case ${{ matrix.os }} in
+#              (macos-12)    MACOSX_DEPLOYMENT_TARGET=12_0;;
+#              (macos-11)    MACOSX_DEPLOYMENT_TARGET=11_0;;
+#              (macos-10.15) MACOSX_DEPLOYMENT_TARGET=10_15;;
+#            esac
+#            export MACOSX_DEPLOYMENT_TARGET
+#            echo $MACOSX_DEPLOYMENT_TARGET
+#            python -m build --sdist --wheel --outdir dist/
       
-      - name: Install Python packages from wheel
+      - name: Install Python package
         run: python -m pip install dist/libdash-*.whl
       
       - name: Test Python bindings
@@ -74,7 +77,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ format('bdist.{0}', matrix.os) }}
-          path: dist/libdash-*.whl
+          path: wheelhouse/libdash-*.whl
       
       - name: Upload source distribution (from Linux)
         uses: actions/upload-artifact@v2
