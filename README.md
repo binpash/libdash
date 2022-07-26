@@ -2,6 +2,8 @@
 
 *libdash* is a fork of the Linux Kernel's `dash` shell that builds a linkable library with extra exposed interfaces. The primary use of libdash is to parse shell scripts, but it could be used for more.
 
+The Python bindings are packaged as the [`libdash` PyPi package](https://pypi.org/project/libdash/).
+
 The OCaml bindings---packaged as the [`libdash` OPAM package](https://opam.ocaml.org/packages/libdash/)---include two executables, `shell_to_json` and `json_to_shell`, which let you conveniently parse POSIX shell scripts into a JSON AST.
 
 # What are the dependencies?
