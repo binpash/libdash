@@ -48,30 +48,18 @@ jobs:
              echo Unsupported RUNNER_OS=$RUNNER_OS
              exit 1
            fi
-           python -m pip install build
       
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.8.1
-          
-#      - name: Build Python packages
-#        run: |
-#            case ${{ matrix.os }} in
-#              (macos-12)    MACOSX_DEPLOYMENT_TARGET=12_0;;
-#              (macos-11)    MACOSX_DEPLOYMENT_TARGET=11_0;;
-#              (macos-10.15) MACOSX_DEPLOYMENT_TARGET=10_15;;
-#            esac
-#            export MACOSX_DEPLOYMENT_TARGET
-#            echo $MACOSX_DEPLOYMENT_TARGET
-#            python -m build --sdist --wheel --outdir dist/
-      
       - name: Install Python package
-        run: python -m pip install dist/libdash-*.whl
+        run: python setup.py install
       
       - name: Test Python bindings
         run: make -C python test
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.8.1
             
       - name: Upload binary wheel
         uses: actions/upload-artifact@v2
