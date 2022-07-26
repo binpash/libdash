@@ -7,8 +7,7 @@ import subprocess
 import sys
 
 from pathlib import Path
-this_directory = Path(__file__).parent
-long_description = (this_directory / "README.md").read_text().split('\n')[2:]
+long_description = (Path(__file__).parent / "README.md").read_text()
 
 def try_exec(*cmds):
     proc = subprocess.run(cmds)
