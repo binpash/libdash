@@ -27,6 +27,9 @@ jobs:
           - macos-10.15
           - ubuntu-latest
 
+        python-version:
+          - 3.7
+
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -44,7 +47,10 @@ jobs:
       
       - name: Checkout code
         uses: actions/checkout@v2
-      
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+          
       - name: Build Python packages
         run: python3 -m build --sdist --wheel --outdir dist/
       
