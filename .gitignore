@@ -50,3 +50,6 @@ libtool
 ltmain.sh
 ocamlprof.dump
 __pycache__
+libdash.egg-info
+dist
+build

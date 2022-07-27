@@ -1,0 +1,23 @@
+include COPYING Makefile.am autogen.sh configure.ac
+graft src
+exclude src/builtins.c src/builtins.h src/builtins.def
+exclude src/dash
+exclude src/init.c src/mkinit
+exclude src/mknodes src/mksignames src/mksyntax
+exclude src/nodes.c src/nodes.h
+exclude src/signames.c
+exclude src/syntax.c src/syntax.h
+exclude src/token.h
+prune src/.deps
+prune src/bltin/.deps
+prune src/mkinit.dSYM
+prune src/mknodes.dSYM
+prune src/mksignames.dSYM
+prune src/mksyntax.dSYM
+global-exclude *.dSYM *.o *.lo *.la *.py[cod] __pycache__ Makefile *.log .gitignore
+prune src/.libs
+prune ocaml/
+prune test/
+prune build/
+exclude python/rt.py
+include libdash/libdash.so libdash/libdash.dylib

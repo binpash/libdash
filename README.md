@@ -2,19 +2,31 @@
 
 *libdash* is a fork of the Linux Kernel's `dash` shell that builds a linkable library with extra exposed interfaces. The primary use of libdash is to parse shell scripts, but it could be used for more.
 
-The OCaml bindings---packaged as the [`libdash` OPAM package](https://opam.ocaml.org/packages/libdash/)---include two executables, `shell_to_json` and `json_to_shell`.
+The Python bindings are packaged as the [`libdash` PyPi package](https://pypi.org/project/libdash/).
+
+The OCaml bindings---packaged as the [`libdash` OPAM package](https://opam.ocaml.org/packages/libdash/)---include two executables, `shell_to_json` and `json_to_shell`, which let you conveniently parse POSIX shell scripts into a JSON AST.
 
 # What are the dependencies?
 
-The C code for dash should build on a wide variety of systems. The library may not build on platforms with esoteric linkers; it's been tested on OS X.
+The C code for dash should build on a wide variety of systems; it requires `libtool` and `autotools` (`aclocal`, `autoheader`, `automake`, `autoconf`). The library may not build on platforms with esoteric linkers; it's been tested on macOS and Linux.
 
-The OCaml code relies on `ctypes-0.11.5` and `ctypes-foreign`; everything else should be in `base`.
+The Python and OCaml bindings depend on being able to build the C code. See `libdash.opam` for details on the OCaml code's dependencies, which includes the build-time external dependencies. Python wheels have no need for these build-time dependencies, but building from a Python source distribution will only succeed when `libtool` and `autotools` are present.
 
-# How to build and test it
+The CI scripts (in `.github/workflows/build.yml`) give build details.
 
-You should be able to simply run `docker build -t libdash .` to get a runnable environment. Everything will be in `/home/opam/libdash`.
+## How to build it
 
-## How to build it locally
+### Python
+
+Run `python3 setup.py install`.
+
+You can test the Python bindings by running:
+
+```
+cd python; make test
+```
+
+### OCaml
 
 Install the OPAM file: `opam pin add .` or `opam install .`. This will build the OCaml library and install it in your OPAM repository. There are tests in another directory; they will only build when libdash is actually installed.
 
@@ -24,15 +36,11 @@ You can test the OCaml bindings by running:
 cd ocaml; make test
 ```
 
-You can test the Python bindings by running:
+### Testing
 
-```
-cd python; make test
-```
+The tests use `test/round_trip.sh` to ensure that every tester file in `test/tests` round-trips correctly through parsing and pretty printing.
 
-The tests use `test/round_trip.sh` to ensure that every tester file in `test/tests` round-trips correctly through parsing and pretty printing. The OPAM package can be installed with the `-t` flag to run the tests internally; see `ocaml/Makefile`'s testing targets.
-
-Additionally, you can run tests that compare the OCaml and Python implementations:
+Additionally, you can run tests that compare the OCaml and Python implementations (after you've installed them both):
 
 ```
 cd test; make
@@ -40,8 +48,14 @@ cd test; make
 
 # How to use the parser
 
-The ideal interface to use is `parsecmd_safe` in `parser.c`. Parsing the POSIX shell is a complicated affair: beyond the usual locale issues, aliases affect the lexer, so one must use `setalias` and `unalias` to manage any aliases that ought to exist.
+For Python, see [`python/rt.py`](https://github.com/mgree/libdash/blob/master/python/rt.py), an example tool that does a round-trip: shell syntax to AST back to shell syntax.
+
+For OCaml, see [`ocaml/shell_to_json.ml`](https://github.com/mgree/libdash/blob/master/ocaml/shell_to_json.ml), a tool that parses shell syntax and produces JSON (using the [atdgen](https://opam.ocaml.org/packages/atdgen/) bindings).
+
+The ideal low-level interface to use is `parsecmd_safe` in `parser.c`; you'll need to ensure that dash's initialization routines have been called and that the stack marks are managed correctly. Parsing the POSIX shell is a complicated affair: beyond the usual locale issues, aliases affect the lexer, so one must use `setalias` and `unalias` to manage any aliases that ought to exist.
 
 # How work with the parsed nodes
 
 The general AST is described in `nodes.h`. There are some tricky invariants around the precise formatting of control codes; the OCaml code shows some examples of working with the `args` fields in `ocaml/ast.ml`, which converts the C AST to an OCaml AST.
+
+The OCaml tools `shell_to_json` and `json_to_shell` will produce JSON ASTs, allowing you to work with these ASTs in any language.

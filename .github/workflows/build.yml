@@ -1,58 +1,143 @@
 name: Main workflow
 
 on:
-  - pull_request
-  - push
+  pull_request:
+  push:
+  schedule:
+    - cron: '5 14 * * *'
 
-jobs:                
-  build-and-test:
+jobs:
+  check-version-numbers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check version numbers
+        run: ./version.sh
+  
+  package-python:
     strategy:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
+          - macos-12
+          - macos-11
+          - macos-10.15
+          - ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install dependencies (libtool, aclocal, autoconf)
+        run: |
+           if [ "$RUNNER_OS" = "Linux" ]; then
+             sudo apt-get install libtool automake
+           elif [ "$RUNNER_OS" = "macOS" ]; then
+             brew install libtool autoconf automake
+           else
+             echo Unsupported RUNNER_OS=$RUNNER_OS
+             exit 1
+           fi
+      
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.8.1
+            
+      - name: Upload binary wheel
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ format('bdist.{0}', matrix.os) }}
+          path: wheelhouse/libdash-*.whl
+
+      - name: Build source distribution (Linux only)
+        if: contains(matrix.os, 'ubuntu')
+        run: python setup.py sdist
+            
+      - name: Upload source distribution (from Linux)
+        uses: actions/upload-artifact@v2
+        if: contains(matrix.os, 'ubuntu')
+        with:
+          name: sdist
+          path: dist/libdash-*.tar.gz
+      
+  build-both-and-compare:
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - macos-12
+          - macos-11
+          - macos-10.15
           - ubuntu-latest
         ocaml-compiler:
-          - 4.12.x
-          - 4.13.x
           - 4.14.x
 
     runs-on: ${{ matrix.os }}
 
     steps:
-     - name: Checkout code
-       uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-     - name: Use OCaml ${{ matrix.ocaml-compiler }}
-       uses: avsm/setup-ocaml@v2
-       with:
-         ocaml-compiler: ${{ matrix.ocaml-compiler }}
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: avsm/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+                             
+      - name: Install OCaml bindings
+        run: opam install .
         
-     - name: Install system dependencies (via OPAM)
-       run: |
-         opam pin add libdash . --no-action
-         opam depext libdash --yes --with-test
-         
-     - name: Build dash
-       run: |
-         if [ $(uname) = "Darwin" ]; then glibtoolize; else libtoolize; fi
-         aclocal
-         autoheader
-         automake --add-missing
-         autoconf
-         ./configure
-         make
-         cp src/.libs/dlldash.so python/libdash.so
-         if [ $(uname) = "Darwin" ]; then cp src/.libs/libdash.dylib python/; fi
-            
-     - name: Test Python bindings
-       run: make -C python test
-            
-     - name: Install OCaml bindings
-       run: opam install .
-       
-     - name: Test OCaml bindings
-       run: opam exec -- make -C ocaml test
+      - name: Test OCaml bindings
+        run: opam exec -- make -C ocaml test
+ 
+        # we don't reuse the wheels so that all of the CI runs can happen concurrently
+      - name: Install Python directly
+        run: sudo python3 setup.py install
+      
+      - name: Test Python bindings
+        run: make -C python test
+          
+      - name: Compare OCaml and Python bindings
+        run: opam exec -- make -C test test
 
-     - name: Compare OCaml and Python bindings
-       run: opam exec -- make -C test test
+  deploy:
+    needs:
+      - check-version-numbers
+      - package-python
+      - build-both-and-compare
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+      
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v2
+
+      - name: Rename distributions
+        run: |
+          mkdir dist
+          VERSION=$(./version.sh)
+          ls bdist.*/
+          mv bdist.*/libdash-*.whl dist/
+          mv sdist/libdash-*.tar.gz dist/
+          echo Look on my Works, ye Mighty, and despair!
+          ls dist
+  
+      - name: Deploy 'latest' release on GH
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Python source and binary distributions"
+          files: |
+            dist/*
+
+      - name: Deploy tagged release on PyPI
+        if: startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
