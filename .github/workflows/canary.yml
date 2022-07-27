@@ -1,0 +1,68 @@
+name: Distribution canary
+
+on:
+  schedule:
+    - cron: '20 13 * * *'
+      
+jobs:
+  ocaml:
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - macos-12
+          - macos-11
+          - ubuntu-latest
+        ocaml-compiler:
+          - 4.14.x
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: avsm/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+
+      - name: Install OCaml bindings from OPAM
+        run: |
+          opam update
+          opam install libdash
+
+      - name: Test OPAM executables
+        run: [ "$(echo hi | opam exec -- shell_to_json | opam exec json_to_shell)" = "hi" ]
+          
+  python:
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - macos-12
+          - macos-11
+          - ubuntu-latest
+        python-version:
+          - 3.7
+          - 3.8
+          - 3.9
+          - 3.10
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Use Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python bindings from PyPi
+        run: |
+          pip update
+          pip install libdash
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+          
+      - name: Test Python library
+        run: |
+          RT="$(printf 'import libdash\nasts = libdash.parse("-", True)\nfor (ast, lines, linno_before, linno_after) in asts:\n  print(libdash.to_string(ast))\n')"
+          [ "$(echo hi | python -c "$RT")" = "hi" ]
