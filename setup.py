@@ -7,13 +7,6 @@ import subprocess
 import sys
 
 from pathlib import Path
-pyproject = (Path(__file__).parent / "pyproject.toml").read_text()
-version_string = re.search('^version = "([^"]+)"$', pyproject)
-if version_string is None:
-    print("Couldn't determine file version from pyproject.toml...", file=sys.stderr)
-    sys.exit(1)
-version = version_string.group(1)
-
 long_description = (Path(__file__).parent / "README.md").read_text()
 
 def try_exec(*cmds):
@@ -47,7 +40,7 @@ class libdash_build_py(build_py):
 setup(name='libdash',
       packages=['libdash'],
       cmdclass={'build_py': libdash_build_py},
-      version=version,
+      version='0.2',
       long_description=long_description,
       long_description_content_type='text/markdown',
       include_package_data=True,
