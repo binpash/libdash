@@ -4,9 +4,18 @@ from ctypes import *
 from .ast import of_node
 from ._dash import *
 
-FILE_PATH = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))
-LIBDASH_LIBRARY_PATH = os.path.join(FILE_PATH, "libdash.so")
 
+LIBDASH_LIBRARY_PATH = None
+def libdash_library_path():
+    global LIBDASH_LIBRARY_PATH
+
+    if LIBDASH_LIBRARY_PATH is not None:
+        return LIBDASH_LIBRARY_PATH
+    
+    FILE_PATH = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))
+    LIBDASH_LIBRARY_PATH = os.path.join(FILE_PATH, "libdash.so")
+    return LIBDASH_LIBRARY_PATH
+    
 EOF_NLEFT = -99; # libdash/src/input.c
 
 class ParsingException(Exception):
@@ -23,7 +32,7 @@ def parse(inputPath, init=True):
     """
     lines = []
 
-    libdash = CDLL(LIBDASH_LIBRARY_PATH)
+    libdash = CDLL(libdash_library_path())
 
     if (init):
         initialize(libdash)
