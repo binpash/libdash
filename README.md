@@ -14,11 +14,11 @@ The Python and OCaml bindings depend on being able to build the C code. See `lib
 
 The CI scripts (in `.github/workflows/build.yml`) give build details.
 
-## How to build it
+## How to build `libdash` from source
 
 ### Python
 
-Run `python3 setup.py install`.
+Run `python3 setup.py install`. On macOS, you must first install the build dependencies via `brew install libtool autoconf automake`.
 
 You can test the Python bindings by running:
 
