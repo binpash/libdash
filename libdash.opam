@@ -40,6 +40,6 @@ install: [
 ]
 dev-repo: "git+https:///github.com/mgree/libdash"
 url {
-  src: "https://github.com/mgree/libdash/archive/v0.1.2.tar.gz"
+  src: "https://github.com/mgree/libdash/archive/v0.2.tar.gz"
 }
 
