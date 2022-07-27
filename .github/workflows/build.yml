@@ -116,7 +116,6 @@ jobs:
       - name: Rename distributions
         run: |
           mkdir dist
-          VERSION=$(./version.sh)
           ls bdist.*/
           mv bdist.*/libdash-*.whl dist/
           mv sdist/libdash-*.tar.gz dist/
