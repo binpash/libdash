@@ -1,6 +1,7 @@
 name: Distribution canary
 
 on:
+  push:
   schedule:
     - cron: '20 13 * * *'
       
