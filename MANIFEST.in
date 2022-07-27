@@ -20,4 +20,4 @@ prune ocaml/
 prune test/
 prune build/
 exclude python/rt.py
-include libdash/libdash.so libdash/libdash.dylib pyproject.toml
+include libdash/libdash.so libdash/libdash.dylib
