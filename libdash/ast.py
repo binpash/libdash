@@ -1,6 +1,7 @@
 import os
 import sys
-from dash import *
+
+from ._dash import *
 
 # parser.h
 CTLESC       = 129
