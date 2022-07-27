@@ -30,7 +30,7 @@ jobs:
           opam install libdash
 
       - name: Test OPAM executables
-        run: [ "$(echo hi | opam exec -- shell_to_json | opam exec json_to_shell)" = "hi" ]
+        run: test "$(echo hi | opam exec -- shell_to_json | opam exec json_to_shell)" = "hi"
           
   python:
     strategy:
@@ -65,4 +65,4 @@ jobs:
       - name: Test Python library
         run: |
           RT="$(printf 'import libdash\nasts = libdash.parse("-", True)\nfor (ast, lines, linno_before, linno_after) in asts:\n  print(libdash.to_string(ast))\n')"
-          [ "$(echo hi | python -c "$RT")" = "hi" ]
+          test "$(echo hi | python -c "$RT")" = "hi"
