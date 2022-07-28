@@ -47,8 +47,8 @@ jobs:
           - '3.9'
           - '3.10'
         repository_url:
-          - https://pypi.org/
-          - https://test.pypi.org/legacy/
+          - https://pypi.org/simple/
+          - https://test.pypi.org/simple/
 
     runs-on: ${{ matrix.os }}
 
