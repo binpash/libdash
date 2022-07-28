@@ -1,19 +1,16 @@
 opam-version: "2.0"
-name: "libdash"
-version: "0.3"
 synopsis: "Bindings to the dash shell's parser"
 maintainer: "Michael Greenberg <michael.greenberg@pomona.edu>"
 authors: "Michael Greenberg <michael.greenberg@pomona.edu>"
-license: "BSD"
+license: "BSD-3-Clause"
 homepage: "https://github.com/mgree/libdash"
 bug-reports: "https://github.com/mgree/libdash/issues"
 depends: [
-  "ocaml" {>= "4.0.7"}
+  "ocaml" {>= "4.07"}
   "ocamlfind" {>= "1.8.0"}
-  "ctypes" {>= "0.11.5"}
-  "ctypes-foreign" {>= "0.4.0"}
-  "atdgen" {>= "2.2.1"}
-  "opam-installer" {>= "2.0.0"}
+  "ctypes" {>= "0.18.0"}
+  "ctypes-foreign" {>= "0.18.0"}
+  "atdgen" {>= "2.3.2"}
   "conf-autoconf" {build}
   "conf-aclocal" {build}
   "conf-libtool" {build}
@@ -34,9 +31,6 @@ build: [
   ["./mk_dot_install.sh"]
   ["./ldconfig.sh"] # fix up .so files if ldconfig didn't do it
   [make "-C" "ocaml" "test"] {with-test}
-]
-install: [
-  ["opam-installer" "--prefix=%{prefix}%" "libdash.install"]
 ]
 dev-repo: "git+https:///github.com/mgree/libdash"
 url {
