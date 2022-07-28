@@ -46,6 +46,9 @@ jobs:
           - '3.8'
           - '3.9'
           - '3.10'
+        repository_url:
+          - https://pypi.org/
+          - https://test.pypi.org/legacy/
 
     runs-on: ${{ matrix.os }}
 
@@ -61,4 +64,4 @@ jobs:
       - name: Test Python library
         run: |
           RT="$(printf 'import libdash\nasts = libdash.parse("-", True)\nfor (ast, lines, linno_before, linno_after) in asts:\n  print(libdash.to_string(ast))\n')"
-          test "$(echo hi | python -c "$RT")" = "hi"
+          test "$(echo hi | python -c "$RT")" = "hi"          
