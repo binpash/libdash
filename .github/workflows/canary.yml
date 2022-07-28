@@ -57,9 +57,6 @@ jobs:
 
       - name: Install Python bindings from PyPi
         run: pip install libdash
-
-      - name: Checkout code
-        uses: actions/checkout@v2
           
       - name: Test Python library
         run: |
