@@ -59,7 +59,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Python bindings from ${{ matrix.repository_url }}
-        run: pip install -i "${{ matrix.repository_url }}" libdash
+        run: pip install -i "${{ matrix.repository_url }}" --extra-index-url https://pypi.org/simple/ libdash
           
       - name: Test Python library
         run: |
