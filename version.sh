@@ -1,6 +1,6 @@
 #!/bin/sh
 
-OPAM_VERSION=$(grep -e '^version:' libdash.opam | cut -d':' -f2 | tr -d ' "')
+OPAM_VERSION=$(grep -e 'https://github.com/mgree/libdash/archive/' libdash.opam | sed -e 's/.*v\([0-9.]*\)\.tar\.gz"/\1/')
 
 PYTHON_VERSION=$(grep -e '^version =' pyproject.toml | cut -d'=' -f2 | tr -d ' "')
 
