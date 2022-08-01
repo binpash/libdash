@@ -28,6 +28,7 @@ jobs:
       - name: Install OCaml bindings from OPAM
         run: |
           opam update
+          opam depext
           opam install libdash
 
       - name: Test OPAM executables

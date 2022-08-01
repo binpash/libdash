@@ -13,6 +13,7 @@ depends: [
   "atdgen" {>= "2.3.2"}
   "conf-autoconf" {build}
   "conf-aclocal" {build}
+  "conf-automake" {build}
   "conf-libtool" {build}
 ]
 build: [
