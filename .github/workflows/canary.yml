@@ -42,7 +42,8 @@ jobs:
         os:
           - macos-12
           - macos-11
-          - ubuntu-latest
+          - ubuntu-18.04
+          - ubuntu-20.04
         python-version:
           - '3.7'
           - '3.8'
