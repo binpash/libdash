@@ -59,3 +59,11 @@ The ideal low-level interface to use is `parsecmd_safe` in `parser.c`; you'll ne
 The general AST is described in `nodes.h`. There are some tricky invariants around the precise formatting of control codes; the OCaml code shows some examples of working with the `args` fields in `ocaml/ast.ml`, which converts the C AST to an OCaml AST.
 
 The OCaml tools `shell_to_json` and `json_to_shell` will produce JSON ASTs, allowing you to work with these ASTs in any language.
+
+# Pretty printing
+
+The pretty printer does its best to produce valid shell scripts, but it's possible to manually construct AST nodes that don't directly correspond to valid scripts.
+
+For example, the Python AST `[[['Q', [['C', 34]]]]]` represents a quoted field containing a double quote character. Translated literally, this would yield the string `"""`, which is not a valid shell script. The pretty printer will instead automatically escape the inner quote, rendering `"\""`.
+
+While the printer tries to get things right either way, you should use escapes to signal to the printer when to escape: you should use the Python AST `[[['Q', [['E', 34]]]]]` to mark the inner double quote as escaped.
