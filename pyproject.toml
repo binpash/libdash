@@ -7,7 +7,7 @@ authors = [
 description = "Bindings for the dash shell as a library"
 readme = "README.md"
 license = { file="COPYING" }
-requires-python = ">=3.7"
+requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: System :: System Shells",
