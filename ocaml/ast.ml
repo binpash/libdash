@@ -99,9 +99,9 @@ let skip = Command (-1,[],[],[])
 let special_chars : char list = explode "|&;<>()$`\\\"'"
 
 type quote_mode =
-    Unquoted
-  | Quoted
-  | Heredoc
+    QUnquoted
+  | QQuoted
+  | QHeredoc
 
 let needs_escaping c = List.mem c special_chars
 
@@ -447,16 +447,16 @@ and string_of_if c t e =
    | If (c,t,e) -> "; el" ^ string_of_if c t e
    | _ -> "; else " ^ to_string e ^ "; fi")
                                                  
-and string_of_arg_char ?quote_mode:(quote_mode=Unquoted) = function
+and string_of_arg_char ?quote_mode:(quote_mode=QUnquoted) = function
   | E c ->
      let chars_to_escape = "'\"`(){}$!&|;" in
      let chars_to_escape_when_no_quotes = "*?[]#<>~ " in
      if String.contains chars_to_escape c
      then "\\" ^ String.make 1 c
-     else if String.contains chars_to_escape_when_no_quotes c && quote_mode=Unquoted
+     else if String.contains chars_to_escape_when_no_quotes c && quote_mode=QUnquoted
      then "\\" ^ String.make 1 c
      else Char.escaped c
-  | C '"' when quote_mode=Quoted -> "\\\""
+  | C '"' when quote_mode=QQuoted -> "\\\""
   | C c -> String.make 1 c
   | T None -> "~"
   | T (Some u) -> "~" ^ u
@@ -464,10 +464,10 @@ and string_of_arg_char ?quote_mode:(quote_mode=Unquoted) = function
   | V (Length,_,name,_) -> "${#" ^ name ^ "}"
   | V (vt,nul,name,a) ->
      "${" ^ name ^ (if nul then ":" else "") ^ string_of_var_type vt ^ string_of_arg ~quote_mode a ^ "}"
-  | Q a -> "\"" ^ string_of_arg ~quote_mode:Quoted a ^ "\""
+  | Q a -> "\"" ^ string_of_arg ~quote_mode:QQuoted a ^ "\""
   | B t -> "$(" ^ to_string t ^ ")"
 
-and string_of_arg ?quote_mode:(quote_mode=Unquoted) = function
+and string_of_arg ?quote_mode:(quote_mode=QUnquoted) = function
   | [] -> ""
   | c :: a ->
      let char = string_of_arg_char ~quote_mode c in
@@ -494,7 +494,7 @@ and string_of_redir = function
   | Dup (ToFD,fd,tgt)   -> show_unless 1 fd ^ ">&" ^ string_of_arg tgt
   | Dup (FromFD,fd,tgt) -> show_unless 0 fd ^ "<&" ^ string_of_arg tgt
   | Heredoc (t,fd,a) ->
-     let heredoc = string_of_arg ~quote_mode:Heredoc a in
+     let heredoc = string_of_arg ~quote_mode:QHeredoc a in
      let marker = fresh_marker (lines heredoc) in
      show_unless 0 fd ^ "<<" ^
      (if t = XHere then marker else "'" ^ marker ^ "'") ^ "\n" ^ heredoc ^ marker ^ "\n"
