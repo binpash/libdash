@@ -449,7 +449,8 @@ and string_of_if c t e =
                                                  
 and string_of_arg_char ?quote_mode:(quote_mode=QUnquoted) = function
   | E c ->
-     let chars_to_escape = "'\"`(){}$!&|;" in
+     (* removed ! from chars_to_escape to have the right behavior in non-interactive shells *)
+     let chars_to_escape = "'\"`(){}$&|;" in
      let chars_to_escape_when_no_quotes = "*?[]#<>~ " in
      if String.contains chars_to_escape c
      then "\\" ^ String.make 1 c
