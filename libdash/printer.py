@@ -15,6 +15,10 @@ STRING_OF_VAR_TYPE_DICT = {
     "Length"   : "#"
 };
 
+UNQUOTED = 0 # everything escaped
+QUOTED = 1   # only escape special characters
+HEREDOC = 2  # like QUOTED, but _don't_ escape double quotes
+QUOTE_MODES = [UNQUOTED, QUOTED, HEREDOC]
 
 # dash.ml
 #
@@ -324,7 +328,7 @@ def escaped (param):
 #      "${" ^ name ^ (if nul then ":" else "") ^ string_of_var_type vt ^ string_of_arg a ^ "}"
 #   | Q a -> "\"" ^ string_of_arg a ^ "\""
 #   | B t -> "$(" ^ to_string t ^ ")"
-def string_of_arg_char (c, is_quoted=False):
+def string_of_arg_char (c, quote_mode=UNQUOTED):
     (type, param) = c;
 
     if (type == "E"):
@@ -337,12 +341,13 @@ def string_of_arg_char (c, is_quoted=False):
         chars_to_escape_when_no_quotes = ['*', '?', '[', ']', '#', '<', '>', '~', ' ']
         if char in chars_to_escape:
             return '\\' + char
-        elif char in chars_to_escape_when_no_quotes and not is_quoted:
+        elif char in chars_to_escape_when_no_quotes and quote_mode==UNQUOTED:
             return '\\' + char
         else:
             return escaped (param)
     elif (type == "C"):
-        if chr(param) == '"':
+        # HEREDOC should never escape double quotes per POSIX 2.7.4
+        if quote_mode==QUOTED and chr(param) == '"':
             return '\\"'
         else:
             return chr (param);
@@ -360,7 +365,7 @@ def string_of_arg_char (c, is_quoted=False):
             print ("Unexpected param for T: %s" % param);
             abort ();
     elif (type == "A"):
-        return "$((" + string_of_arg (param, is_quoted) + "))";
+        return "$((" + string_of_arg (param, quote_mode) + "))";
     elif (type == "V"):
         assert (len (param) == 4);
         if (param [0] == "Length"):
@@ -381,11 +386,11 @@ def string_of_arg_char (c, is_quoted=False):
             else:
                 os.abort (); # For my own sanity
 
-            stri += string_of_var_type (vt) + string_of_arg (a, is_quoted) + "}";
+            stri += string_of_var_type (vt) + string_of_arg (a, quote_mode) + "}";
 
             return stri;
     elif (type == "Q"):
-        return "\"" + string_of_arg (param, is_quoted=True) + "\"";
+        return "\"" + string_of_arg (param, quote_mode=QUOTED) + "\"";
     elif (type == "B"):
         return "$(" + to_string (param) + ")";
     else:
@@ -395,13 +400,13 @@ def string_of_arg_char (c, is_quoted=False):
 # and string_of_arg = function
 #   | [] -> ""
 #   | c :: a -> string_of_arg_char c ^ string_of_arg a
-def string_of_arg (args, is_quoted=False):
+def string_of_arg (args, quote_mode=UNQUOTED):
     # print (args);
 
     i = 0
     text = []
     while i < len(args):
-        c = string_of_arg_char(args[i], is_quoted)
+        c = string_of_arg_char(args[i], quote_mode=quote_mode)
 
         # dash will parse '$?' as
         # [(C, '$'), (E, '?')]
@@ -526,7 +531,8 @@ def string_of_redir (redir):
     elif (type == "Heredoc"):
         (t, fd, a) = params;
 
-        heredoc = string_of_arg (a, is_quoted = True);
+        # MMG 2022-08-23 not quite correct 
+        heredoc = string_of_arg (a, quote_mode=HEREDOC);
         marker = fresh_marker0 (heredoc);
 
         stri = show_unless (0, fd) + "<<";
