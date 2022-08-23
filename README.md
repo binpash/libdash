@@ -67,3 +67,7 @@ The pretty printer does its best to produce valid shell scripts, but it's possib
 For example, the Python AST `[[['Q', [['C', 34]]]]]` represents a quoted field containing a double quote character. Translated literally, this would yield the string `"""`, which is not a valid shell script. The pretty printer will instead automatically escape the inner quote, rendering `"\""`.
 
 While the printer tries to get things right either way, you should use escapes to signal to the printer when to escape: you should use the Python AST `[[['Q', [['E', 34]]]]]` to mark the inner double quote as escaped.
+
+# Known issues
+
+We currently do not escape the character `!` (exclamation point). In an interactive shell, `!` is likely treated as a history substitution (and so should be escaped), but in a non-interactive shell, `!` is treated normally. We currently cater to non-interactive shells; eventually this behavior will be controllable.

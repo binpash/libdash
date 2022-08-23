@@ -40,7 +40,7 @@ class libdash_build_py(build_py):
 setup(name='libdash',
       packages=['libdash'],
       cmdclass={'build_py': libdash_build_py},
-      version='0.3',
+      version='0.3.1',
       long_description=long_description,
       long_description_content_type='text/markdown',
       include_package_data=True,
