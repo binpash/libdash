@@ -92,7 +92,7 @@ jobs:
  
         # we don't reuse the wheels so that all of the CI runs can happen concurrently
       - name: Install Python directly
-        run: sudo python3 setup.py install
+        run: sudo pip3 install .
       
       - name: Test Python bindings
         run: make -C python test
