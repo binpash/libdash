@@ -62,7 +62,9 @@ struct arglist {
 #define EXP_DISCARD	0x400	/* discard result of expansion */
 
 
+struct jmploc;
 union node;
+
 void expandarg(union node *, struct arglist *, int);
 #define rmescapes(p) _rmescapes((p), 0)
 char *_rmescapes(char *, int);
@@ -71,6 +73,7 @@ void recordregion(int, int, int);
 void removerecordregions(int); 
 void ifsbreakup(char *, int, struct arglist *);
 void ifsfree(void);
+void restore_handler_expandarg(struct jmploc *savehandler, int err);
 
 /* From arith.y */
 intmax_t arith(const char *);

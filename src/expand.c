@@ -1777,6 +1777,16 @@ varunset(const char *end, const char *var, const char *umsg, int varflags)
 	sh_error("%.*s: %s%s", end - var - 1, var, msg, tail);
 }
 
+void restore_handler_expandarg(struct jmploc *savehandler, int err)
+{
+	handler = savehandler;
+	if (err) {
+		if (exception != EXERROR)
+			longjmp(handler->loc, 1);
+		ifsfree();
+	}
+}
+
 #ifdef mkinit
 
 INCLUDE "expand.h"
