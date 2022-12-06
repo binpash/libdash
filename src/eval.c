@@ -239,7 +239,7 @@ evaltree(union node *n, int flags)
 #endif
 	case NNOT:
 		status = !evaltree(n->nnot.com, EV_TESTED);
-		goto setstatus;
+		break;
 	case NREDIR:
 		errlinno = lineno = n->nredir.linno;
 		if (funcline)
@@ -250,7 +250,7 @@ evaltree(union node *n, int flags)
 			 evaltree(n->nredir.n, flags & EV_TESTED);
 		if (n->nredir.redirect)
 			popredir(0);
-		goto setstatus;
+		break;
 	case NCMD:
 		evalfn = evalcommand;
 checkexit:
@@ -292,7 +292,7 @@ evaln:
 		evalfn = evaltree;
 calleval:
 		status = evalfn(n, flags);
-		goto setstatus;
+		break;
 	case NIF:
 		status = evaltree(n->nif.test, EV_TESTED);
 		if (evalskip)
@@ -305,13 +305,14 @@ calleval:
 			goto evaln;
 		}
 		status = 0;
-		goto setstatus;
+		break;
 	case NDEFUN:
 		defun(n);
-setstatus:
-		exitstatus = status;
 		break;
 	}
+
+	exitstatus = status;
+
 out:
 	dotrap();
 
