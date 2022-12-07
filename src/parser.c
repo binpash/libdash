@@ -1333,7 +1333,7 @@ badsub:
 			synstack->dblquote = newsyn != BASESYNTAX;
 		}
 
-		*((char *)stackblock() + typeloc) = subtype;
+		*((char *)stackblock() + typeloc) = subtype | VSBIT;
 		if (subtype != VSNORMAL) {
 			synstack->varnest++;
 			if (synstack->dblquote)

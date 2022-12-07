@@ -704,7 +704,7 @@ evalvar(char *p, int flag)
 	int discard;
 	int quoted;
 
-	varflags = *p++;
+	varflags = *p++ & ~VSBIT;
 	subtype = varflags & VSTYPE;
 
 	quoted = flag & EXP_QUOTED;
