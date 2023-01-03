@@ -154,6 +154,10 @@ RESET {
 }
 #endif
 
+static char *varnull(const char *s)
+{
+	return (strchr(s, '=') ?: nullstr - 1) + 1;
+}
 
 /*
  * This routine initializes the builtin variables.  It is called when the
@@ -266,7 +270,7 @@ struct var *setvareq(char *s, int flags)
 			goto out;
 
 		if (vp->func && (flags & VNOFUNC) == 0)
-			(*vp->func)(strchrnul(s, '=') + 1);
+			(*vp->func)(varnull(s));
 
 		if ((vp->flags & (VTEXTFIXED|VSTACK)) == 0)
 			ckfree(vp->text);
@@ -531,7 +535,7 @@ poplocalvars(void)
 			unsetvar(vp->text);
 		} else {
 			if (vp->func)
-				(*vp->func)(strchrnul(lvp->text, '=') + 1);
+				(*vp->func)(varnull(lvp->text));
 			if ((vp->flags & (VTEXTFIXED|VSTACK)) == 0)
 				ckfree(vp->text);
 			vp->flags = lvp->flags;
