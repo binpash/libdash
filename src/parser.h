@@ -50,6 +50,7 @@
 /* variable substitution byte (follows CTLVAR) */
 #define VSTYPE	0x0f		/* type of variable substitution */
 #define VSNUL	0x10		/* colon--treat the empty string as unset */
+#define VSBIT	0x20		/* Ensure subtype is not zero */
 
 /* values of VSTYPE field */
 #define VSNORMAL	0x1		/* normal variable:  $var or ${var} */

@@ -50,4 +50,5 @@ int savefd(int, int);
 int redirectsafe(union node *, int);
 void unwindredir(struct redirtab *stop);
 struct redirtab *pushredir(union node *redir);
+int sh_open(const char *pathname, int flags, int mayfail);
 

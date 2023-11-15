@@ -78,6 +78,9 @@ int exitstatus;			/* exit status of last command */
 int back_exitstatus;		/* exit status of backquoted command */
 int savestatus = -1;		/* exit status of last command outside traps */
 
+/* Prevent PS4 nesting. */
+MKINIT int inps4;
+
 
 #if !defined(__alpha__) || (defined(__GNUC__) && __GNUC__ >= 3)
 STATIC
@@ -123,6 +126,7 @@ EXITRESET {
 	}
 	evalskip = 0;
 	loopnest = 0;
+	inps4 = 0;
 }
 #endif
 
@@ -209,6 +213,9 @@ evaltree(union node *n, int flags)
 
 	setstackmark(&smark);
 
+	if (nflag)
+		goto out;
+
 	if (n == NULL) {
 		TRACE(("evaltree(NULL) called\n"));
 		goto out;
@@ -231,23 +238,28 @@ evaltree(union node *n, int flags)
 		break;
 #endif
 	case NNOT:
-		status = !evaltree(n->nnot.com, EV_TESTED);
-		goto setstatus;
+		status = evaltree(n->nnot.com, EV_TESTED);
+		if (!evalskip)
+			status = !status;
+		break;
 	case NREDIR:
 		errlinno = lineno = n->nredir.linno;
 		if (funcline)
 			lineno -= funcline - 1;
 		expredir(n->nredir.redirect);
 		pushredir(n->nredir.redirect);
-		status = redirectsafe(n->nredir.redirect, REDIR_PUSH) ?:
-			 evaltree(n->nredir.n, flags & EV_TESTED);
+		status = redirectsafe(n->nredir.redirect, REDIR_PUSH);
+		if (status)
+			checkexit = EV_TESTED;
+		else
+			status = evaltree(n->nredir.n, flags & EV_TESTED);
 		if (n->nredir.redirect)
 			popredir(0);
-		goto setstatus;
+		break;
 	case NCMD:
 		evalfn = evalcommand;
 checkexit:
-		checkexit = ~flags & EV_TESTED;
+		checkexit = EV_TESTED;
 		goto calleval;
 	case NFOR:
 		evalfn = evalfor;
@@ -285,7 +297,7 @@ evaln:
 		evalfn = evaltree;
 calleval:
 		status = evalfn(n, flags);
-		goto setstatus;
+		break;
 	case NIF:
 		status = evaltree(n->nif.test, EV_TESTED);
 		if (evalskip)
@@ -298,17 +310,19 @@ calleval:
 			goto evaln;
 		}
 		status = 0;
-		goto setstatus;
+		break;
 	case NDEFUN:
 		defun(n);
-setstatus:
-		exitstatus = status;
 		break;
 	}
+
+	exitstatus = status;
+
 out:
 	dotrap();
 
-	if (eflag && checkexit && status)
+	if (eflag && (~flags & checkexit) && status)
+
 		goto exexit;
 
 	if (flags & EV_EXIT) {
@@ -847,12 +861,14 @@ bail:
 	}
 
 	/* Print the command if xflag is set. */
-	if (xflag) {
+	if (xflag && !inps4) {
 		struct output *out;
 		int sep;
 
 		out = &preverrout;
+		inps4 = 1;
 		outstr(expandstr(ps4val()), out);
+		inps4 = 0;
 		sep = 0;
 		sep = eprintlist(out, varlist.list, sep);
 		eprintlist(out, osp, sep);

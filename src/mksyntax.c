@@ -64,7 +64,6 @@ struct synclass synclass[] = {
 	{ "CEOF",	"end of file" },
 	{ "CCTL",	"like CWORD, except it must be escaped" },
 	{ "CSPCL",	"these terminate a word" },
-	{ "CIGN",	"character should be ignored" },
 	{ NULL,		NULL }
 };
 
@@ -145,9 +144,8 @@ main(int argc, char **argv)
 		fprintf(hfile, "/* %s */\n", is_entry[i].comment);
 	}
 	putc('\n', hfile);
-	fprintf(hfile, "#define SYNBASE %d\n", 130);
-	fprintf(hfile, "#define PEOF %d\n\n", -130);
-	fprintf(hfile, "#define PEOA %d\n\n", -129);
+	fprintf(hfile, "#define SYNBASE %d\n", 129);
+	fprintf(hfile, "#define PEOF %d\n\n", -129);
 	putc('\n', hfile);
 	fputs("#define BASESYNTAX (basesyntax + SYNBASE)\n", hfile);
 	fputs("#define DQSYNTAX (dqsyntax + SYNBASE)\n", hfile);
@@ -170,7 +168,6 @@ main(int argc, char **argv)
 	add("$", "CVAR");
 	add("}", "CENDVAR");
 	add("<>();&| \t", "CSPCL");
-	syntax[1] = "CSPCL";
 	print("basesyntax");
 	init();
 	fputs("\n/* syntax table used when in double quotes */\n", cfile);
@@ -223,7 +220,7 @@ filltable(char *dftval)
 {
 	int i;
 
-	for (i = 0 ; i < 258; i++)
+	for (i = 0 ; i < 257; i++)
 		syntax[i] = dftval;
 }
 
@@ -239,9 +236,8 @@ init(void)
 
 	filltable("CWORD");
 	syntax[0] = "CEOF";
-	syntax[1] = "CIGN";
 	for (ctl = CTL_FIRST; ctl <= CTL_LAST; ctl++ )
-		syntax[130 + ctl] = "CCTL";
+		syntax[129 + ctl] = "CCTL";
 }
 
 
@@ -253,7 +249,7 @@ static void
 add(char *p, char *type)
 {
 	while (*p)
-		syntax[(signed char)*p++ + 130] = type;
+		syntax[(signed char)*p++ + 129] = type;
 }
 
 
@@ -271,7 +267,7 @@ print(char *name)
 	fprintf(hfile, "extern const char %s[];\n", name);
 	fprintf(cfile, "const char %s[] = {\n", name);
 	col = 0;
-	for (i = 0 ; i < 258; i++) {
+	for (i = 0 ; i < 257; i++) {
 		if (i == 0) {
 			fputs("      ", cfile);
 		} else if ((i & 03) == 0) {

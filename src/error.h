@@ -116,11 +116,7 @@ void __inton(void);
 #define int_pending() intpending
 
 void exraise(int) __attribute__((__noreturn__));
-#ifdef USE_NORETURN
 void onint(void) __attribute__((__noreturn__));
-#else
-void onint(void);
-#endif
 extern int errlinno;
 void sh_error(const char *, ...) __attribute__((__noreturn__));
 void exerror(int, const char *, ...) __attribute__((__noreturn__));
