@@ -247,7 +247,7 @@ cmdloop(int top)
 				out2str("\nUse \"exit\" to leave shell.\n");
 			}
 			numeof++;
-		} else if (nflag == 0) {
+		} else {
 			int i;
 
 			job_warning = (job_warning == 2) ? 1 : 0;

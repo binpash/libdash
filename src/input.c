@@ -58,7 +58,6 @@
 #include "myhistedit.h"
 #endif
 
-#define EOF_NLEFT -99		/* value of parsenleft when EOF pushed back */
 #define IBUFSIZ (BUFSIZ + 1)
 
 
@@ -68,6 +67,7 @@ struct parsefile *parsefile = &basepf;	/* current input file */
 int whichprompt;		/* 1 == PS1, 2 == PS2 */
 
 STATIC void pushfile(void);
+static void popstring(void);
 static int preadfd(void);
 /*
 static void setinputfd(int fd, int push); 
@@ -88,6 +88,7 @@ INIT {
 RESET {
 	/* clear input buffer */
 	basepf.lleft = basepf.nleft = 0;
+	basepf.unget = 0;
 	popallfiles();
 }
 
@@ -101,13 +102,32 @@ FORKRESET {
 #endif
 
 
-/*
- * Read a character from the script, returning PEOF on end of file.
- * Nul characters in the input are silently discarded.
- */
+static void freestrings(struct strpush *sp)
+{
+	INTOFF;
+	do {
+		struct strpush *psp;
 
-int
-pgetc(void)
+		if (sp->ap) {
+			sp->ap->flag &= ~ALIASINUSE;
+			if (sp->ap->flag & ALIASDEAD) {
+				unalias(sp->ap->name);
+			}
+		}
+
+		psp = sp;
+		sp = sp->spfree;
+
+		if (psp != &(parsefile->basestrpush))
+			ckfree(psp);
+	} while (sp);
+
+	parsefile->spfree = NULL;
+	INTON;
+}
+
+
+static int __pgetc(void)
 {
 	int c;
 
@@ -127,17 +147,18 @@ pgetc(void)
 
 
 /*
- * Same as pgetc(), but ignores PEOA.
+ * Read a character from the script, returning PEOF on end of file.
+ * Nul characters in the input are silently discarded.
  */
 
-int
-pgetc2()
+int pgetc(void)
 {
-	int c;
-	do {
-		c = pgetc();
-	} while (c == PEOA);
-	return c;
+	struct strpush *sp = parsefile->spfree;
+
+	if (unlikely(sp))
+		freestrings(sp);
+
+	return __pgetc();
 }
 
 
@@ -200,9 +221,8 @@ retry:
  * Refill the input buffer and return the next input character:
  *
  * 1) If a string was pushed back on the input, pop it;
- * 2) If an EOF was pushed back (parsenleft == EOF_NLEFT) or we are reading
- *    from a string so we can't refill the buffer, return EOF.
- * 3) If the is more stuff in this buffer, use it else call read to fill it.
+ * 2) If we are reading from a string we can't refill the buffer, return EOF.
+ * 3) If there is more stuff in this buffer, use it else call read to fill it.
  * 4) Process input up to the next newline, deleting nul characters.
  */
 
@@ -216,19 +236,10 @@ static int preadbuffer(void)
 	char savec;
 
 	if (unlikely(parsefile->strpush)) {
-		if (
-			parsefile->nleft == -1 &&
-			parsefile->strpush->ap &&
-			parsefile->nextc[-1] != ' ' &&
-			parsefile->nextc[-1] != '\t'
-		) {
-			return PEOA;
-		}
 		popstring();
-		return pgetc();
+		return __pgetc();
 	}
-	if (unlikely(parsefile->nleft == EOF_NLEFT ||
-		     parsefile->buf == NULL))
+	if (parsefile->buf == NULL)
 		return PEOF;
 	flushall();
 
@@ -236,7 +247,7 @@ static int preadbuffer(void)
 	if (more <= 0) {
 again:
 		if ((more = preadfd()) <= 0) {
-			parsefile->lleft = parsefile->nleft = EOF_NLEFT;
+			parsefile->lleft = parsefile->nleft = 0;
 			return PEOF;
 		}
 	}
@@ -333,7 +344,8 @@ pushstring(char *s, void *ap)
 	len = strlen(s);
 	INTOFF;
 /*dprintf("*** calling pushstring: %s, %d\n", s, len);*/
-	if (parsefile->strpush) {
+	if ((unsigned long)parsefile->strpush |
+	    (unsigned long)parsefile->spfree) {
 		sp = ckmalloc(sizeof (struct strpush));
 		sp->prev = parsefile->strpush;
 		parsefile->strpush = sp;
@@ -342,6 +354,7 @@ pushstring(char *s, void *ap)
 	sp->prevstring = parsefile->nextc;
 	sp->prevnleft = parsefile->nleft;
 	sp->unget = parsefile->unget;
+	sp->spfree = parsefile->spfree;
 	memcpy(sp->lastc, parsefile->lastc, sizeof(sp->lastc));
 	sp->ap = (struct alias *)ap;
 	if (ap) {
@@ -351,11 +364,11 @@ pushstring(char *s, void *ap)
 	parsefile->nextc = s;
 	parsefile->nleft = len;
 	parsefile->unget = 0;
+	parsefile->spfree = NULL;
 	INTON;
 }
 
-void
-popstring(void)
+static void popstring(void)
 {
 	struct strpush *sp = parsefile->strpush;
 
@@ -368,10 +381,6 @@ popstring(void)
 		if (sp->string != sp->ap->val) {
 			ckfree(sp->string);
 		}
-		sp->ap->flag &= ~ALIASINUSE;
-		if (sp->ap->flag & ALIASDEAD) {
-			unalias(sp->ap->name);
-		}
 	}
 	parsefile->nextc = sp->prevstring;
 	parsefile->nleft = sp->prevnleft;
@@ -379,8 +388,7 @@ popstring(void)
 	memcpy(parsefile->lastc, sp->lastc, sizeof(sp->lastc));
 /*dprintf("*** calling popstring: restoring to '%s'\n", parsenextc);*/
 	parsefile->strpush = sp->prev;
-	if (sp != &(parsefile->basestrpush))
-		ckfree(sp);
+	parsefile->spfree = sp;
 	INTON;
 }
 
@@ -395,12 +403,9 @@ setinputfile(const char *fname, int flags)
 	int fd;
 
 	INTOFF;
-	if ((fd = open64(fname, O_RDONLY)) < 0) {
-		if (flags & INPUT_NOFILE_OK)
-			goto out;
-		exitstatus = 127;
-		exerror(EXERROR, "Can't open %s", fname);
-	}
+	fd = sh_open(fname, O_RDONLY, flags & INPUT_NOFILE_OK);
+	if (fd < 0)
+		goto out;
 	if (fd < 10)
 		fd = savefd(fd, fd);
 	setinputfd(fd, flags & INPUT_PUSH_FILE);
@@ -465,6 +470,7 @@ pushfile(void)
 	pf->prev = parsefile;
 	pf->fd = -1;
 	pf->strpush = NULL;
+	pf->spfree = NULL;
 	pf->basestrpush.prev = NULL;
 	pf->unget = 0;
 	parsefile = pf;
@@ -481,8 +487,12 @@ popfile(void)
 		close(pf->fd);
 	if (pf->buf)
 		ckfree(pf->buf);
-	while (pf->strpush)
+	if (parsefile->spfree)
+		freestrings(parsefile->spfree);
+	while (pf->strpush) {
 		popstring();
+		freestrings(parsefile->spfree);
+	}
 	parsefile = pf->prev;
 	ckfree(pf);
 	INTON;

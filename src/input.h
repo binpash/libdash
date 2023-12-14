@@ -50,6 +50,9 @@ struct strpush {
 	struct alias *ap;	/* if push was associated with an alias */
 	char *string;		/* remember the string since it may change */
 
+	/* Delay freeing so we can stop nested aliases. */
+	struct strpush *spfree;
+
 	/* Remember last two characters for pungetc. */
 	int lastc[2];
 
@@ -73,6 +76,9 @@ struct parsefile {
 	struct strpush *strpush; /* for pushing strings at this level */
 	struct strpush basestrpush; /* so pushing one is fast */
 
+	/* Delay freeing so we can stop nested aliases. */
+	struct strpush *spfree;
+
 	/* Remember last two characters for pungetc. */
 	int lastc[2];
 
@@ -93,7 +99,6 @@ int pgetc(void);
 int pgetc2(void);
 void pungetc(void);
 void pushstring(char *, void *);
-void popstring(void);
 int setinputfile(const char *, int);
 void setinputfd(int fd, int push); // libdash
 void setinputstring(char *);

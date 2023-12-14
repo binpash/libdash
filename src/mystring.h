@@ -37,11 +37,18 @@
 #include <inttypes.h>
 #include <string.h>
 
+#ifdef HAVE_FNMATCH
+#define FNMATCH_IS_ENABLED 1
+#else
+#define FNMATCH_IS_ENABLED 0
+#endif
+
 extern const char snlfmt[];
 extern const char spcstr[];
 extern const char dolatstr[];
 #define DOLATSTRLEN 6
-extern const char qchars[];
+extern const char cqchars[];
+#define qchars (cqchars + FNMATCH_IS_ENABLED)
 extern const char illnum[];
 extern const char homestr[];
 

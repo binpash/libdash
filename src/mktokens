@@ -95,4 +95,3 @@ sed 's/"//g' "${TMPDIR}"/ka$$ | awk '
 END{print "	\"" last "\"\n};"}'
 
 rm "${TMPDIR}"/ka$$
-
