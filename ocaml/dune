@@ -50,3 +50,13 @@
       (run sed -i -e "/type char = Libdash.Ast.char/d" ast_atd_j.mli)
       (run mv ast_atd_j.ml ast_json.ml)
       (run mv ast_atd_j.mli ast_json.mli))))
+
+(rule
+ (alias runtest)
+ (deps (glob_files ../test/tests/*) (glob_files ../test/pash_tests/*) rt.sh %{bin:json_to_shell} %{bin:shell_to_json})
+ (action
+  (setenv
+   JSON_TO_SHELL %{bin:json_to_shell}
+   (setenv
+    SHELL_TO_JSON %{bin:shell_to_json}
+    (bash "{ find ../test/tests ../test/pash_tests -type f | while read f; do ../test/round_trip.sh ./rt.sh \"$f\"; done | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c | grep ':' ; } && echo FAILED && exit 1 || exit 0")))))
