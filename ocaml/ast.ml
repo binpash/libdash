@@ -86,24 +86,19 @@ let string_of_var_type = function
 
 
 open Ctypes
-open Foreign
 open Dash
 
 let rec last = function
   | [] -> None
   | [x] -> Some x
-  | x::xs -> last xs
+  | _::xs -> last xs
 
 let skip = Command (-1,[],[],[])
-
-let special_chars : char list = explode "|&;<>()$`\\\"'"
 
 type quote_mode =
     QUnquoted
   | QQuoted
   | QHeredoc
-
-let needs_escaping c = List.mem c special_chars
 
 let rec of_node (n : node union ptr) : t =
   if nullptr n
@@ -225,7 +220,7 @@ and of_binary (n : node union ptr) =
   (of_node (getf n nbinary_ch1), of_node (getf n nbinary_ch2))
 
 and to_arg (n : narg structure) : arg =
-  let a,s,bqlist,stack = parse_arg ~tilde_ok:true ~assign:false (explode (getf n narg_text)) (getf n narg_backquote) [] in
+  let a,s,bqlist,stack = parse_arg ~assign:false (explode (getf n narg_text)) (getf n narg_backquote) [] in
   (* we should have used up the string and have no backquotes left in our list *)
   assert (s = []);
   assert (nullptr bqlist);
@@ -304,6 +299,7 @@ and parse_arg ?tilde_ok:(tilde_ok=false) ~assign:(assign:bool) (s : char list) (
      then (* we're in arithmetic or double quotes, so tilde is ignored *)
        arg_char assign (C '~') s bqlist stack
      else
+       let _ = tilde_ok in (* unused? *)
        let uname,s' = parse_tilde [] s in
        arg_char assign (T uname) s' bqlist stack
   (* ordinary character *)
@@ -325,7 +321,7 @@ and parse_tilde acc s =
 and arg_char assign c s bqlist stack =
   let tilde_ok = 
     match c with
-    | C c -> assign && (match last s with
+    | C _ -> assign && (match last s with
                        | Some ':' -> true
                        | _ -> false)
     | _ -> false

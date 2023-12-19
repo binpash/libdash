@@ -1,4 +1,5 @@
 (* This is straight-up copied from the libdash tests *)
+open Libdash
 
 let verbose = ref false
 let input_src : string option ref = ref None

@@ -1,0 +1,62 @@
+(executables
+ (names shell_to_json json_to_shell)
+ (public_names shell_to_json json_to_shell)
+ (modules shell_to_json json_to_shell ast_json)
+ (modes (native exe))
+ (foreign_archives ../dash)
+ (libraries libdash yojson atdgen))
+
+(library
+  (name libdash)
+  (public_name libdash)
+  (modes native)
+  (modules (:standard \ json_to_shell shell_to_json ast_json))
+  (libraries ctypes ctypes.foreign)
+  (ctypes
+    (external_library_name dash)
+    (build_flags_resolver (vendored (c_flags :standard) (c_library_flags :standard)))
+    (deps (glob_files ../src/*.h) ../src/builtins.h ../src/nodes.h ../src/syntax.h ../src/token.h ../src/token_vars.h)
+    (headers (preamble
+              "\
+             \n#include \"../src/shell.h\"\
+             \n#include \"../src/memalloc.h\"\
+             \n#include \"../src/mystring.h\"\
+             \n#include \"../src/init.h\"\
+             \n#include \"../src/main.h\"\
+             \n#include \"../src/input.h\"\
+             \n#include \"../src/var.h\"\
+             \n#include \"../src/alias.h\"\
+             \n#include \"../src/redir.h\"\
+             \n#include \"../src/parser.h\"\
+             \n#include \"../src/nodes.h\"\
+             \n"))
+    (type_description
+      (instance Types)
+      (functor Type_description))
+    (function_description
+      (instance Functions)
+      (functor Function_description))
+    (generated_types Types_generated)
+    (generated_entry_point Cdash)))
+
+(rule
+  (targets ast_json.mli ast_json.ml)
+  (deps ast_atd.atd)
+  (action
+    (progn
+      (run atdgen -j -j-std ast_atd.atd)
+      (run sed -i -e "/type char = Libdash.Ast.char/d" ast_atd_j.ml)
+      (run sed -i -e "/type char = Libdash.Ast.char/d" ast_atd_j.mli)
+      (run mv ast_atd_j.ml ast_json.ml)
+      (run mv ast_atd_j.mli ast_json.mli))))
+
+(rule
+ (alias runtest)
+ (deps (glob_files ../test/tests/*) (glob_files ../test/pash_tests/*)
+       ../test/round_trip.sh rt.sh %{bin:json_to_shell} %{bin:shell_to_json})
+ (action
+  (setenv
+   JSON_TO_SHELL %{bin:json_to_shell}
+   (setenv
+    SHELL_TO_JSON %{bin:shell_to_json}
+    (bash "{ find ../test/tests ../test/pash_tests -type f | while read f; do ../test/round_trip.sh ./rt.sh \"$f\"; done | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c | grep ':' ; } && echo FAILED && exit 1 || { echo OK; exit 0; }")))))

@@ -11,9 +11,9 @@ val initialize : unit -> unit
 
    see libdash/test/test.ml for an example usage in parse_all
 *)
-type stackmark
-val init_stack : unit -> stackmark Ctypes.structure
-val pop_stack : stackmark Ctypes.structure -> unit
+type stackmark_t
+val init_stack : unit -> stackmark_t Ctypes.structure
+val pop_stack : stackmark_t Ctypes.structure -> unit
 
 val alloc_stack_string : string -> (char Ctypes.ptr)
 val free_stack_string : (char Ctypes.ptr) -> unit

@@ -1,0 +1,36 @@
+(data_only_dirs src)
+
+(rule
+  (deps (source_tree src) configure.ac Makefile.am)
+  (targets libdash.a dlldash.so
+           builtins.h nodes.h syntax.h token.h token_vars.h
+           )
+  (action
+    (bash
+    "\
+     \n set -e\
+     \n if [ \"$(uname -s)\" = \"Darwin\" ]; then glibtoolize; else libtoolize; fi\
+     \n aclocal && autoheader && automake --add-missing && autoconf\
+     \n ./configure --prefix=\"$(pwd)\"\
+     \n %{make}\
+     \n %{make} install\
+     \n cp lib/libdash.a libdash.a\
+     \n cp lib/dlldash.so dlldash.so\
+     \n cp src/{builtins,nodes,syntax,token,token_vars}.h .\
+     \n")))
+
+(subdir src
+  (rule
+    (deps    ../builtins.h ../nodes.h ../syntax.h ../token.h ../token_vars.h)
+    (targets    builtins.h    nodes.h    syntax.h    token.h    token_vars.h)
+    (action
+      (progn
+        (copy ../builtins.h builtins.h)
+        (copy ../nodes.h nodes.h)
+        (copy ../syntax.h syntax.h)
+        (copy ../token.h token.h)
+        (copy ../token_vars.h token_vars.h)))))
+
+(library
+  (name dash)
+  (foreign_archives dash))
