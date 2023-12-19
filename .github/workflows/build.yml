@@ -83,12 +83,13 @@ jobs:
         uses: avsm/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
                              
       - name: Install OCaml bindings
-        run: dune install
+        run: opam exec -- dune install
         
       - name: Test OCaml bindings
-        run: dune test
+        run: opam exec -- dune test
  
         # we don't reuse the wheels so that all of the CI runs can happen concurrently
       - name: Install Python directly
