@@ -1,8 +1,8 @@
-type char <ocaml predef module="Ast"> = int <ocaml repr="char">
+type char <ocaml predef module="Libdash.Ast"> = int <ocaml repr="char">
 
-type linno <ocaml predef module="Ast"> = int
+type linno <ocaml predef module="Libdash.Ast"> = int
 
-type t <ocaml predef module="Ast"> = [
+type t <ocaml predef module="Libdash.Ast"> = [
     Command of (linno * assign list * args * redirection list) (* assign, args, redir *)
   | Pipe of (bool * t list) (* background?, commands *)
   | Redir of (linno * t * redirection list)
@@ -19,15 +19,15 @@ type t <ocaml predef module="Ast"> = [
   | Defun of (linno * string * t) (* name, body *)
 ] <ocaml repr="classic">
 
-type assign <ocaml predef module="Ast"> = (string * arg) <ocaml repr="classic">
+type assign <ocaml predef module="Libdash.Ast"> = (string * arg) <ocaml repr="classic">
 
-type redirection <ocaml predef module="Ast"> = [
+type redirection <ocaml predef module="Libdash.Ast"> = [
      File of (redir_type * int * arg)
    | Dup of (dup_type * int * arg)
    | Heredoc of (heredoc_type * int * arg)
 ] <ocaml repr="classic">
 
-type redir_type <ocaml predef module="Ast"> = [
+type redir_type <ocaml predef module="Libdash.Ast"> = [
      To
    | Clobber
    | From
@@ -35,21 +35,21 @@ type redir_type <ocaml predef module="Ast"> = [
    | Append
 ] <ocaml repr="classic">
 
-type dup_type <ocaml predef module="Ast"> = [
+type dup_type <ocaml predef module="Libdash.Ast"> = [
      ToFD
    | FromFD
 ] <ocaml repr="classic">
 
-type heredoc_type <ocaml predef module="Ast"> = [
+type heredoc_type <ocaml predef module="Libdash.Ast"> = [
      Here
    | XHere (* for when in a quote... not sure when this comes up *)
 ] <ocaml repr="classic">
 
-type args <ocaml predef module="Ast"> = arg list
+type args <ocaml predef module="Libdash.Ast"> = arg list
 
-type arg <ocaml predef module="Ast"> = arg_char list
+type arg <ocaml predef module="Libdash.Ast"> = arg_char list
 
-type arg_char <ocaml predef module="Ast"> = [
+type arg_char <ocaml predef module="Libdash.Ast"> = [
      C of char
    | E of char (* escape... necessary for expansion *)
    | T of string option (* tilde *)
@@ -59,7 +59,7 @@ type arg_char <ocaml predef module="Ast"> = [
    | B of t (* backquote *)
 ] <ocaml repr="classic">
 
-type var_type <ocaml predef module="Ast"> = [
+type var_type <ocaml predef module="Libdash.Ast"> = [
      Normal
    | Minus
    | Plus
@@ -72,7 +72,7 @@ type var_type <ocaml predef module="Ast"> = [
    | Length
 ] <ocaml repr="classic">
 
-type case <ocaml predef module="Ast"> = {
+type case <ocaml predef module="Libdash.Ast"> = {
   cpattern : arg list;
   cbody : t
 }

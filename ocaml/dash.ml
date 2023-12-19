@@ -1,246 +1,33 @@
-open Printf
 open Ctypes
-open Ctypes_types
-open Foreign
+include Cdash.Functions
+include Cdash.Types
 
 (* First, some dash trivia. *)
-   
-type stackmark
-              
-let stackmark : stackmark structure typ = structure "stackmark"
-let stackp = field stackmark "stackp" (ptr void)
-let nxt = field stackmark "nxt" string
-let size = field stackmark "stacknleft" PosixTypes.size_t
-let () = seal stackmark
 
-let init_stack () =
-  let stack = make stackmark in
-  foreign "setstackmark" (ptr stackmark @-> returning void) (addr stack);
+type stackmark_t = Stackmark.stackmark
+
+let init_stack () : stackmark =
+  let stack = Ctypes.make stackmark in
+  setstackmark (addr stack);
   stack
 
-let pop_stack stack =
-  foreign "popstackmark" (ptr stackmark @-> returning void) (addr stack)
-
-let alloc_stack_string =
-  foreign "sstrdup" (string @-> returning (ptr char))
-
-let free_stack_string s =
-  foreign "stunalloc" (ptr char @-> returning void) s
-  
-let dash_init : unit -> unit = foreign "init" (void @-> returning void)
-let initialize_dash_errno : unit -> unit = 
-  foreign "initialize_dash_errno" (void @-> returning void)
-
-let initialize () =
+let pop_stack stack : unit =
+  popstackmark (addr stack)
+ 
+let initialize () : unit =
   initialize_dash_errno ();
   dash_init ()
 
-let popfile : unit -> unit =
-  foreign "popfile" (void @-> returning void)
-                                  
-let setinputstring : char ptr -> unit =
-  foreign "setinputstring" (ptr char @-> returning void)
-
 let setinputtostdin () : unit =
-  foreign "setinputfd" (int @-> int @-> returning void) 0 0 (* don't both pushing the file *)
+  setinputfd 0 0 (* don't bother pushing the file *)
 
 let setinputfile ?push:(push=false) (s : string) : unit =
-  let _ = foreign "setinputfile" (string @-> int @-> returning int) s (if push then 1 else 0) in
+  let _ = raw_setinputfile s (if push then 1 else 0) in
   ()
 
 let setvar (x : string) (v : string) : unit =
-  let _ = foreign "setvar" (string @-> string @-> int @-> returning (ptr void)) x v 0 in
+  let _ = raw_setvar x v 0 in
   ()
-          
-let setalias (name : string) (mapping : string) : unit =
-  foreign "setalias" (string @-> string @-> returning void) name mapping
-
-let unalias (name : string) : unit =
-  foreign "unalias" (string @-> returning void) name
-
-(* Next, a utility function that isn't in Unix or ExtUnix. *)
-
-let freshfd_ge10 (fd : int) : int =
-  foreign "freshfd_ge10" (int @-> returning int) fd
-  
-(* Actual AST stuff begins here. *)
-(* first, we define the node type... *)
-          
-type node       
-let node : node union typ = union "node"
-let node_type = field node "type" int
-(* but we don't seal it yet! *)
-
-type nodelist
-let nodelist : nodelist structure typ = structure "nodelist"       
-let nodelist_next = field nodelist "next" (ptr nodelist)
-let nodelist_n = field nodelist "n" (ptr node)
-let () = seal nodelist
-                       
-type ncmd
-
-let ncmd : ncmd structure typ = structure "ncmd"
-let ncmd_type = field ncmd "type" int
-let ncmd_linno = field ncmd "linno" int
-let ncmd_assign = field ncmd "assign" (ptr node)
-let ncmd_args = field ncmd "args" (ptr node)
-let ncmd_redirect = field ncmd "redirect" (ptr node)
-let () = seal ncmd
-
-let node_ncmd = field node "ncmd" ncmd
-
-type npipe
-
-let npipe : npipe structure typ = structure "npipe"
-let npipe_type = field npipe "type" int
-let npipe_backgnd = field npipe "backgnd" int
-let npipe_cmdlist = field npipe "cmdlist" (ptr nodelist)
-let () = seal npipe
-
-let node_npipe = field node "npipe" npipe
-                           
-type nredir
-
-let nredir : nredir structure typ = structure "nredir"
-let nredir_type = field nredir "type" int
-let nredir_linno = field nredir "linno" int
-let nredir_n = field nredir "n" (ptr node)
-let nredir_redirect = field nredir "redirect" (ptr node)
-let () = seal nredir
-
-let node_nredir = field node "nredir" nredir
-
-type nbinary
-
-let nbinary : nbinary structure typ = structure "nbinary"
-let nbinary_type = field nbinary "type" int
-let nbinary_ch1 = field nbinary "ch1" (ptr node)
-let nbinary_ch2 = field nbinary "ch2" (ptr node)
-let () = seal nbinary
-
-let node_nbinary = field node "nbinary" nbinary
-
-type nif
-
-let nif : nif structure typ = structure "nif"
-let nif_type = field nif "type" int
-let nif_test = field nif "test" (ptr node)
-let nif_ifpart = field nif "ifpart" (ptr node)
-let nif_elsepart = field nif "elsepart" (ptr node)
-let () = seal nif
-
-let node_nif = field node "nif" nif
-
-type nfor
-
-let nfor : nfor structure typ = structure "nfor"
-let nfor_type = field nfor "type" int
-let nfor_linno = field nfor "linno" int
-let nfor_args = field nfor "args" (ptr node)
-let nfor_body = field nfor "body" (ptr node)
-let nfor_var = field nfor "var" string
-let () = seal nfor
-
-let node_nfor = field node "nfor" nfor
-
-type ncase
-
-let ncase : ncase structure typ = structure "ncase"
-let ncase_type = field ncase "type" int
-let ncase_linno = field ncase "linno" int
-let ncase_expr = field ncase "expr" (ptr node)
-let ncase_cases = field ncase "cases" (ptr node)
-let () = seal ncase
-
-let node_ncase = field node "ncase" ncase
-
-type nclist
-
-let nclist : nclist structure typ = structure "nclist"
-let nclist_type = field nclist "type" int
-let nclist_next = field nclist "next" (ptr node)
-let nclist_pattern = field nclist "pattern" (ptr node)
-let nclist_body = field nclist "body" (ptr node)
-let () = seal nclist
-
-let node_nclist = field node "nclist" nclist
-
-type ndefun
-
-let ndefun : ndefun structure typ = structure "ndefun"
-let ndefun_type = field ndefun "type" int
-let ndefun_linno = field ndefun "linno" int
-let ndefun_text = field ndefun "text" string
-let ndefun_body = field ndefun "body" (ptr node)
-let () = seal ndefun
-
-let node_ndefun = field node "ndefun" ndefun
-
-type narg
-
-let narg : narg structure typ = structure "narg"
-let narg_type = field narg "type" int
-let narg_next = field narg "next" (ptr node)
-let narg_text = field narg "text" string
-let narg_backquote = field narg "backquote" (ptr nodelist)
-let () = seal narg
-
-let node_narg = field node "narg" narg
-
-type nfile
-
-let nfile : nfile structure typ = structure "nfile"
-let nfile_type = field nfile "type" int
-let nfile_next = field nfile "next" (ptr node)
-let nfile_fd = field nfile "fd" int
-let nfile_fname = field nfile "fname" (ptr node)
-let nfile_expfname = field nfile "expfname" string
-let () = seal nfile
-
-let node_nfile = field node "nfile" nfile
-
-type ndup
-
-let ndup : ndup structure typ = structure "ndup"
-let ndup_type = field ndup "type" int
-let ndup_next = field ndup "next" (ptr node)
-let ndup_fd = field ndup "fd" int
-let ndup_dupfd = field ndup "dupfd" int
-let ndup_vname = field ndup "vname" (ptr node)
-let () = seal ndup
-
-let node_ndup = field node "ndup" ndup
-
-type nhere
-
-let nhere : nhere structure typ = structure "nhere"
-let nhere_type = field nhere "type" int
-let nhere_next = field nhere "next" (ptr node)
-let nhere_fd = field nhere "fd" int
-let nhere_doc = field nhere "doc" (ptr node)
-let () = seal nhere
-
-let node_nhere = field node "nhere" nhere
-
-type nnot
-
-let nnot : nnot structure typ = structure "nnot"
-let nnot_type = field nnot "type" int
-let nnot_com = field nnot "com" (ptr node)
-let () = seal nnot
-
-let node_nnot = field node "nnot" nnot
-let () = seal node
-              
-let parsecmd_safe : int -> node union ptr =
-  foreign "parsecmd_safe" (int @-> returning (ptr node))
-          
-let parse s =
-  setinputstring s; (* TODO set stack mark? *)
-  parsecmd_safe 0
-
-let neof : node union ptr = foreign_value "tokpushback" node
-let nerr : node union ptr = foreign_value "lasttoken" node
 
 let addrof p = raw_address_of_ptr (to_voidp p)
 
