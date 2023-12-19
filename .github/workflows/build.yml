@@ -86,10 +86,10 @@ jobs:
           dune-cache: true
                              
       - name: Install OCaml bindings
-        run: opam exec -- dune install
+        run: opam exec -- dune build -p libdash @install
         
       - name: Test OCaml bindings
-        run: opam exec -- dune test
+        run: opam exec -- dune build -p libdash @test
  
         # we don't reuse the wheels so that all of the CI runs can happen concurrently
       - name: Install Python directly

@@ -3,6 +3,7 @@
  (public_names shell_to_json json_to_shell)
  (modules shell_to_json json_to_shell ast_json)
  (modes (native exe))
+ (foreign_archives ../dash)
  (libraries libdash yojson atdgen))
 
 (library
@@ -11,8 +12,6 @@
   (modes native)
   (modules (:standard \ json_to_shell shell_to_json ast_json))
   (libraries ctypes ctypes.foreign)
-;  (library_flags (-linkall))
-  (foreign_archives ../dash)
   (ctypes
     (external_library_name dash)
     (build_flags_resolver (vendored (c_flags :standard) (c_library_flags :standard)))
