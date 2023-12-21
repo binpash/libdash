@@ -2,7 +2,7 @@
 
 (rule
   (deps (source_tree src) configure.ac Makefile.am)
-  (targets libdash.a dlldash.so
+  (targets libdash.a dlldash.so libdash2.a dlldash2.so
            builtins.h nodes.h syntax.h token.h token_vars.h
            )
   (action
@@ -16,6 +16,8 @@
      \n %{make} install\
      \n cp lib/libdash.a libdash.a\
      \n cp lib/dlldash.so dlldash.so\
+     \n cp lib/libdash.a libdash2.a\
+     \n cp lib/dlldash.so dlldash2.so\
      \n cp src/{builtins,nodes,syntax,token,token_vars}.h .\
      \n")))
 
@@ -34,3 +36,7 @@
 (library
   (name dash)
   (foreign_archives dash))
+
+(library
+  (name dash2)
+  (foreign_archives dash2))

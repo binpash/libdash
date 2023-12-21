@@ -86,8 +86,8 @@ jobs:
           dune-cache: true
                              
       - name: Install and test OCaml bindings
-        run: opam install --with-test --working-dir .
-        
+        run: opam install --with-test .
+
         # we don't reuse the wheels so that all of the CI runs can happen concurrently
       - name: Install Python directly
         run: sudo pip3 install .
