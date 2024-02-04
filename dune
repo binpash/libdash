@@ -6,6 +6,7 @@
            builtins.h nodes.h syntax.h token.h token_vars.h
            )
   (action
+    (setenv CC "%{cc}"
     (bash
     "\
      \n set -e\
@@ -17,7 +18,7 @@
      \n cp lib/libdash.a libdash.a\
      \n cp lib/dlldash.so dlldash.so\
      \n cp src/{builtins,nodes,syntax,token,token_vars}.h .\
-     \n")))
+     \n"))))
 
 (subdir src
   (rule
