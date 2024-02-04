@@ -3,8 +3,10 @@
  (public_names shell_to_json json_to_shell)
  (modules shell_to_json json_to_shell ast_json)
  (modes (native exe))
- (foreign_archives ../dash)
  (libraries libdash yojson atdgen))
+
+(rule (copy ../dlldash.so dlldash_native.so))
+(rule (copy ../libdash.a libdash_native.a))
 
 (library
   (name libdash)
@@ -12,9 +14,10 @@
   (modes native)
   (modules (:standard \ json_to_shell shell_to_json ast_json))
   (libraries ctypes ctypes.foreign)
+  (foreign_archives dash_native)
   (ctypes
     (external_library_name dash)
-    (build_flags_resolver (vendored (c_flags :standard) (c_library_flags :standard)))
+    (build_flags_resolver vendored)
     (deps (glob_files ../src/*.h) ../src/builtins.h ../src/nodes.h ../src/syntax.h ../src/token.h ../src/token_vars.h)
     (headers (preamble
               "\
