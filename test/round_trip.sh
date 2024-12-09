@@ -8,6 +8,10 @@ fi
 p=$1
 tgt=$2
 
+two_roundtrips() {
+    [ "$(head -n1 "$tgt")" != '# TEST: single roundtrip' ]
+}
+
 orig=$(mktemp)
 
 "$p" "$tgt" >"$orig"
@@ -31,25 +35,31 @@ then
      echo "PASS '$tgt'"
      exit 0
 else
-    # try one more time around the loop
-    rtrt=$(mktemp)
-
-    "$p" "$rt" >"$rtrt"
-    if [ "$?" -ne 0 ]
+    if two_roundtrips
     then
-        echo "RT_ABORT_3: '$tgt' -> '$orig' -> '$rt' -> '$rtrt'"
-        exit 5
+        # try one more time around the loop
+        rtrt=$(mktemp)
+
+        "$p" "$rt" >"$rtrt"
+        if [ "$?" -ne 0 ]
+        then
+            echo "RT_ABORT_3: '$tgt' -> '$orig' -> '$rt' -> '$rtrt'"
+            exit 5
+        fi
+
+        if diff -b "$rt" "$rtrt" >/dev/null
+        then
+            echo "PASS '$tgt' (two runs to fixpoint)"
+            exit 0
+        fi
     fi
 
-    if diff -b "$rt" "$rtrt" >/dev/null
-    then
-        echo "PASS '$tgt' (two runs to fixpoint)"
-        exit 0
-    fi
-    
     echo "FAIL: '$tgt' first time"
     diff -ub "$orig" "$rt"
-    echo ">>> '$tgt' second time"
-    diff -ub "$rt" "$rtrt"
+    if two_roundtrips
+    then
+        echo ">>> '$tgt' second time"
+        diff -ub "$rt" "$rtrt"
+    fi
     exit 1
 fi
