@@ -468,7 +468,7 @@ and string_of_arg ?quote_mode:(quote_mode=QUnquoted) = function
   | [] -> ""
   | c :: a ->
      let char = string_of_arg_char ~quote_mode c in
-     if char = "$" && next_is_escaped a
+     if char = "$" && a <> []
      then "\\$" ^ string_of_arg ~quote_mode a
      else char ^ string_of_arg ~quote_mode a
 

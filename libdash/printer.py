@@ -408,14 +408,7 @@ def string_of_arg (args, quote_mode=UNQUOTED):
     text = []
     while i < len(args):
         c = string_of_arg_char(args[i], quote_mode=quote_mode)
-
-        # dash will parse '$?' as
-        # [(C, '$'), (E, '?')]
-        # but we don't normally want to escape ?
-        #
-        # so we check up after the fact: if the character after $ is escaped,
-        # we'll escape the $, too
-        if c == "$" and (i+1 < len(args)) and args[i+1][0] == "E":
+        if c == "$" and (i+1 < len(args)):
             c = "\\$"
         text.append(c)
 
