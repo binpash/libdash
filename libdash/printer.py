@@ -393,7 +393,14 @@ def string_of_arg_char (c, quote_mode=UNQUOTED):
     elif (type == "Q"):
         return "\"" + string_of_arg (param, quote_mode=QUOTED) + "\"";
     elif (type == "B"):
-        return "$(" + to_string (param) + ")";
+        body = to_string (param)
+        # to handle $( () )
+        try:
+            if body[0] == "(" and body[-1] == ")":
+                body = f" {body} "
+        except IndexError:
+            pass
+        return "$(" + body + ")"
     else:
         abort ();
 
