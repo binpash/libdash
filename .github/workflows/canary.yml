@@ -4,19 +4,20 @@ on:
 #  push:
   schedule:
     - cron: '20 13 * * *'
-      
+
 jobs:
   ocaml:
     strategy:
       fail-fast: false
       matrix:
         os:
-          - macos-12
-          - macos-11
-          - ubuntu-18.04
-          - ubuntu-20.04
+          - macos-14
+          - macos-15
+          - ubuntu-22.04
+          - ubuntu-24.04
         ocaml-compiler:
           - 4.14.x
+          - 5.2.x
 
     runs-on: ${{ matrix.os }}
 
@@ -34,7 +35,7 @@ jobs:
 
       - name: Test OPAM executables
         run: test "$(echo hi | opam exec -- shell_to_json | opam exec -- json_to_shell)" = "hi"
-          
+
   python:
     strategy:
       fail-fast: true
@@ -63,8 +64,8 @@ jobs:
 
       - name: Install Python bindings from ${{ matrix.repository_url }}
         run: pip install -v -i "${{ matrix.repository_url }}" --extra-index-url https://pypi.org/simple/ libdash
-          
+
       - name: Test Python library
         run: |
           RT="$(printf 'import libdash\nasts = libdash.parse("-", True)\nfor (ast, lines, linno_before, linno_after) in asts:\n  print(libdash.to_string(ast))\n')"
-          test "$(echo hi | python -c "$RT")" = "hi"          
+          test "$(echo hi | python -c "$RT")" = "hi"

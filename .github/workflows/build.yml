@@ -16,13 +16,13 @@ jobs:
 
       - name: Check version numbers
         run: ./version.sh
-  
+
   package-python:
     strategy:
       fail-fast: false
       matrix:
         os:
-          - macos-11
+          - macos-latest
           - ubuntu-latest
 
     runs-on: ${{ matrix.os }}
@@ -38,15 +38,15 @@ jobs:
              echo Unsupported RUNNER_OS=$RUNNER_OS
              exit 1
            fi
-      
+
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.8.1
-            
+
       - name: Upload binary wheel
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ format('bdist.{0}', matrix.os) }}
           path: wheelhouse/libdash-*.whl
@@ -54,14 +54,14 @@ jobs:
       - name: Build source distribution (Linux only)
         if: contains(matrix.os, 'ubuntu')
         run: python setup.py sdist
-            
+
       - name: Upload source distribution (from Linux)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: contains(matrix.os, 'ubuntu')
         with:
           name: sdist
           path: dist/libdash-*.tar.gz
-      
+
   build-both-and-compare:
     strategy:
       fail-fast: true
@@ -84,17 +84,17 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
-                             
+
       - name: Install and test OCaml bindings
         run: opam install --with-test --working-dir .
-        
+
         # we don't reuse the wheels so that all of the CI runs can happen concurrently
       - name: Install Python directly
         run: sudo pip3 install .
-      
+
       - name: Test Python bindings
         run: make -C python test
-          
+
       - name: Compare OCaml and Python bindings
         run: opam exec -- make -C test test
 
@@ -105,10 +105,10 @@ jobs:
       - build-both-and-compare
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags')
-      
+
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
 
       - name: Rename distributions
         run: |
@@ -118,7 +118,7 @@ jobs:
           mv sdist/libdash-*.tar.gz dist/
           echo Look on my Works, ye Mighty, and despair!
           ls dist
-  
+
       - name: Deploy 'latest' release on GH
         uses: marvinpinto/action-automatic-releases@latest
         with:
@@ -135,8 +135,8 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           verbose: true
           repository_url: https://test.pypi.org/legacy/
-          skip_existing: true            
-              
+          skip_existing: true
+
       - name: Deploy tagged release on PyPI
         if: startsWith(github.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@release/v1
