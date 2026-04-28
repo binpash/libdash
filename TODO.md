@@ -3,6 +3,6 @@
 - [x] correct libdash.so installation (locally)
 - [x] pip setup
 - [x] testpypi setup
+- [ ] version bump, fix CI
 - [ ] pash pull request
 - [ ] smoosh pull request
-
