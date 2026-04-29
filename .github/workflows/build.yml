@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check version numbers
         run: ./version.sh
@@ -40,13 +40,13 @@ jobs:
            fi
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.8.1
 
       - name: Upload binary wheel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ format('bdist.{0}', matrix.os) }}
           path: wheelhouse/libdash-*.whl
@@ -56,7 +56,7 @@ jobs:
         run: python setup.py sdist
 
       - name: Upload source distribution (from Linux)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: contains(matrix.os, 'ubuntu')
         with:
           name: sdist
@@ -76,7 +76,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: avsm/setup-ocaml@v3
@@ -107,7 +107,7 @@ jobs:
 
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
 
       - name: Rename distributions
         run: |
