@@ -81,7 +81,7 @@ static int cmdloop(int);
 
 //libdash
 void
-initialize_dash_errno() 
+initialize_dash_errno()
 {
 #ifdef __GLIBC__
 	dash_errno = __errno_location();

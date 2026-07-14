@@ -11,11 +11,11 @@ def libdash_library_path():
 
     if LIBDASH_LIBRARY_PATH is not None:
         return LIBDASH_LIBRARY_PATH
-    
+
     FILE_PATH = os.path.dirname(os.path.realpath(os.path.abspath(__file__)))
     LIBDASH_LIBRARY_PATH = os.path.join(FILE_PATH, "libdash.so")
     return LIBDASH_LIBRARY_PATH
-    
+
 EOF_NLEFT = -99; # libdash/src/input.c
 
 class ParsingException(Exception):
@@ -83,8 +83,9 @@ def parse(inputPath, init=True):
 
                     # Last line did not have a newline
                     assert (len (lines [-1]) > 0 and (lines [-1][-1] != '\n'))
-            else:
-                assert (nleft_after == 0); # Read whole lines
+            elif nleft_after != 0:
+                # we formerly asserted that `nleft_after != 0`, but this no longer holds
+                linno_after = linno_after + 1; # The last line wasn't counted
 
             n_ptr = cast (n_ptr_C, POINTER (union_node))
             new_ast = of_node (n_ptr)

@@ -2,6 +2,8 @@ name: Main workflow
 
 on:
   pull_request:
+    branches:
+      - master
   push:
   schedule:
     - cron: '5 14 * * *'
@@ -12,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check version numbers
         run: ./version.sh
@@ -40,10 +42,12 @@ jobs:
            fi
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.8.1
+        uses: pypa/cibuildwheel@v3.4.1
+        env:
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
 
       - name: Upload binary wheel
         uses: actions/upload-artifact@v4
@@ -76,7 +80,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: avsm/setup-ocaml@v3
@@ -88,14 +92,21 @@ jobs:
         run: opam install --with-test --working-dir .
 
         # we don't reuse the wheels so that all of the CI runs can happen concurrently
-      - name: Install Python directly
-        run: sudo pip3 install .
+      - name: Install Python via venv
+        run: |
+           python3 -m venv .venv
+           . .venv/bin/activate
+           python3 -m pip install .
 
       - name: Test Python bindings
-        run: make -C python test
+        run: |
+          . .venv/bin/activate
+          make -C python test
 
       - name: Compare OCaml and Python bindings
-        run: opam exec -- make -C test test
+        run: |
+          . .venv/bin/activate
+          opam exec -- make -C test test
 
   deploy:
     needs:

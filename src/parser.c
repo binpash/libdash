@@ -784,7 +784,7 @@ ignorenl:
 			} else {
 				t = xxreadtoken();
 				goto ignorenl;
-   		        }
+                        }
 		}
 	}
 out:

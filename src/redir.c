@@ -453,7 +453,7 @@ FORKRESET {
 
 #endif
 
-/* 
+/*
  * Just a convenience because fcntl isn't well exposed in OCaml.
  */
 // libdash
@@ -464,7 +464,7 @@ freshfd_ge10(int fd)
   int err;
 
   newfd = fcntl(fd, F_DUPFD_CLOEXEC, 10);
-  
+
   err = newfd < 0 ? errno : 0;
   if (err == EBADF) {
     newfd = -1;

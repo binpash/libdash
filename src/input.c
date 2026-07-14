@@ -83,7 +83,7 @@ STATIC void pushfile(void);
 static void popstring(void);
 static int preadfd(void);
 /*
-static void setinputfd(int fd, int push); 
+static void setinputfd(int fd, int push);
 */ // libdash
 static int preadbuffer(void);
 
@@ -573,7 +573,7 @@ out:
  * interrupts off.
  */
 
-/* 
+/*
 static void
 */
 void // libdash
