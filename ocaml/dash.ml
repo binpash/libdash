@@ -13,7 +13,7 @@ let init_stack () : stackmark =
 
 let pop_stack stack : unit =
   popstackmark (addr stack)
- 
+
 let initialize () : unit =
   initialize_dash_errno ();
   dash_init ()
@@ -31,29 +31,27 @@ let setvar (x : string) (v : string) : unit =
 
 let addrof p = raw_address_of_ptr (to_voidp p)
 
-let eqptr p1 p2 = addrof p1 = addrof p2
-                                  
 let nullptr (p : 'a ptr) = addrof p = Nativeint.zero
 
 type parse_result = Done | Error | Null | Parsed of (node union ptr)
 
 let parse_next ?interactive:(i=false) () =
   let n = parsecmd_safe (if i then 1 else 0) in
-  if eqptr n neof
+  if addrof n = addrof neof
   then Done
-  else if eqptr n nerr
+  else if addrof n = addrof nerr
   then Error
   else if nullptr n
   then Null (* comment or blank line or error ... *)
   else Parsed n
-            
+
 let (@->) (s : ('b, 'c) structured ptr) (f : ('a, ('b, 'c) structured) field) =
   getf (!@ s) f
 
 let rec arglist (n : narg structure) : (narg structure) list =
   let next = getf n narg_next in
   if nullptr next
-  then [n] 
+  then [n]
   else
     (assert (next @-> node_type = 15);
      n::arglist (next @-> node_narg))
@@ -62,7 +60,7 @@ let rec nodelist (n : nodelist structure ptr) : (node union ptr) list =
   if nullptr n
   then []
   else (n @-> nodelist_n)::nodelist (n @-> nodelist_next)
-                  
+
 let rec redirlist (n : node union ptr) =
   if nullptr n
   then []
@@ -78,9 +76,9 @@ let rec redirlist (n : node union ptr) =
       | 19 -> `File (0,"<>",n @-> node_nfile)
       (* NAPPEND *)
       | 20 -> `File (1,">>",n @-> node_nfile)
-      (* NTOFD *)      
+      (* NTOFD *)
       | 21 -> `Dup (1,">&",n @-> node_ndup)
-      (* NFROMFD *)              
+      (* NFROMFD *)
       | 22 -> `Dup (0,"<&",n @-> node_ndup)
       (* NHERE quoted heredoc---no expansion)*)
       | 23 -> `Here (0,"<<",false,n @-> node_nhere)
@@ -93,11 +91,11 @@ let rec redirlist (n : node union ptr) =
 let rec caselist (n : node union ptr) =
   if nullptr n
   then []
-  else    
+  else
     let n = n @-> node_nclist in
     assert (getf n nclist_type = 13); (* NCLIST *)
     (getf n nclist_pattern, getf n nclist_body)::caselist (getf n nclist_next)
-                   
+
 let explode s =
   let rec exp i l =
     if i < 0 then l else exp (i - 1) (s.[i] :: l) in
@@ -112,12 +110,12 @@ let implode l =
   in
   imp 0 l;
   Bytes.unsafe_to_string s
-                   
+
 let rec intercalate p ss =
   match ss with
   | [] -> ""
   | [s] -> s
-  | s::ss -> s ^ p ^ intercalate p ss          
+  | s::ss -> s ^ p ^ intercalate p ss
 
 let lines = Str.split (Str.regexp "[\n\r]+")
 
@@ -125,7 +123,7 @@ let rec fresh_marker ls s =
   if List.mem s ls
   then fresh_marker ls (s ^ (String.sub s (String.length s - 1) 1))
   else s
-                      
+
 let rec split_at p xs =
   match xs with
   | [] -> ([],[])
@@ -146,10 +144,10 @@ let string_of_vs = function
   | 0x8 -> (* VSTRIMLEFT ${var#pattern} *) ['#']
   | 0x9 -> (* VSTRIMLEFTMAX ${var##pattern} *) ['#';'#']
   | vs -> failwith ("Unknown VSTYPE: " ^ string_of_int vs)
-                   
+
 let braces s = "{ " ^ s ^ " ; }"
 let parens s = "( " ^ s ^ " )"
-                  
+
 let rec show (n : node union ptr) : string =
   match (n @-> node_type) with
   (* NCMD *)
@@ -164,7 +162,7 @@ let rec show (n : node union ptr) : string =
      let cmds = nodelist (getf n npipe_cmdlist) in
      intercalate " | " (List.map show cmds) ^ if (getf n npipe_backgnd) = 0 then "" else " &"
   (* NREDIR *)
-  | 2  -> shnredir braces n 
+  | 2  -> shnredir braces n
   (* NBACKGND *)
   | 3  -> shnredir braces n ^ " &"
   (* NSUBSHELL *)
@@ -221,11 +219,11 @@ and shif n =
    else "; else " ^ show else_part ^ "; fi")
 
 and shclist clist = intercalate " " (List.map shcase (caselist clist)) (* handles NCLIST = 13 *)
-    
+
 and shcase (pat,body) =
   assert (pat @-> node_type = 15);
   sharg (pat @-> node_narg) ^ ") " ^ show body ^ ";;"
-    
+
 and shredir (n : node union ptr) : string =
   let redirs = redirlist n in
   if redirs = []
@@ -234,7 +232,7 @@ and shredir (n : node union ptr) : string =
 and show_redir n : string =
   match n with
   | `File (src,sym,f) -> show_redir_src (getf f nfile_fd) src ^ sym ^ sharg ((getf f nfile_fname) @-> node_narg)
-  | `Dup (src,sym,d) -> 
+  | `Dup (src,sym,d) ->
       let vname = getf d ndup_vname in
       let tgt =
         if nullptr vname
@@ -250,14 +248,14 @@ and show_redir_src actual expected =
   if actual = expected
   then ""
   else string_of_int actual
-                                                    
+
 and sharg (n : narg structure) : string =
   let str,s',bqlist,stack = show_arg (explode (getf n narg_text)) (getf n narg_backquote) [] in
   (* we should have used up the string and have no backquotes left in our list *)
   assert (s' = []);
   assert (nullptr bqlist);
   assert (stack = []);
-  str    
+  str
 and show_arg (s : char list) (bqlist : nodelist structure ptr) stack =
   (* we have to look at the string and interpret control characters... *)
   match s,stack with
@@ -266,7 +264,7 @@ and show_arg (s : char list) (bqlist : nodelist structure ptr) stack =
   | [],`CTLAri::stack' -> failwith "End of string before CTLENDARI"
   | [],`CTLQuo::stack' -> failwith "End of string before CTLQUOTEMARK"
   (* CTLESC *)
-  | '\129'::c::s',_ -> 
+  | '\129'::c::s',_ ->
      let str,s'',bqlist',stack' = show_arg s' bqlist stack in
      let c' = match c with
       | '\'' -> "\\'"
@@ -275,7 +273,7 @@ and show_arg (s : char list) (bqlist : nodelist structure ptr) stack =
      in
      c' ^ str,s'',bqlist',stack'
   (* CTLVAR *)
-  | '\130'::t::s',_ -> 
+  | '\130'::t::s',_ ->
      let v,s'',bqlist',stack' = show_var (int_of_char t) s' bqlist stack in
      assert (stack = stack');
      let str,s''',bqlist'',stack'' = show_arg s'' bqlist' stack' in
@@ -314,7 +312,7 @@ and show_arg (s : char list) (bqlist : nodelist structure ptr) stack =
      let str,s''',bqlist'',stack'' = show_arg s'' bqlist' stack in
      "\"" ^ quoted ^ "\"" ^ str, s''', bqlist'', stack''
   (* ordinary character *)
-  | c::s',_ -> 
+  | c::s',_ ->
      let str,s',bqlist',stack' = show_arg s' bqlist stack in
      let c' = match c with
       | '\'' -> "\\'"
@@ -343,4 +341,3 @@ and show_var (t : int) (s : char list) (bqlist : nodelist structure ptr) stack =
      implode (var_name @ vsnul @ string_of_vs vstype) ^ mods, s'', bqlist', stack'
   | _,c::s' -> failwith ("Expected '=' terminating variable name, found " ^ Char.escaped c)
   | _,[] -> failwith "Expected '=' terminating variable name, found EOF"
-

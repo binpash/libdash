@@ -1,4 +1,4 @@
-(* dash internals 
+(* dash internals
 
    call initialize before doing anything!
 *)
@@ -17,7 +17,7 @@ val pop_stack : stackmark_t Ctypes.structure -> unit
 
 val alloc_stack_string : string -> (char Ctypes.ptr)
 val free_stack_string : (char Ctypes.ptr) -> unit
-  
+
 val popfile : unit -> unit
 val setinputstring : (char Ctypes.ptr) -> unit
 val setinputtostdin : unit -> unit
@@ -28,8 +28,8 @@ val setalias : string -> string -> unit
 val unalias : string -> unit
 
 (* returns -1 when fd was closed; -2 on other errors *)
-val freshfd_ge10 : int -> int 
-  
+val freshfd_ge10 : int -> int
+
 (* Ctypes mappings of the node types *)
 type node
 val node : node Ctypes.union Ctypes.typ
@@ -205,8 +205,6 @@ val caselist :
   list
 
 (* useful functions for working with the Ctypes AST *)
-val addrof : 'a Ctypes.ptr -> nativeint
-val eqptr : 'a Ctypes.ptr -> 'b Ctypes.ptr -> bool
 val nullptr : 'a Ctypes.ptr -> bool
 
 (* useful functions for pretty printing *)

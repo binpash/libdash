@@ -23,14 +23,14 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let raw_setvar = foreign "setvar" (string @-> string @-> int @-> returning (ptr void))
 
   let setalias = foreign "setalias" (string @-> string @-> returning void)
-  let unalias = foreign "unalias" (string @-> returning void) 
+  let unalias = foreign "unalias" (string @-> returning void)
 
   (* Unix/ExtUnix don't let you renumber things the way you want *)
   let freshfd_ge10 = foreign "freshfd_ge10" (int @-> returning int)
 
   let parsecmd_safe = foreign "parsecmd_safe" (int @-> returning (ptr node))
-  let neof = foreign_value "tokpushback" node
-  let nerr = foreign_value "lasttoken" node
+
+  (* dummy addresses used inside dash *)
+  let neof = foreign_value "tokpushback" int
+  let nerr = foreign_value "lasttoken" int
 end
-
-

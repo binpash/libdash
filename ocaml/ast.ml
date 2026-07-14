@@ -1,7 +1,7 @@
 type linno = int
 
 exception ParseException of string
-           
+
 type t =
   | Command of (linno * assign list * args * redirection list) (* assign, args, redir *)
   | Pipe of (bool * t list) (* background?, commands *)
@@ -70,14 +70,14 @@ let string_of_var_type = function
  | TrimR -> "%"
  | TrimRMax -> "%%"
  | TrimL -> "#"
- | TrimLMax -> "##" 
- | Length -> "#" 
+ | TrimLMax -> "##"
+ | Length -> "#"
 
 (* Some possible further simplifications:
 
      * Drop bool from pipe
        dash *always* forks for a pipe, but sometimes it waits
-     * Drop redirection from Command, etc. 
+     * Drop redirection from Command, etc.
          Just use Redir... though this may affect subshell behavior.
            NCMD: expredir, pushredir, redirectsafe REDIR_PUSH|REDIR_SAVEFD2
            NREDIR: expredir, pushredir, redirectsafe REDIR_PUSH
@@ -203,9 +203,9 @@ and redirs (n : node union ptr) =
       | 19 -> mk_file FromTo
       (* NAPPEND *)
       | 20 -> mk_file Append
-      (* NTOFD *)      
+      (* NTOFD *)
       | 21 -> mk_dup ToFD
-      (* NFROMFD *)              
+      (* NFROMFD *)
       | 22 -> mk_dup FromFD
       (* NHERE quoted heredoc---no expansion)*)
       | 23 -> mk_here Here
@@ -225,7 +225,7 @@ and to_arg (n : narg structure) : arg =
   assert (s = []);
   assert (nullptr bqlist);
   assert (stack = []);
-  a  
+  a
 
 and parse_arg ?tilde_ok:(tilde_ok=false) ~assign:(assign:bool) (s : char list) (bqlist : nodelist structure ptr) stack =
   match s,stack with
@@ -316,10 +316,10 @@ and parse_tilde acc s =
      if acc = [] then (None, s) else (Some (implode acc), s)
   (* ordinary char *)
   (* TODO 2019-01-03 only characters from the portable character set *)
-  | c::s' -> parse_tilde (acc @ [c]) s'  
-              
+  | c::s' -> parse_tilde (acc @ [c]) s'
+
 and arg_char assign c s bqlist stack =
-  let tilde_ok = 
+  let tilde_ok =
     match c with
     | C _ -> assign && (match last s with
                        | Some ':' -> true
@@ -351,17 +351,17 @@ and to_assign (n : narg structure) : (string * arg) =
   assert (nullptr bqlist);
   assert (stack = []);
   (v,a)
-    
-and to_assigns n = 
+
+and to_assigns n =
   if nullptr n
-  then [] 
+  then []
   else (assert (n @-> node_type = 15);
         let n = n @-> node_narg in
         to_assign n::to_assigns (getf n narg_next))
-    
+
 and to_args (n : node union ptr) : args =
   if nullptr n
-  then [] 
+  then []
   else (assert (n @-> node_type = 15);
         let n = n @-> node_narg in
         to_arg n::to_args (getf n narg_next))
@@ -377,7 +377,7 @@ let background s = "{ " ^ s ^ " & }"
 
 let lines = Str.split (Str.regexp "[\n]+")
 
-let fresh_marker heredoc =  
+let fresh_marker heredoc =
   let eofs_in_line line =
     if String.length line > 2 && String.get line 0 = 'E' && String.get line 1 == 'O'
     then
@@ -391,7 +391,7 @@ let fresh_marker heredoc =
     | line::lines -> find_eofs lines (max max_fs (eofs_in_line line))
   in
   "EOF" ^ String.make (find_eofs heredoc 0) 'F'
-  
+
 let rec to_string = function
   | Command (_,assigns,cmds,redirs) ->
      separated string_of_assign assigns ^
@@ -403,7 +403,7 @@ let rec to_string = function
   | Redir (_,a,redirs) ->
      to_string a ^ string_of_redirs redirs
   | Background (_,a,redirs) ->
-     (* we translate 
+     (* we translate
            cmds... &
         to
            { cmds & }
@@ -434,7 +434,7 @@ let rec to_string = function
      "case " ^ string_of_arg a ^ " in " ^
      separated string_of_case cs ^ " esac"
   | Defun (_,name,body) -> name ^ "() {\n" ^ to_string body ^ "\n}"
-                                                 
+
 and string_of_if c t e =
   "if " ^ to_string c ^
   "; then " ^ to_string t ^
@@ -442,7 +442,7 @@ and string_of_if c t e =
    | Command (-1,[],[],[]) -> "; fi" (* one-armed if *)
    | If (c,t,e) -> "; el" ^ string_of_if c t e
    | _ -> "; else " ^ to_string e ^ "; fi")
-                                                 
+
 and string_of_arg_char ?quote_mode:(quote_mode=QUnquoted) = function
   | E c ->
      (* removed ! from chars_to_escape to have the right behavior in non-interactive shells *)
@@ -476,12 +476,8 @@ and string_of_arg ?quote_mode:(quote_mode=QUnquoted) = function
      then "\\$" ^ string_of_arg ~quote_mode a
      else char ^ string_of_arg ~quote_mode a
 
-and next_is_escaped = function
-  | E _ :: _ -> true
-  | _ -> false
-                
 and string_of_assign (v,a) = v ^ "=" ^ string_of_arg a
-                                                   
+
 and string_of_case c =
   let pats = List.map string_of_arg c.cpattern in
   intercalate "|" pats ^ ") " ^ to_string c.cbody ^ ";;"
@@ -499,7 +495,7 @@ and string_of_redir = function
      let marker = fresh_marker (lines heredoc) in
      show_unless 0 fd ^ "<<" ^
      (if t = XHere then marker else "'" ^ marker ^ "'") ^ "\n" ^ heredoc ^ marker ^ "\n"
-                                                                               
+
 and string_of_redirs rs =
   let ss = List.map string_of_redir rs in
   (if List.length ss > 0 then " " else "") ^ intercalate " " ss
