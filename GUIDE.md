@@ -4,14 +4,14 @@ The dash AST itself is defined in `src/nodes.h` and `src/parser.h`
 
 - `union node` in `src/nodes.h` on line 146 for commands/statements
   node.type type tag
-  
+
   node.nbinary (AND, OR, SEMI)
-  
+
 - special characters and codes in `parser.h` on lines 40-64
 
   CTL* for control codes in words
     breaks multibyte characters/UTF-8 :(
-    
+
   VS* for variable format metadata
 
 The parser in `src/parser.c` is not easy to read, but is a good place
@@ -41,13 +41,13 @@ few results:
 
   - `Done` when EOF (dash returns the special node `neof`, not `NULL`!) has been
     reached for the current input.
-    
+
   - `Error` when parsing failed (dash returns the special node `nerr`,
     not `NULL`!).
-    
+
   - `Null` when there was no command, e.g., a blank line (dash returns
     `NULL` here).
-    
+
   - `Parsed n` for some `node`, `n`. Note that `n` is a dash AST,
     i.e., a ctypes structure.
 
@@ -69,4 +69,14 @@ an assignment).
 
 Call `Dash.initialize`, then `Dash.parse` with the string you
 have. Call `Ast.of_node` on the resulting dash AST to get a nice OCaml
-structure.
+structure. Look at `ocaml/rt.sh` (and the binaries it calls) and
+`python/rt.py` for examples.
+
+# Versioning
+
+To cut a new release, you must update the version numbers in
+`setup.py`, `pyproject.toml`, and `dune-workspace`. A CI lint job will
+check to ensure that they are the same.
+
+PyPI releases are automatic via GH CI. OCaml releases are via
+`dune-release`.
