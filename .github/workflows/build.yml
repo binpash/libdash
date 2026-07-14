@@ -5,6 +5,10 @@ on:
     branches:
       - master
   push:
+    branches:
+      - master
+    tags:
+      - '**'
   schedule:
     - cron: '5 14 * * *'
 
