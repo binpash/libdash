@@ -11,7 +11,8 @@ test: test_ocaml_python.sh $(PYTHON_FILES) $(OCAML_FILES)
 
 	@echo "PASH TESTS"
 	@find pash_tests -type f | while read f; do ./test_ocaml_python.sh "$$f"; done | tee -a ocaml_python.log
-	@cat ocaml_python.log | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c
+	@cat ocaml_python.log | egrep '^[A-Z0-9_]+:' | cut -d ':' -f 1 | sort | uniq -c | tee summary.log
+	@! [ -s summary.log ]
 
 clean :
 	rm -f ocaml_python.log

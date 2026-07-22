@@ -14,6 +14,7 @@ module Functions (F : Ctypes.FOREIGN) = struct
 
   let dash_init = foreign "init" (void @-> returning void)
   let initialize_dash_errno = foreign "initialize_dash_errno" (void @-> returning void)
+  let initialize_dash_setlocale = foreign "initialize_dash_setlocale" (void @-> returning void)
 
   let popfile = foreign "popfile" (void @-> returning void)
   let setinputstring = foreign "setinputstring" (ptr char @-> returning void)
