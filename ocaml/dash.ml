@@ -16,6 +16,7 @@ let pop_stack stack : unit =
 
 let initialize () : unit =
   initialize_dash_errno ();
+  initialize_dash_setlocale ();
   dash_init ()
 
 let setinputtostdin () : unit =

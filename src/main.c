@@ -79,13 +79,20 @@ STATIC void read_profile(const char *);
 STATIC char *find_dot_file(char *);
 static int cmdloop(int);
 
-//libdash
+// libdash
 void
 initialize_dash_errno()
 {
 #ifdef __GLIBC__
 	dash_errno = __errno_location();
 #endif
+}
+
+// libdash
+void
+initialize_dash_setlocale()
+{
+	setlocale(LC_ALL, "");
 }
 
 #ifdef MAIN // libdash
@@ -100,7 +107,7 @@ int main(int, char **);
  * is used to figure out how far we had gotten.
  */
 
-#ifdef MAIN //libdash
+#ifdef MAIN // libdash
 int
 main(int argc, char **argv)
 {
@@ -117,7 +124,8 @@ main(int argc, char **argv)
 	monitor(4, etext, profile_buf, sizeof profile_buf, 50);
 #endif
 
-	setlocale(LC_ALL, "");
+	// libdash
+	initialize_dash_setlocale();
 
 	state = 0;
 	if (unlikely(setjmp(main_handler.loc))) {

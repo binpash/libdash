@@ -220,7 +220,8 @@ and of_binary (n : node union ptr) =
   (of_node (getf n nbinary_ch1), of_node (getf n nbinary_ch2))
 
 and to_arg (n : narg structure) : arg =
-  let a,s,bqlist,stack = parse_arg ~assign:false (explode (getf n narg_text)) (getf n narg_backquote) [] in
+  let s = explode (getf n narg_text) in
+  let a,s,bqlist,stack = parse_arg ~assign:false s (getf n narg_backquote) [] in
   (* we should have used up the string and have no backquotes left in our list *)
   assert (s = []);
   assert (nullptr bqlist);
@@ -277,6 +278,39 @@ and parse_arg ?tilde_ok:(tilde_ok=false) ~assign:(assign:bool) (s : char list) (
      if nullptr bqlist
      then failwith "Saw CTLBACKQ but bqlist was null"
      else arg_char assign (B (of_node (bqlist @-> nodelist_n))) s (bqlist @-> nodelist_next) stack
+  (* CTLMBCHAR *)
+  | '\133'::s,_ ->
+     (* get constructor and multi-byte length *)
+     let char_ctor, ml, s =
+       begin match s with
+       | '\129'::ml::s -> (fun x -> E x), Char.code ml, s
+       |         ml::s -> (fun x -> C x), Char.code ml, s
+       | _ -> failwith "Saw CTLMBCHAR without CTLESC or length"
+       end
+     in
+     (* extract bytes, decode to UTF-8 *)
+     let mb_ords, s =
+       begin match ml, s with
+       | 1, c1            ::s -> [c1],             s
+       | 2, c1::c2        ::s -> [c1; c2],         s
+       | 3, c1::c2::c3    ::s -> [c1; c2; c3],     s
+       | 4, c1::c2::c3::c4::s -> [c1; c2; c3; c4], s
+       | _ -> failwith "Expected 1 <= ml <= 4 after CTLMBCHAR"
+       end
+     in
+     (* double-check final bytes, CTLMBCHAR *)
+     let s = match s with
+       | ml'::'\133'::s ->
+          let ml' = Char.code ml' in
+          if ml <> ml' then
+            failwith (Printf.sprintf "saw %d bytes before, %d bytes after CTLMBCHAR" ml ml');
+          s
+       | _ -> failwith "Expected byte-count and CTLMBCHAR"
+     in
+     let tilde_ok = false in
+     let a,s,bqlist,stack = parse_arg ~tilde_ok ~assign s bqlist stack in
+     (List.map char_ctor mb_ords @ a,s,bqlist,stack)
+
   (* CTLARI *)
   | '\134'::s,_ ->
      let a,s,bqlist,stack' = parse_arg ~assign s bqlist (`CTLAri::stack) in
@@ -336,7 +370,7 @@ and extract_assign v = function
   | '\130'::_ -> failwith "Unexpected CTLVAR in variable name"
   | '\131'::_ -> failwith "Unexpected CTLENDVAR in variable name"
   | '\132'::_ -> failwith "Unexpected CTLBACKQ in variable name"
-  | '\133'::_ -> failwith "Unexpected CTL??? in variable name"
+  | '\133'::_ -> failwith "Unexpected CTLMBCHAR in variable name"
   | '\134'::_ -> failwith "Unexpected CTLARI in variable name"
   | '\135'::_ -> failwith "Unexpected CTLENDARI in variable name"
   | '\136'::_ -> failwith "Unexpected CTLQUOTEMARK in variable name"

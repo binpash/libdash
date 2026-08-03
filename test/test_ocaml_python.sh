@@ -45,14 +45,17 @@ then
    exit 1
 fi
 
-diff "$ocaml_rt" "$python_rt" >/dev/null
-if [ $? -ne 0 ]
+if ! diff "$ocaml_rt" "$python_rt" >/dev/null
 then
-    diff -w "$ocaml_rt" "$python_rt" >/dev/null
-    if [ $? -ne 0 ]
+    if ! diff -w "$ocaml_rt" "$python_rt" >/dev/null
     then
-        diff -w "$ocaml_rt" "$python_rt" >/dev/null
         echo "FAIL: '$testFile' | $ocaml_rt $python_rt"
+        if [ "$CI" ]
+        then
+            echo "::group::$testFile differences"
+            diff -uw "$ocaml_rt" "$python_rt"
+            echo "::endgroup::"
+        fi
     else
         diff "$ocaml_rt" "$python_rt" >/dev/null
         echo "FAIL_WHITESPACE: '$testFile' | $ocaml_rt $python_rt"

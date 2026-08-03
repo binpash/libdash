@@ -10,3 +10,4 @@ test.err
 test.byte
 test.cmo
 ocaml_python.log
+summary.log

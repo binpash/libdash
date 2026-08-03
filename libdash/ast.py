@@ -8,6 +8,7 @@ CTLESC       = 129
 CTLVAR       = 130
 CTLENDVAR    = 131
 CTLBACKQ     = 132
+CTLMBCHAR    = 133
 CTLARI       = 134
 CTLENDARI    = 135
 CTLQUOTEMARK = 136
@@ -384,6 +385,37 @@ def parse_arg (s, bqlist, stack):
                     acc.append (["B", of_node (bqlist.contents.n)])
 
                     bqlist = bqlist.contents.next
+
+            # (* CTLMBCHAR *)
+            # | '\133'::s,_ ->
+            elif s[-1] == CTLMBCHAR:
+                s.pop()
+
+                # sometimes there is a CTLESC
+                char_ctor = "C"
+                if s[-1] == CTLESC:
+                    s.pop()
+                    char_ctor = "E"
+
+                # encoded multi-byte length
+                ml = s.pop()
+                assert 1 <= ml and ml <= 4
+
+                # extract bytes, decode to UTF-8, record in acc
+                mb_ords = []
+                count = ml
+                while count > 0:
+                    mb_ords.append(s.pop())
+                    count -= 1
+
+                mb = bytes(mb_ords).decode()
+                acc.extend([(char_ctor, ord(c)) for c in mb])
+
+                # clear out second ml and CTLMBCHAR
+                ml2 = s.pop()
+                assert ml == ml2
+                ctlmbchar = s.pop()
+                assert ctlmbchar == CTLMBCHAR
 
             # (* CTLARI *)
             # | '\134'::s,_ ->
