@@ -10,7 +10,7 @@
 (package
  (name libdash)
  (synopsis "Bindings to the dash shell's parser")
- (version 0.4.1)
+ (version 0.5.0)
  (depends
    ("ctypes" (>= "0.21.1"))
    ("ctypes-foreign" (>= "0.21.1"))
