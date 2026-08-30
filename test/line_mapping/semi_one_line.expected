@@ -1,0 +1,2 @@
+node 0  [0, 1)  'echo a; echo b\n'
+node 1  [1, 2)  'echo c\n'

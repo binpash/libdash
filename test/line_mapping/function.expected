@@ -1,0 +1,2 @@
+node 0  [0, 3)  'greet() {\n    echo hello\n}\n'
+node 1  [3, 4)  'greet\n'

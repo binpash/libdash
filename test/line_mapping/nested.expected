@@ -1,0 +1,2 @@
+node 0  [0, 4)  '(\n  echo inner\n  if true; then echo nested; fi\n)\n'
+node 1  [4, 5)  'echo outer\n'
