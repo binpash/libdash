@@ -1,6 +1,10 @@
-.PHONY:  test test-roundtrip test-line-mapping clean
+.PHONY:  test test-structs test-roundtrip test-line-mapping clean
 
-test: test-roundtrip test-line-mapping
+test: test-structs test-roundtrip test-line-mapping
+
+# _dash.py hand-copies dash's struct layouts; nothing else checks them.
+test-structs: ../test/check_structs.py ../libdash/_dash.py
+	@../test/check_structs.py
 
 test-roundtrip: rt.py ../libdash/*.py
 	@find ../test/tests ../test/pash_tests -type f | while read f; do ../test/round_trip.sh ./rt.py "$$f"; done | tee python.log
