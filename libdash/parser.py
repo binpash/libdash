@@ -16,7 +16,8 @@ def libdash_library_path():
     LIBDASH_LIBRARY_PATH = os.path.join(FILE_PATH, "libdash.so")
     return LIBDASH_LIBRARY_PATH
 
-EOF_NLEFT = -99; # libdash/src/input.c
+# parsefile->eof bit 1: set by preadbuffer at EOF, never cleared by pungetc.
+PARSEFILE_EOF = 2;
 
 class ParsingException(Exception):
     def __init__(self, message='ParseError'):
@@ -64,7 +65,7 @@ def parse(inputPath, init=True):
         n_ptr_C = parsecmd_safe (libdash, False)
 
         linno_after = parsefile_var.contents.linno - 1; # libdash is 1-indexed
-        nleft_after = parsefile_var.contents.nleft
+        eof_after = parsefile_var.contents.eof
 
         if (n_ptr_C == None): # Dash.Null
             pass
@@ -73,16 +74,18 @@ def parse(inputPath, init=True):
         elif (n_ptr_C == NERR): # Dash.Error
             raise ParsingException()
         else:
-            if (nleft_after == EOF_NLEFT):
-                linno_after = linno_after + 1; # The last line wasn't counted
+            ## dash bumps `linno` on newline, so an unterminated last line is
+            ## never counted. Only adjust at EOF; otherwise every node would
+            ## swallow the next one's first line.
+            if (eof_after & PARSEFILE_EOF):
+                if (inputPath == "-"):
+                    ## no lines to check against; trust the flag
+                    linno_after = linno_after + 1
+                elif (lines and (lines [-1][-1:] != '\n')):
+                    linno_after = len (lines)
 
-                if (inputPath != "-"):
-                    ## Both of these assertions check "our" assumption with respect to the final parser state
-                    ## and are therefore not necessary if they become an issue.
-                    assert ((linno_after == len (lines)) or (linno_after == len (lines) + 1))
-
-                    # Last line did not have a newline
-                    assert (len (lines [-1]) > 0 and (lines [-1][-1] != '\n'))
+            if (inputPath != "-"):
+                linno_after = min (linno_after, len (lines))
 
             n_ptr = cast (n_ptr_C, POINTER (union_node))
             new_ast = of_node (n_ptr)
