@@ -1,0 +1,5 @@
+node 0  [0, 1)  'echo A\n'
+node 1  [1, 2)  'echo B; echo C\n'
+node 2  [2, 5)  'for i in 1 2; do\n  echo "loop $i"\ndone\n'
+node 3  [5, 7)  'echo D | \\\n  cat\n'
+node 4  [7, 8)  'echo E\n'
