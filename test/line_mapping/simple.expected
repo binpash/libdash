@@ -1,0 +1,3 @@
+node 0  [0, 1)  'echo one\n'
+node 1  [1, 2)  'echo two\n'
+node 2  [2, 3)  'echo three\n'

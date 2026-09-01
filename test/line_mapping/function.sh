@@ -1,0 +1,4 @@
+greet() {
+    echo hello
+}
+greet

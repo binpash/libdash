@@ -1,0 +1,1 @@
+node 0  [0, 4)  'if true\nthen\n    echo x\nfi'

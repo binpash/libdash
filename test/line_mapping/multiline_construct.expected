@@ -1,0 +1,2 @@
+node 0  [0, 4)  'while false\ndo\n    echo loop\ndone\n'
+node 1  [4, 5)  'echo after\n'

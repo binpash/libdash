@@ -1,0 +1,2 @@
+node 0  [0, 4)  'cat <<EOF\nline one\nline two\nEOF\n'
+node 1  [4, 5)  'echo after\n'

@@ -223,8 +223,8 @@ class strpush (Structure):
 #     struct alias *ap;   /* if push was associated with an alias */
 #     char *string;       /* remember the string since it may change */
 #
-#     /* Remember last two characters for pungetc. */
-#     int lastc[2];
+#     /* Delay freeing so we can stop nested aliases. */
+#     struct strpush *spfree;
 #
 #     /* Number of outstanding calls to pungetc. */
 #     int unget;
@@ -234,7 +234,7 @@ strpush._fields_ = [("prev", POINTER (strpush)),
                     ("prevnleft", c_int),
                     ("ap", c_void_p),
                     ("string", c_char_p),
-                    ("lastc", 2 * c_int),
+                    ("spfree", POINTER (strpush)),
                     ("unget", c_int)];
 
 class parsefile (Structure):
@@ -245,14 +245,18 @@ class parsefile (Structure):
 #     int linno;      /* current line */
 #     int fd;         /* file descriptor (or -1 if string) */
 #     int nleft;      /* number of chars left in this line */
-#     int lleft;      /* number of chars left in this buffer */
+#     int eof;        /* do not read again once we hit EOF */
 #     char *nextc;        /* next char in buffer */
 #     char *buf;      /* input buffer */
 #     struct strpush *strpush; /* for pushing strings at this level */
 #     struct strpush basestrpush; /* so pushing one is fast */
 #
-#     /* Remember last two characters for pungetc. */
-#     int lastc[2];
+#     /* Delay freeing so we can stop nested aliases. */
+#     struct strpush *spfree;
+#
+# #ifndef SMALL
+#     int lleft;      /* number of chars left in this buffer */
+# #endif
 #
 #     /* Number of outstanding calls to pungetc. */
 #     int unget;
@@ -261,12 +265,13 @@ parsefile._fields_ = [("prev",        POINTER (parsefile)),
                       ("linno",       c_int),
                       ("fd",          c_int),
                       ("nleft",       c_int),
-                      ("lleft",       c_int),
+                      ("eof",         c_int),
                       ("nextc",       POINTER (c_char)), # NOT c_char_p!
                       ("buf",         c_char_p),
                       ("strpush",     POINTER (strpush)),
                       ("basestrpush", strpush),
-                      ("lastc",       2 * c_int),
+                      ("spfree",      POINTER (strpush)),
+                      ("lleft",       c_int),
                       ("unget",       c_int)];
 
 
