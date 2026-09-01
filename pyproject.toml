@@ -1,6 +1,6 @@
 [project]
 name = "libdash"
-version = "0.5.0"
+version = "0.5.1"
 authors = [
   { name="Michael Greenberg", email="michael@greenberg.science" },
   { name="PaSh contributors" },
