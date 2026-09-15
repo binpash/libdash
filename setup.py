@@ -22,8 +22,6 @@ class libdash_build_py(build_py):
         build_py.run(self)
 
         if sys.platform == 'darwin':
-            libtoolize = "glibtoolize"
-
             target_arch = os.environ.get("ARCHFLAGS")
             build_arch = platform.machine()
             if not target_arch:
@@ -38,19 +36,13 @@ class libdash_build_py(build_py):
             os.environ["LDFLAGS"] = f'{os.environ.get("LDFLAGS", "")} {target_arch}'.strip()
 
             print(f'ARCHFLAGS: {target_arch} MACOSX_DEPLOYMENT_TARGET: {os.environ.get("MACOSX_DEPLOYMENT_TARGET", "")} CFLAGS: {os.environ.get("CFLAGS")} LDFLAGS: {os.environ.get("LDFLAGS")}')
-        else:
-            libtoolize = "libtoolize"
 
         # cibuildwheel builds every wheel in the same source tree; objects
         # left over from a previous build may target a different arch
         if os.path.exists('Makefile'):
             subprocess.run(['make', 'distclean'])
 
-        try_exec(libtoolize)
-        try_exec('aclocal')
-        try_exec('autoheader')
-        try_exec('automake', '--add-missing')
-        try_exec('autoconf')
+        try_exec('autoreconf', '--install', '--force')
         try_exec('./configure')
         try_exec('make')
 
