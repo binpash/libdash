@@ -1,3 +1,13 @@
+# 0.5.2 (2026-09-22)
+
+- Use `autoreconf` to handle libtoolize properly.
+
+# 0.5.1 (2026-09-01)
+
+- Fix multiline attribution bug.
+
+- Many new tests to avoid regressions.
+
 # 0.5.0 (2026-08-03)
 
 - Add multibyte character support.

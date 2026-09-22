@@ -2,7 +2,7 @@
 (name libdash)
 (using ctypes 0.3)
 
-(source (github mgree/libdash))
+(source (github binpash/libdash))
 (license BSD-3-Clause)
 (authors "Michael Greenberg")
 (maintainers "michael@greenberg.science")
