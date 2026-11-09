@@ -1,6 +1,6 @@
-.PHONY:  test test-structs test-crashes test-roundtrip test-line-mapping clean
+.PHONY:  test test-structs test-crashes test-linno test-roundtrip test-line-mapping clean
 
-test: test-structs test-crashes test-roundtrip test-line-mapping
+test: test-structs test-crashes test-linno test-roundtrip test-line-mapping
 
 # _dash.py hand-copies dash's struct layouts; nothing else checks them.
 test-structs: ../test/check_structs.py ../libdash/_dash.py
@@ -9,6 +9,10 @@ test-structs: ../test/check_structs.py ../libdash/_dash.py
 # Crashes in exported C entry points (bad longjmp, setalias buffer contract).
 test-crashes: ../test/test_crashes.py
 	@python3 ../test/test_crashes.py
+
+# Line numbers on AST nodes.
+test-linno: ../test/test_linno.py
+	@python3 ../test/test_linno.py
 
 test-roundtrip: rt.py ../libdash/*.py
 	@find ../test/tests ../test/pash_tests -type f | while read f; do ../test/round_trip.sh ./rt.py "$$f"; done | tee python.log

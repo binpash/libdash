@@ -10,3 +10,12 @@
  (action
   (bash
    "fail=0; for c in $(./test_crashes.exe); do ./test_crashes.exe $c || { echo \"FAIL $c (exit $?)\"; fail=1; }; done; exit $fail")))
+
+(executable
+ (name test_linno)
+ (modules test_linno)
+ (libraries libdash))
+
+(rule
+ (alias runtest)
+ (action (run ./test_linno.exe)))
