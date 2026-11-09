@@ -230,12 +230,14 @@ def of_binary (n):
     return [of_node (n.nbinary.ch1), of_node (n.nbinary.ch2)]
 
 
-def to_arg (narg):
+def to_arg (narg, assign = False):
     s = explode_rev (narg.text)
     bqlist = narg.backquote
     stack = []
 
-    a = parse_arg (s, bqlist, stack)
+    # An assignment word starts with its name; tilde prefixes may only come
+    # after the first '=' (and after unquoted ':'s).
+    a = parse_arg (s, bqlist, stack, assign = assign, tilde_ok = not assign)
 
     assert (len (s) == 0)
     # assert (nullptr bqlist)
@@ -248,10 +250,26 @@ def to_arg (narg):
     return (a)
 
 
-def parse_arg (s, bqlist, stack):
+def parse_arg (s, bqlist, stack, assign = False, tilde_ok = False):
+    """`tilde_ok`: a tilde prefix may start here (the start of a word). In an
+    assignment (`assign`), one may also start right after the first '=' and
+    after any unquoted ':'."""
     acc = []
+    seen_len = 0
+    seen_equals = False
 
     while (True):
+        # after each new element, decide whether a tilde prefix may follow it
+        if (len (acc) != seen_len):
+            seen_len = len (acc)
+            last = acc [-1]
+
+            if (assign and not seen_equals and last == ["C", ORD_EQUALS]):
+                seen_equals = True
+                tilde_ok = True
+            else:
+                tilde_ok = assign and (last == ["C", ORD_COLON])
+
         s_len = len (s)
         # stack_len = len (stack)
 
@@ -324,7 +342,7 @@ def parse_arg (s, bqlist, stack):
 
                     stack.append (STACK_CTLVAR)
 
-                    a = parse_arg (s, bqlist, stack)
+                    a = parse_arg (s, bqlist, stack, assign = assign, tilde_ok = True)
 
                     v = ["V", [var_type (vstype), (t & 0x10 == 0x10), var_name, a]]
                 elif (len (s) >= 1):
@@ -424,7 +442,7 @@ def parse_arg (s, bqlist, stack):
 
                 stack.append (STACK_CTLARI)
 
-                a = parse_arg (s, bqlist, stack)
+                a = parse_arg (s, bqlist, stack, assign = assign)
 
                 # TODO: assert (stack = stack')
 
@@ -465,7 +483,7 @@ def parse_arg (s, bqlist, stack):
                     s.pop ()
                     stack.append (STACK_CTLQUO)
 
-                    a = parse_arg (s, bqlist, stack)
+                    a = parse_arg (s, bqlist, stack, assign = assign)
 
                     acc.append (["Q", a])
 
@@ -474,12 +492,17 @@ def parse_arg (s, bqlist, stack):
             elif (s [-1] == ORD_TILDE):
                 s.pop ()
 
-                if ((STACK_CTLQUO in stack) or (STACK_CTLARI in stack)):
+                # no tilde prefix here, in arithmetic, or in double quotes
+                if ((not tilde_ok) or (STACK_CTLQUO in stack) or (STACK_CTLARI in stack)):
                     acc.append (["C", ORD_TILDE])
                 else:
-                    uname = parse_tilde (s)
+                    (is_prefix, uname) = parse_tilde (s, assign)
 
-                    acc.append (["T", uname])
+                    if (is_prefix):
+                        acc.append (["T", uname])
+                    else:
+                        # interrupted: the ~ and what follows are ordinary
+                        acc.append (["C", ORD_TILDE])
 
             # (* ordinary character *)
             # | c::s,_ -> arg_char (C c) s bqlist stack
@@ -496,22 +519,26 @@ def stringOrNull (acc_str):
         return ["Some", acc_str]
 
 
-def parse_tilde (s):
-    acc_str = ""
+def parse_tilde (s, assign):
+    """Returns (True, uname) and consumes the tilde prefix at the end of the
+    reversed `s` (uname is "None" for the bare ~), or (False, None), leaving
+    `s` untouched, if there is no tilde prefix (see exptilde in
+    src/expand.c)."""
+    i = len (s)
 
     while (True):
-        if (s == []):
-            return stringOrNull (acc_str)
-        else:
-            s_last = s [-1]
+        i = i - 1
 
-            if (s_last in [CTLESC, CTLVAR, CTLQUOTEMARK, CTLBACKQ, CTLARI]):
-                return ("None")
-            elif (s_last in [CTLENDVAR, CTLENDARI, ORD_COLON, ORD_SLASH]):
-                return (stringOrNull (acc_str))
-            else:
-                c = s.pop ()
-                acc_str = acc_str + chr (c)
+        if ((i < 0) or (s [i] in [CTLENDVAR, CTLENDARI, ORD_SLASH])
+                or (assign and (s [i] == ORD_COLON))):
+            break
+        elif (s [i] in [CTLESC, CTLVAR, CTLQUOTEMARK, CTLBACKQ, CTLARI]):
+            return (False, None)
+
+    acc_str = "".join (chr (c) for c in reversed (s [i + 1:]))
+    del s [i + 1:]
+
+    return (True, stringOrNull (acc_str))
 
 
 def to_assign (a_rev):
@@ -551,7 +578,7 @@ def to_assigns (n):
             sys.stdout.flush ()
             os.abort ()
 
-        arg = to_arg (n.contents.narg)
+        arg = to_arg (n.contents.narg, assign = True)
 
         arg.reverse ()
         assigns.append (to_assign (arg))

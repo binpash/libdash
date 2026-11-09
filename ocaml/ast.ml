@@ -88,11 +88,6 @@ let string_of_var_type = function
 open Ctypes
 open Dash
 
-let rec last = function
-  | [] -> None
-  | [x] -> Some x
-  | _::xs -> last xs
-
 let skip = Command (-1,[],[],[])
 
 type quote_mode =
@@ -221,7 +216,7 @@ and of_binary (n : node union ptr) =
 
 and to_arg (n : narg structure) : arg =
   let s = explode (getf n narg_text) in
-  let a,s,bqlist,stack = parse_arg ~assign:false s (getf n narg_backquote) [] in
+  let a,s,bqlist,stack = parse_arg ~tilde_ok:true ~assign:false s (getf n narg_backquote) [] in
   (* we should have used up the string and have no backquotes left in our list *)
   assert (s = []);
   assert (nullptr bqlist);
@@ -327,39 +322,40 @@ and parse_arg ?tilde_ok:(tilde_ok=false) ~assign:(assign:bool) (s : char list) (
      let a,s,bqlist,stack' = parse_arg ~assign s bqlist (`CTLQuo::stack) in
      assert (stack' = stack);
      arg_char assign (Q a) s bqlist stack'
-  (* tildes *)
+  (* tildes: a tilde prefix only where tilde_ok, i.e., at the start of a
+     word or after = or an unquoted : in an assignment, and never in
+     arithmetic or double quotes *)
   | '~'::s,stack ->
-     if List.exists (fun m -> m = `CTLQuo || m = `CTLAri) stack
-     then (* we're in arithmetic or double quotes, so tilde is ignored *)
-       arg_char assign (C '~') s bqlist stack
+     if not tilde_ok || List.exists (fun m -> m = `CTLQuo || m = `CTLAri) stack
+     then arg_char assign (C '~') s bqlist stack
      else
-       let _ = tilde_ok in (* unused? *)
-       let uname,s' = parse_tilde [] s in
-       arg_char assign (T uname) s' bqlist stack
+       begin match parse_tilde ~assign [] s with
+       | Some (uname,s') -> arg_char assign (T uname) s' bqlist stack
+       (* interrupted: no tilde prefix, so the ~ and what follows are ordinary *)
+       | None -> arg_char assign (C '~') s bqlist stack
+       end
   (* ordinary character *)
   | c::s,_ ->
      arg_char assign (C c) s bqlist stack
 
-and parse_tilde acc s =
+(* the user name of the tilde prefix at the start of s (None for the bare ~)
+   and the rest of s, or None if s has no tilde prefix (see exptilde in
+   src/expand.c) *)
+and parse_tilde ~assign acc s =
+  let prefix () = Some ((if acc = [] then None else Some (implode acc)), s) in
   match s with
-  (* CTLESC, CTLVAR, CTLQUOTEMARK, CTLBACKQ, CTLARI: no tilde prefix *)
-  | '\129'::_ | '\130'::_ | '\132'::_ | '\134'::_ | '\136'::_ -> None, s
-  (* CTLENDVAR, CTLENDARI, /, :, EOF: terminate tilde prefix *)
-  | '\131'::_ | '\135'::_
-  | ':'::_ | '/'::_ | [] ->
-     if acc = [] then (None, s) else (Some (implode acc), s)
+  (* CTLESC, CTLVAR, CTLBACKQ, CTLARI, CTLQUOTEMARK: no tilde prefix *)
+  | '\129'::_ | '\130'::_ | '\132'::_ | '\134'::_ | '\136'::_ -> None
+  (* CTLENDVAR, CTLENDARI, /, EOF, and : in assignments: end of prefix *)
+  | '\131'::_ | '\135'::_ | '/'::_ | [] -> prefix ()
+  | ':'::_ when assign -> prefix ()
   (* ordinary char *)
   (* TODO 2019-01-03 only characters from the portable character set *)
-  | c::s' -> parse_tilde (acc @ [c]) s'
+  | c::s' -> parse_tilde ~assign (acc @ [c]) s'
 
 and arg_char assign c s bqlist stack =
-  let tilde_ok =
-    match c with
-    | C _ -> assign && (match last s with
-                       | Some ':' -> true
-                       | _ -> false)
-    | _ -> false
-  in
+  (* in an assignment, a tilde prefix may follow an unquoted : *)
+  let tilde_ok = assign && c = C ':' in
   let a,s,bqlist,stack = parse_arg ~tilde_ok ~assign s bqlist stack in
   (c::a,s,bqlist,stack)
 
