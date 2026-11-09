@@ -45,7 +45,11 @@ struct alias {
 };
 
 struct alias *lookupalias(const char *, int);
+/* libdash: setalias(buf, val) wants buf = "name=value" and val pointing just
+ * past the '=' in that same buffer, and calls sh_error on a bad name.
+ * Bindings should use setalias_safe(name, value) instead. */
 void setalias(const char *, const char *); // libdash
+int setalias_safe(const char *, const char *); // libdash
 int aliascmd(int, char **);
 int unaliascmd(int, char **);
 void rmaliases(void);

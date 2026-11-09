@@ -88,9 +88,24 @@ def setinputtostdin (libdash):
 
 # TODO: allow push parameter
 def setinputfile (libdash, filename):
-    libdash.setinputfile.argtypes = [c_char_p, c_int];
-    libdash.setinputfile.restypes = c_int;
-    libdash.setinputfile (filename.encode ('utf-8'), 0);
+    libdash.setinputfile_safe.argtypes = [c_char_p, c_int];
+    libdash.setinputfile_safe.restype = c_int;
+    if (libdash.setinputfile_safe (filename.encode ('utf-8'), 0) < 0):
+        raise OSError ("cannot open %s" % filename);
+
+
+def setalias (libdash, name, value):
+    libdash.setalias_safe.argtypes = [c_char_p, c_char_p];
+    libdash.setalias_safe.restype = c_int;
+    if (libdash.setalias_safe (name.encode ('utf-8'), value.encode ('utf-8')) != 0):
+        raise ValueError ("invalid alias name: %r" % name);
+
+
+def unalias (libdash, name):
+    """Returns True if `name` was an alias."""
+    libdash.unalias.argtypes = [c_char_p];
+    libdash.unalias.restype = c_int;
+    return (libdash.unalias (name.encode ('utf-8')) == 0);
 
 
 def parsecmd_safe (libdash, interactive):

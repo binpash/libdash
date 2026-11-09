@@ -567,6 +567,32 @@ out:
 	return fd;
 }
 
+// libdash
+/*
+ * Like setinputfile, but never calls sh_error: returns -1 (with errno set
+ * when the file could not be opened) instead.  Safe to call when no
+ * exception handler is installed, as from a binding.
+ */
+int
+setinputfile_safe(const char *fname, int flags)
+{
+	struct jmploc jmploc;
+	struct jmploc *volatile savehandler = handler;
+	volatile int saveint = suppressint;
+	int fd;
+
+	if (unlikely(setjmp(jmploc.loc))) {
+		handler = savehandler;
+		suppressint = saveint;
+		return -1;
+	}
+	handler = &jmploc;
+
+	fd = setinputfile(fname, flags | INPUT_NOFILE_OK);
+	handler = savehandler;
+	return fd;
+}
+
 
 /*
  * Like setinputfile, but takes an open file descriptor.  Call this with

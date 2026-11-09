@@ -33,6 +33,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "shell.h"
 #include "input.h"
 #include "output.h"
@@ -87,6 +88,49 @@ setalias(const char *name, const char *val)
 	ap->name = savestr(name);
 	ap->val = ap->name + namelen;
 	INTON;
+}
+
+// libdash
+/*
+ * Define alias `name` with value `value`, two separate strings (unlike
+ * setalias, which wants a "name=value" buffer).  Returns 0 on success and -1
+ * for an invalid name or on error; never calls sh_error.
+ */
+int
+setalias_safe(const char *name, const char *value)
+{
+	struct jmploc jmploc;
+	struct jmploc *volatile savehandler = handler;
+	volatile int saveint = suppressint;
+	char *volatile buf = NULL;
+	const char *p;
+	size_t namelen, vallen;
+
+	if (!*name)
+		return -1;
+	for (p = name; *p; p++)
+		if (*p == '=' || BASESYNTAX[(signed char)*p] != CWORD)
+			return -1;
+	namelen = p - name;
+	vallen = strlen(value);
+
+	if (unlikely(setjmp(jmploc.loc))) {
+		handler = savehandler;
+		suppressint = saveint;
+		free(buf);
+		return -1;
+	}
+	handler = &jmploc;
+
+	buf = ckmalloc(namelen + 1 + vallen + 1);
+	memcpy(buf, name, namelen);
+	buf[namelen] = '=';
+	memcpy(buf + namelen + 1, value, vallen + 1);
+	setalias(buf, buf + namelen + 1);	/* copies buf */
+
+	handler = savehandler;
+	free(buf);
+	return 0;
 }
 
 int

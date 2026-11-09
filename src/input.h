@@ -112,6 +112,7 @@ void pungetc(void);
 void pungetn(int);
 void pushstring(char *, void *);
 int setinputfile(const char *, int);
+int setinputfile_safe(const char *, int); // libdash
 void setinputfd(int fd, int push); // libdash
 void setinputstring(char *);
 void pushstdin(void);

@@ -19,11 +19,11 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let popfile = foreign "popfile" (void @-> returning void)
   let setinputstring = foreign "setinputstring" (ptr char @-> returning void)
   let setinputfd = foreign "setinputfd" (int @-> int @-> returning void)
-  let raw_setinputfile = foreign "setinputfile" (string @-> int @-> returning int)
+  let raw_setinputfile = foreign "setinputfile_safe" (string @-> int @-> returning int)
 
   let raw_setvar = foreign "setvar" (string @-> string @-> int @-> returning (ptr void))
 
-  let setalias = foreign "setalias" (string @-> string @-> returning void)
+  let raw_setalias = foreign "setalias_safe" (string @-> string @-> returning int)
   let unalias = foreign "unalias" (string @-> returning void)
 
   (* Unix/ExtUnix don't let you renumber things the way you want *)
