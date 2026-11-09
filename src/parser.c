@@ -207,6 +207,7 @@ list(int nlflag)
 	int chknl = nlflag & 1 ? 0 : CHKNL;
 	union node *n1, *n2, *n3;
 	int tok;
+	int savelinno;
 
 	n1 = NULL;
 	for (;;) {
@@ -232,6 +233,7 @@ out_eof:
 			return n1;
 		nlflag |= 2;
 
+		savelinno = plinno; // libdash: for the NBACKGND below, as in command()
 		n2 = andor();
 		tok = readtoken();
 		if (tok == TBACKGND) {
@@ -240,6 +242,7 @@ out_eof:
 			} else {
 				if (n2->type != NREDIR) {
 					n3 = stalloc(sizeof(struct nredir));
+					n3->nredir.linno = savelinno; // libdash
 					n3->nredir.n = n2;
 					n3->nredir.redirect = NULL;
 					n2 = n3;
