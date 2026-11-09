@@ -5,10 +5,10 @@
    For, Case, Defun) should report the line its construct starts on. Each
    case lists those nodes in source (pre-)order, as (kind, linno).
 
-   Background is the regression: `cmd &` wraps any command that is not
-   already an NPIPE or NREDIR in a fresh nredir (list() in src/parser.c) and
-   never set its linno, so it reported whatever was on dash's stack: 0 in a
-   fresh process, garbage later. *)
+   For Background, `cmd &` wraps any command that is not already an NPIPE or
+   NREDIR in a fresh nredir (list() in src/parser.c), which must get the
+   line the backgrounded command starts on; an uninitialized linno shows up
+   as 0 in a fresh process and garbage later. *)
 
 open Libdash
 open Ast
@@ -67,7 +67,7 @@ let k l = ("Case", l)
 let d l = ("Defun", l)
 
 let cases = [
-  (* constructs that already got the right linno *)
+  (* constructs without & *)
   "simple", "echo a\necho b\n", [c 1; c 2];
   "semi", "a; b\nc\n", [c 1; c 1; c 2];
   "continuation", "echo a \\\n  b\necho c\n", [c 1; c 3];
@@ -84,9 +84,9 @@ let cases = [
   "cmdsubst", "echo $(\n  echo inner\n)\necho after\n", [c 1; c 2; c 4];
   "backquote", "echo `echo inner`\n", [c 1; c 1];
 
-  (* Background (the regression) *)
+  (* Background *)
   "bg_first_line", "sleep 1 &\n", [bg 1; c 1];
-  (* the reproduction from the bug report: garbage (e.g., 32601) here *)
+  (* deep enough into a parse that stale stack holds nonzero garbage *)
   "bg_after_30_lines", filler 30 ^ "sleep 1 &\n",
   List.init 30 (fun i -> c (i + 1)) @ [bg 31; c 31];
   (* the wrapped NAND has no linno of its own *)
@@ -95,7 +95,7 @@ let cases = [
   "bg_subshell", "( echo a ) &\n", [bg 1; s 1; c 1];
   "bg_two_on_one_line", "a & b &\n", [bg 1; c 1; bg 1; c 1];
   "bg_in_function", "f() {\n  sleep 1 &\n}\n", [d 1; bg 2; c 2];
-  (* an NREDIR keeps its own linno; this already worked *)
+  (* an NREDIR is retyped in place and keeps its own linno *)
   "bg_already_nredir", "{ echo a; } >/dev/null &\n", [bg 1; c 1];
 ]
 

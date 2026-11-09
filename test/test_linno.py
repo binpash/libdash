@@ -5,10 +5,10 @@ Every node that carries a linno (Command, Redir, Background, Subshell, For,
 Case, Defun) should report the line its construct starts on. Each case lists
 those nodes in source (pre-)order, as (kind, linno).
 
-Background is the regression: `cmd &` wraps any command that is not already
-an NPIPE or NREDIR in a fresh nredir (list() in src/parser.c) and never set
-its linno, so it reported whatever was on dash's stack: 0 in a fresh process,
-garbage later.
+For Background, `cmd &` wraps any command that is not already an NPIPE or
+NREDIR in a fresh nredir (list() in src/parser.c), which must get the line
+the backgrounded command starts on; an uninitialized linno shows up as 0 in
+a fresh process and garbage later.
 """
 
 import os
@@ -69,7 +69,7 @@ def D(l): return ("Defun", l)
 
 
 CASES = {
-    # constructs that already got the right linno
+    # constructs without &
     "simple": ("echo a\necho b\n", [C(1), C(2)]),
     "semi": ("a; b\nc\n", [C(1), C(1), C(2)]),
     "continuation": ("echo a \\\n  b\necho c\n", [C(1), C(3)]),
@@ -88,9 +88,9 @@ CASES = {
     "cmdsubst": ("echo $(\n  echo inner\n)\necho after\n", [C(1), C(2), C(4)]),
     "backquote": ("echo `echo inner`\n", [C(1), C(1)]),
 
-    # Background (the regression)
+    # Background
     "bg_first_line": ("sleep 1 &\n", [BG(1), C(1)]),
-    # the reproduction from the bug report: garbage (e.g., 32601) here
+    # deep enough into a parse that stale stack holds nonzero garbage
     "bg_after_30_lines": (filler(30) + "sleep 1 &\n",
                           [C(i) for i in range(1, 31)] + [BG(31), C(31)]),
     # the wrapped NAND has no linno of its own
@@ -100,7 +100,7 @@ CASES = {
     "bg_subshell": ("( echo a ) &\n", [BG(1), S(1), C(1)]),
     "bg_two_on_one_line": ("a & b &\n", [BG(1), C(1), BG(1), C(1)]),
     "bg_in_function": ("f() {\n  sleep 1 &\n}\n", [D(1), BG(2), C(2)]),
-    # an NREDIR keeps its own linno; this already worked
+    # an NREDIR is retyped in place and keeps its own linno
     "bg_already_nredir": ("{ echo a; } >/dev/null &\n", [BG(1), C(1)]),
 }
 
