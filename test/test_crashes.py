@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""Regression tests for crashes in libdash's exported C entry points.
+"""libdash's exported C entry points must report errors, not crash.
 See ocaml/tests/test_crashes.ml for the OCaml side.
 
 Each case runs in its own process (this file re-runs itself with the case's
 name): a bad longjmp kills the process, and libdash keeps global state.
 
-1. parsecmd_safe installed its own jmploc as `handler` and never restored it,
-   so a later sh_error (e.g., setinputfile on a missing file) longjmp'd into
-   a dead stack frame. Before the first parse, `handler` was NULL.
-2. setalias(name, val) expects `name` to be a whole "name=value" buffer with
-   `val` pointing into it; called with two separate strings it reads past the
-   end of `name` and calls sh_error. setalias_safe takes two strings.
+- parsecmd_safe installs its own jmploc as `handler` and must restore the
+  caller's (possibly NULL) on return, so that a later sh_error (e.g., from
+  setinputfile on a missing file) never longjmps into its dead frame.
+- setalias_safe takes the alias name and value as two strings. Raw
+  setalias(buf, val) wants buf = "name=value" with val pointing into it.
 """
 
 import os
@@ -65,7 +64,7 @@ def expect_raise(f, *args):
 
 # Each case starts in a fresh process with libdash initialized.
 
-# issue 1: parsecmd_safe leaves `handler` pointing at a dead frame
+# errors outside a parse: parsecmd_safe must restore `handler`
 
 def case_parsecmd_safe_restores_handler():
     before = handler()
@@ -88,7 +87,7 @@ def case_parse_still_works_after_missing_file():
     assert parse_one("echo hi\n") == "echo hi"
 
 
-# issue 2: setalias wants a "name=value" buffer; setalias_safe takes two strings
+# setalias_safe takes the name and value as two strings
 
 def case_setalias_safe():
     assert setalias_safe(b"ll", b"ls -l") == 0

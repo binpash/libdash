@@ -1,14 +1,14 @@
-(* Regression tests for crashes in libdash's exported C entry points, seen
-   through the OCaml binding. See test/test_crashes.py for the Python side.
+(* libdash's exported C entry points, seen through the OCaml binding, must
+   report errors, not crash. See test/test_crashes.py for the Python side.
 
    Each case is run in its own process (see dune): a bad longjmp kills the
    process, and libdash keeps global state between calls.
 
-   1. parsecmd_safe left `handler` pointing at its own (dead) jmploc, so a
-      later sh_error, e.g., from setinputfile on a missing file, longjmp'd
-      into a dead frame. Before the first parse, `handler` was NULL.
-   2. Dash.setalias was bound straight to C setalias, which expects a whole
-      "name=value" buffer rather than two strings. *)
+   - After a parse, an error from another call (e.g., Dash.setinputfile on a
+     missing file) must raise Failure, not longjmp into a dead frame.
+   - Dash.setalias takes the alias name and value as two strings (raw C
+     setalias wants a "name=value" buffer), and raises Failure on a bad
+     name. *)
 
 open Libdash
 
@@ -40,7 +40,7 @@ let expect_raise what f =
 let missing = "/nonexistent/file"
 
 let cases = [
-  (* issue 1 *)
+  (* errors outside a parse *)
   "missing_file_before_any_parse", (fun () ->
      expect_raise "setinputfile" (fun () -> Dash.setinputfile missing));
   "missing_file_after_a_parse", (fun () ->
@@ -49,7 +49,7 @@ let cases = [
   "parse_still_works_after_missing_file", (fun () ->
      expect_raise "setinputfile" (fun () -> Dash.setinputfile missing);
      expect_parse "echo hi\n" "echo hi");
-  (* issue 2 *)
+  (* Dash.setalias takes the name and value as two strings *)
   "setalias", (fun () ->
      Dash.setalias "ll" "ls -l";
      expect_parse "ll\n" "ls -l");
