@@ -19,3 +19,12 @@
 (rule
  (alias runtest)
  (action (run ./test_linno.exe)))
+
+(executable
+ (name test_tilde)
+ (modules test_tilde)
+ (libraries libdash))
+
+(rule
+ (alias runtest)
+ (action (run ./test_tilde.exe)))
