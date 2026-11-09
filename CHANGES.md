@@ -1,3 +1,7 @@
+# Unreleased
+
+- Fix crashes when `sh_error` fires outside a parse (e.g., `setinputfile` on a missing file); add `setinputfile_safe` and `setalias_safe`. `Dash.setalias` works again (broken since 0.4.0).
+
 # 0.5.2 (2026-09-22)
 
 - Use `autoreconf` to handle libtoolize properly.
