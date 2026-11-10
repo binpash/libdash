@@ -1,4 +1,4 @@
-# Unreleased
+# 0.5.3 (2026-11-10)
 
 - Fix crashes when `sh_error` fires outside a parse (e.g., `setinputfile` on a missing file); add `setinputfile_safe` and `setalias_safe`. `Dash.setalias` works again (broken since 0.4.0).
 
@@ -7,6 +7,10 @@
 - The Python bindings check their struct layouts against `libdash.so` before the first parse, raising `LibdashLayoutError` on a mismatch; `libdash.check_layout()` runs the check on demand.
 
 - Fixed bugs in how both Python and OCaml bindings computed tilde prefixes.
+
+- `pip install .` builds the library in setuptools' build directory and no longer writes autotools output into the source tree.
+
+- Release tags drop the `v` prefix, starting with this one (`0.5.3`, not `v0.5.3`): libdash's history includes dash's, and dash's own release tags are `v0.5.3` and up.
 
 # 0.5.2 (2026-09-22)
 
