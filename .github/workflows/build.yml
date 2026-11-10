@@ -96,6 +96,14 @@ jobs:
       - name: Install and test OCaml bindings
         run: opam install --with-test --working-dir .
 
+      - name: Check libdash.opam is in sync with dune-project
+        run: |
+          opam exec -- dune build libdash.opam
+          git diff --exit-code libdash.opam || {
+            echo "::error file=libdash.opam::libdash.opam is out of date; run 'dune build libdash.opam' and commit the result"
+            exit 1
+          }
+
         # we don't reuse the wheels so that all of the CI runs can happen concurrently
       - name: Install Python via venv
         run: |
