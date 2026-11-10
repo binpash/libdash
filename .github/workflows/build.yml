@@ -111,6 +111,20 @@ jobs:
            . .venv/bin/activate
            python3 -m pip install .
 
+      - name: Check that the Python build stayed out of the source tree
+        # autotools or make output in the tree (e.g., src/builtins.h) breaks dune.
+        # Allowed: setuptools' build/ and egg-info, dune's _build, and the CI
+        # environment (setup-ocaml's _opam switch, our .venv), whether git
+        # reports them as untracked (??) or ignored (!!).
+        run: |
+          stray=$(git status --porcelain --ignored --untracked-files=all |
+                  grep -v -E '^(\?\?|!!) (build|libdash\.egg-info|_build|_opam|\.venv)/' || true)
+          if [ -n "$stray" ]; then
+            echo "::error::Building left files in the source tree"
+            echo "$stray"
+            exit 1
+          fi
+
       - name: Test Python bindings
         run: |
           . .venv/bin/activate
