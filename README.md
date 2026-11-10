@@ -54,7 +54,31 @@ For OCaml, see [`ocaml/shell_to_json.ml`](https://github.com/mgree/libdash/blob/
 
 The ideal low-level interface to use is `parsecmd_safe` in `parser.c`; you'll need to ensure that dash's initialization routines have been called and that the stack marks are managed correctly. Parsing the POSIX shell is a complicated affair: beyond the usual locale issues, aliases affect the lexer, so one must use `setalias` and `unalias` to manage any aliases that ought to exist.
 
-# How work with the parsed nodes
+# Locales and multibyte characters
+
+dash's lexer decodes multibyte characters using the process's current
+`LC_CTYPE`. In a multibyte locale (e.g., `C.UTF-8`), each multibyte character
+is wrapped in `CTLMBCHAR` markers, and the bindings decode it to Unicode.
+In the `C` locale, it stays as raw bytes, and any byte that collides with a
+dash control code is escaped with `CTLESC`. The same script can therefore
+parse to different ASTs depending on the locale in effect when you parse.
+
+libdash never sets the locale for you:
+
+- The OCaml binding's `Dash.initialize` calls `initialize_dash_setlocale`,
+  i.e., `setlocale(LC_ALL, "")`, so it uses the environment's locale.
+- The Python binding uses whatever locale the interpreter set at startup.
+  Python calls `setlocale(LC_CTYPE, "")` and coerces a `C` locale to
+  `C.UTF-8` (PEP 538), so Python usually parses in UTF-8 even when the
+  environment says `C`.
+- Programs calling the C library directly (e.g., from C or another
+  language's FFI) stay in the `C` locale unless they call `setlocale` or
+  `initialize_dash_setlocale` themselves.
+
+To get the same ASTs from different bindings, set the same `LC_CTYPE` in
+each process before parsing.
+
+# How to work with parsed nodes
 
 The general AST is described in `nodes.h`. There are some tricky invariants around the precise formatting of control codes; the OCaml code shows some examples of working with the `args` fields in `ocaml/ast.ml`, which converts the C AST to an OCaml AST.
 
