@@ -54,7 +54,7 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
 
       - name: Upload binary wheel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ format('bdist.{0}', matrix.os) }}
           path: wheelhouse/libdash-*.whl
@@ -64,7 +64,7 @@ jobs:
         run: python setup.py sdist
 
       - name: Upload source distribution (from Linux)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: contains(matrix.os, 'ubuntu')
         with:
           name: sdist
@@ -88,10 +88,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
-        uses: avsm/setup-ocaml@v3
+        uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: true
 
       - name: Install and test OCaml bindings
         run: opam install --with-test --working-dir .
@@ -145,7 +144,7 @@ jobs:
 
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
 
       - name: Rename distributions
         run: |
