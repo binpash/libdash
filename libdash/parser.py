@@ -16,6 +16,11 @@ def libdash_library_path():
     LIBDASH_LIBRARY_PATH = os.path.join(FILE_PATH, "libdash.so")
     return LIBDASH_LIBRARY_PATH
 
+def check_layout():
+    """Raises LibdashLayoutError if the bindings' ctypes structs disagree
+    with libdash.so's. parse() checks this itself before its first parse."""
+    require_layout(CDLL(libdash_library_path()), force=True)
+
 # parsefile->eof bit 1: set by preadbuffer at EOF, never cleared by pungetc.
 PARSEFILE_EOF = 2;
 

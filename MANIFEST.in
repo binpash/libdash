@@ -5,7 +5,7 @@ exclude src/dash
 exclude src/init.c src/mkinit
 exclude src/mknodes src/mksignames src/mksyntax
 exclude src/nodes.c src/nodes.h
-exclude src/signames.c
+exclude src/signames.c src/libdash_layout.c
 exclude src/syntax.c src/syntax.h
 exclude src/token.h
 prune src/.deps

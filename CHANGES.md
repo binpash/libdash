@@ -4,6 +4,8 @@
 
 - Set the line number on `Background` nodes, which held uninitialized memory.
 
+- The Python bindings check their struct layouts against `libdash.so` before the first parse, raising `LibdashLayoutError` on a mismatch; `libdash.check_layout()` runs the check on demand.
+
 - Fixed bugs in how both Python and OCaml bindings computed tilde prefixes.
 
 # 0.5.2 (2026-09-22)

@@ -27,6 +27,7 @@ libdash_la_SOURCES = \
 	mystring.c options.c parser.c redir.c show.c trap.c output.c \
 	bltin/printf.c system.c bltin/test.c bltin/times.c var.c \
 	builtins.c init.c nodes.c signames.c syntax.c
+nodist_libdash_la_SOURCES = libdash_layout.c
 libdash_la_CFLAGS = $(AM_CFLAGS)
 libdash_la_LDFLAGS = -shared -dynamic
 
@@ -36,6 +37,7 @@ dlldash_la_SOURCES = \
 	mystring.c options.c parser.c redir.c show.c trap.c output.c \
 	bltin/printf.c system.c bltin/test.c bltin/times.c var.c \
 	builtins.c init.c nodes.c signames.c syntax.c
+nodist_dlldash_la_SOURCES = libdash_layout.c
 dlldash_la_CFLAGS = $(AM_CFLAGS)
 dlldash_la_LDFLAGS = -shared -dynamic -module
 
@@ -61,13 +63,13 @@ HELPERS = mkinit mksyntax mknodes mksignames
 BUILT_SOURCES = builtins.h nodes.h syntax.h token.h token_vars.h
 CLEANFILES = \
 	$(BUILT_SOURCES) $(patsubst %.o,%.c,$(dash_LDADD)) \
-	$(HELPERS) builtins.def
+	$(HELPERS) builtins.def libdash_layout.c
 
 man_MANS = dash.1
 EXTRA_DIST = \
 	$(man_MANS) \
 	mktokens mkbuiltins builtins.def.in mkinit.c \
-	mknodes.c nodetypes nodes.c.pat mksyntax.c mksignames.c
+	mknodes.c nodetypes nodes.c.pat mksyntax.c mksignames.c mklayout
 
 token.h token_vars.h: mktokens
 	$(AM_V_GEN)$(SHELL) $^
@@ -89,6 +91,22 @@ syntax.c syntax.h: mksyntax
 
 signames.c: mksignames
 	$(AM_V_GEN)./$^
+
+# The structs whose layouts libdash/_dash.py mirrors, and the headers that
+# define them.
+LAYOUT_INCLUDES = shell.h nodes.h input.h memalloc.h
+LAYOUT_TYPES = \
+	struct stackmark struct nodelist union node \
+	struct ncmd struct npipe struct nredir struct nbinary struct nif \
+	struct nfor struct ncase struct nclist struct ndefun struct narg \
+	struct nfile struct ndup struct nhere struct nnot \
+	struct strpush struct parsefile
+
+libdash_layout.c: mklayout $(LAYOUT_INCLUDES) $(top_builddir)/config.h
+	$(AM_V_GEN)for h in $(LAYOUT_INCLUDES); do echo "#include \"$$h\""; done | \
+	  $(COMPILE) -E -x c - | \
+	  $(SHELL) $(srcdir)/mklayout $(LAYOUT_INCLUDES) -- $(LAYOUT_TYPES) > $@.tmp && \
+	  mv $@.tmp $@
 
 mksyntax: token.h
 
