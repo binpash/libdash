@@ -1,0 +1,12 @@
+(executable
+ (name test_crashes)
+ (modules test_crashes)
+ (libraries libdash))
+
+; Run each case in its own process, so a segfault fails just that case.
+(rule
+ (alias runtest)
+ (deps test_crashes.exe)
+ (action
+  (bash
+   "fail=0; for c in $(./test_crashes.exe); do ./test_crashes.exe $c || { echo \"FAIL $c (exit $?)\"; fail=1; }; done; exit $fail")))

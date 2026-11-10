@@ -23,8 +23,12 @@ let setinputtostdin () : unit =
   setinputfd 0 0 (* don't bother pushing the file *)
 
 let setinputfile ?push:(push=false) (s : string) : unit =
-  let _ = raw_setinputfile s (if push then 1 else 0) in
-  ()
+  if raw_setinputfile s (if push then 1 else 0) < 0
+  then failwith ("cannot open " ^ s)
+
+let setalias (name : string) (value : string) : unit =
+  if raw_setalias name value <> 0
+  then failwith ("invalid alias name: " ^ name)
 
 let setvar (x : string) (v : string) : unit =
   let _ = raw_setvar x v 0 in

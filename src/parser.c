@@ -171,10 +171,15 @@ parsecmd(int interact)
 
 // libdash
 /* 2018-09-25 manually install a handler here so we can return an appropriate error code */
+/* The caller's handler (possibly NULL) is restored on every return, so a
+ * later sh_error never longjmps into this function's dead frame. */
 union node *
 parsecmd_safe(int interact)
 {
 	struct jmploc jmploc;
+	struct jmploc *volatile savehandler = handler;
+	volatile int saveint = suppressint;
+	union node *n;
 
 	tokpushback = 0;
 	checkkwd = 0;
@@ -184,12 +189,16 @@ parsecmd_safe(int interact)
 		setprompt(doprompt);
 	needprompt = 0;
 
-        if (unlikely(setjmp(jmploc.loc))) {
-          return NERR;
-        }
-        handler = &jmploc;
+	if (unlikely(setjmp(jmploc.loc))) {
+		handler = savehandler;
+		suppressint = saveint;	/* exraise left INTOFF in effect */
+		return NERR;
+	}
+	handler = &jmploc;
 
-	return list(1);
+	n = list(1);
+	handler = savehandler;
+	return n;
 }
 
 STATIC union node *

@@ -52,7 +52,7 @@ For Python, see [`python/rt.py`](https://github.com/mgree/libdash/blob/master/py
 
 For OCaml, see [`ocaml/shell_to_json.ml`](https://github.com/mgree/libdash/blob/master/ocaml/shell_to_json.ml), a tool that parses shell syntax and produces JSON (using the [atdgen](https://opam.ocaml.org/packages/atdgen/) bindings).
 
-The ideal low-level interface to use is `parsecmd_safe` in `parser.c`; you'll need to ensure that dash's initialization routines have been called and that the stack marks are managed correctly. Parsing the POSIX shell is a complicated affair: beyond the usual locale issues, aliases affect the lexer, so one must use `setalias` and `unalias` to manage any aliases that ought to exist.
+The ideal low-level interface to use is `parsecmd_safe` in `parser.c`; you'll need to ensure that dash's initialization routines have been called and that the stack marks are managed correctly. Parsing the POSIX shell is a complicated affair: beyond the usual locale issues, aliases affect the lexer, so one must use `setalias_safe` and `unalias` to manage any aliases that ought to exist. Outside of `parsecmd_safe`, call only entry points that cannot raise a dash error (e.g., `setinputfile_safe` rather than `setinputfile`).
 
 # Locales and multibyte characters
 

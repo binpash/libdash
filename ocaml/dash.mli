@@ -21,9 +21,11 @@ val free_stack_string : (char Ctypes.ptr) -> unit
 val popfile : unit -> unit
 val setinputstring : (char Ctypes.ptr) -> unit
 val setinputtostdin : unit -> unit
+(* raises Failure if the file cannot be opened *)
 val setinputfile : ?push:bool -> string -> unit
 
 val setvar : string -> string -> unit
+(* raises Failure on an invalid alias name *)
 val setalias : string -> string -> unit
 val unalias : string -> unit
 
