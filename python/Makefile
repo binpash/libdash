@@ -4,7 +4,7 @@ test: test-structs test-crashes test-linno test-tilde test-roundtrip test-line-m
 
 # _dash.py hand-copies dash's struct layouts; nothing else checks them.
 test-structs: ../test/check_structs.py ../libdash/_dash.py
-	@../test/check_structs.py
+	@../test/check_structs.py --require
 
 # Crashes in exported C entry points (bad longjmp, setalias buffer contract).
 test-crashes: ../test/test_crashes.py

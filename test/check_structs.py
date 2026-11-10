@@ -6,13 +6,20 @@ so a moved field is read at the old offset and silently returns a different
 member -- as happened when parsefile gained `eof` and Python's `lleft` started
 returning it.
 
-Compiles a probe against src/*.h and compares sizeof and every field offset
-with ctypes. Needs a built tree (src/nodes.h is generated).
+Compiles a probe against a configured tree's src/*.h (src/nodes.h and
+config.h are generated) and compares sizeof and every field offset with
+ctypes. The tree is, in order: $LIBDASH_BUILT_TREE; setuptools' build
+directory from the latest `pip install .`, which built the library the Python
+tests load; or the source tree, if built in place. (dune's _build keeps no
+config.h.) A build directory holds the headers as of its last build, so
+rebuild after changing src/*.h. With --require, a missing tree is an error,
+not a skip.
 
 The OCaml bindings need no equivalent: ocaml/dune's ctypes stanza computes
 offsets from the headers at build time.
 """
 
+import glob
 import os
 import subprocess
 import sys
@@ -72,7 +79,7 @@ def probe_source (ctype, fields):
     return PROBE_HEADER + "\n".join (body) + "\n    return 0;\n}\n"
 
 
-def run_probe (ctype, fields, workdir):
+def run_probe (ctype, fields, workdir, tree):
     """Returns (offsets dict, None) or (None, error string)."""
     src = os.path.join (workdir, "probe.c")
     exe = os.path.join (workdir, "probe")
@@ -81,7 +88,7 @@ def run_probe (ctype, fields, workdir):
         f.write (probe_source (ctype, fields))
 
     cc = os.environ.get ("CC", "cc")
-    compiled = subprocess.run ([cc, "-I", os.path.join (ROOT, "src"), "-I", ROOT,
+    compiled = subprocess.run ([cc, "-I", os.path.join (tree, "src"), "-I", tree,
                                 "-o", exe, src],
                                capture_output = True, text = True)
 
@@ -116,10 +123,39 @@ def resolve (pyname):
     return found
 
 
+def configured (tree):
+    return all (os.path.exists (os.path.join (tree, f))
+                for f in [os.path.join ("src", "nodes.h"), "config.h"])
+
+
+def find_tree ():
+    """A configured tree to compile against, or None."""
+    if "LIBDASH_BUILT_TREE" in os.environ:
+        tree = os.environ ["LIBDASH_BUILT_TREE"]
+        return tree if configured (tree) else None
+
+    # setuptools' build matches the library the Python tests load; newest
+    # first. The source tree comes last: an in-tree build there may be stale.
+    setuptools = sorted (glob.glob (os.path.join (ROOT, "build", "temp.*", "autotools")),
+                         key = os.path.getmtime, reverse = True)
+
+    for tree in setuptools + [ROOT]:
+        if configured (tree):
+            return tree
+
+    return None
+
+
 def main ():
-    if not os.path.exists (os.path.join (ROOT, "src", "nodes.h")):
-        print ("SKIP: src/nodes.h not generated; build libdash first")
-        return 0
+    require = "--require" in sys.argv [1:]
+    tree = find_tree ()
+
+    if tree is None:
+        print ("{}: no configured tree (src/nodes.h, config.h); build libdash first"
+               .format ("FAIL" if require else "SKIP"))
+        return 1 if require else 0
+
+    print ("# headers: {}".format (os.path.relpath (tree, ROOT)))
 
     status = 0
 
@@ -128,7 +164,7 @@ def main ():
             cls = resolve (pyname)
             fields = [n for (n, _t) in cls._fields_] if check_fields else []
 
-            (c, err) = run_probe (ctype, fields, workdir)
+            (c, err) = run_probe (ctype, fields, workdir, tree)
 
             if err is not None:
                 print ("STRUCT_MISMATCH: '{}' ({}): {}".format (ctype, pyname, err))
