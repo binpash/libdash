@@ -1,10 +1,14 @@
-.PHONY:  test test-structs test-crashes test-linno test-tilde test-roundtrip test-line-mapping clean
+.PHONY:  test test-structs test-layout test-crashes test-linno test-tilde test-roundtrip test-line-mapping clean
 
-test: test-structs test-crashes test-linno test-tilde test-roundtrip test-line-mapping
+test: test-structs test-layout test-crashes test-linno test-tilde test-roundtrip test-line-mapping
 
 # _dash.py hand-copies dash's struct layouts; nothing else checks them.
 test-structs: ../test/check_structs.py ../libdash/_dash.py
 	@../test/check_structs.py --require
+
+# _dash.py hand-copies dash's struct layouts; libdash.so carries the real ones.
+test-layout: ../test/test_layout.py
+	@python3 ../test/test_layout.py
 
 # Crashes in exported C entry points (bad longjmp, setalias buffer contract).
 test-crashes: ../test/test_crashes.py
