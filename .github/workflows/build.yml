@@ -117,7 +117,7 @@ jobs:
         # reports them as untracked (??) or ignored (!!).
         run: |
           stray=$(git status --porcelain --ignored --untracked-files=all |
-                  grep -v -E '^(\?\?|!!) (build|libdash\.egg-info|_build|_opam|\.venv)/' || true)
+                  grep -v -E '^(\?\?|!!) "?(build|libdash\.egg-info|_build|_opam|\.venv)/' || true)
           if [ -n "$stray" ]; then
             echo "::error::Building left files in the source tree"
             echo "$stray"
